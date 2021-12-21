@@ -1,0 +1,42 @@
+{
+    "type": "AdaptiveCard",
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.5",
+    "body": [
+        {
+            "type": "TextBlock",
+            "text": "${actionTitle}",
+            "wrap": true,
+            "weight": "Bolder",
+            "size": "Large"
+        },
+        {
+            "type": "TextBlock",
+            "text": "${actionText}",
+            "wrap": true
+        },
+        {
+            "type": "TextBlock",
+            "text": " ",
+            "wrap": true
+        },
+        {
+            "type": "FactSet",
+            "$data": "${changes}",
+            "facts": [
+                {
+                    "title": "${title}",
+                    "value": "${value}"
+                }
+            ],
+            "separator": true
+        },
+        {
+            "type": "TextBlock",
+            "text": "${footNote}",
+            "wrap": true,
+            "size": "Small",
+            "color": "Light"
+        }
+    ]
+}
