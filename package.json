@@ -4,8 +4,9 @@
     "description": "A template for RingCentral Bot Add-In",
     "main": "index.js",
     "scripts": {
-        "start": "node -r dotenv/config src/index.js",
-        "ngrok": "ngrok http -region us 6066 "
+        "dev": "node -r dotenv/config src/index.js",
+        "ngrok": "ngrok http -region us 6066 ",
+        "start": "node src/index.js"
     },
     "dependencies": {
         "adaptive-expressions": "^4.15.0",
