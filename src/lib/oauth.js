@@ -6,7 +6,7 @@ const oauthApp = new ClientOAuth2({
     clientId: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
     accessTokenUri: 'https://da-comp.aha.io/oauth/token',
-    authorizationUri: `https://${AHA_SUBDOMAIN}.aha.io/oauth/authorize?client_id=${process.env.CLIENT_ID}&redirect_uri=${process.env.RINGCENTRAL_CHATBOT_SERVER}/bot/oauth&response_type=token`,
+    authorizationUri: `https://${process.env.AHA_SUBDOMAIN}.aha.io/oauth/authorize?client_id=${process.env.CLIENT_ID}&redirect_uri=${process.env.RINGCENTRAL_CHATBOT_SERVER}/bot/oauth&response_type=token`,
     redirectUri: `${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/oauth`,
     scopes: ''
 });
