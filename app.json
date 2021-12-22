@@ -51,7 +51,7 @@
       },
       "USE_HEROKU_POSTGRES": {
         "description": "Sequelize config",
-        "value": true
+        "value": "true"
       },
       "IM_SHARED_SECRET": {
         "description": "(ignore it if your are not using Interactive Messages feature)RingCentral app interactive message shared secret",

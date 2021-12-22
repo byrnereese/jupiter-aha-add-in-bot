@@ -6,7 +6,7 @@ Adaptive card can be designed with [Adaptive Cards Designer](https://adaptivecar
 
 ## Deploy to Heroku
 
-Click below button for your first time deployment. (Note: Heroku Button is to be used for the first time setup. Further changes are to be made on Heroku app web page)
+Fork this repo and click below button for your first time deployment. (Note: Heroku Button is to be used for the first time setup. Further changes are to be made on Heroku app web page)
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
@@ -25,12 +25,15 @@ Right after the deployment, make sure taking following steps to configure it:
 
 ## Configure on RingCentral Developer Portal
 
-1. Go to your app's `Settings` tab on RingCentral Developer Portal
-2. Find `OAuth Redirect URI` and fill it with `{BotSererUrl}/bot/oauth`
-3. Go to `Bot` tab and click `Add to RingCentral` (Note: bot server url might not be updated right away. Please wait for a few minutes if it fails.)
+1. Create a `Bot Add-In` app
+2. Go to your app's `Settings` tab on RingCentral Developer Portal
+3. Find `OAuth Redirect URI` and fill it with `{BotSererUrl}/bot/oauth`
+4. Go to `Bot` tab and click `Add to RingCentral` (Note: bot server url might not be updated right away. Please wait for a few minutes if it fails.)
 
 Note: Aha server seems like using an internal polling mechanism which doesn't send the activity message right after the change. It feels like there's a 5min interval.
 
-TODOs:
-1. Deploy to Heroku
-2. Finish README
+## Try on RingCentral Jupiter
+
+Note: if bot's status is `In Sandbox`, then go to `https://app.devtest.ringcentral.com/`. Please also update `RINGCENTRAL_SERVER` in Heroku app env var config if switching between Sandbox and Production
+
+Add the bot to a group chat and type `@{botName} help` or direct message the bot `help`.
