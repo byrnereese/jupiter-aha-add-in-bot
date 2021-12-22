@@ -1,12 +1,15 @@
-const {Sequelize} = require('sequelize');
+const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize(
   process.env.RINGCENTRAL_CHATBOT_DATABASE_CONNECTION_URI,
   {
-    define: {
-      timestamps: true,
-    },
-    logging: false,
+    dialect: 'postgres',
+    protocol: 'postgres',
+    dialectOptions: {
+      ssl: {
+        rejectUnauthorized: false
+      }
+    }
   }
 );
 
