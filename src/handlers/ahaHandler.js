@@ -110,7 +110,7 @@ const ahaWebhookHandler = async (req, res) => {
     }
 }
 
-
+// Comment from Da: this can be done easily with client-oauth2. Let me know when you want to do it. I can get this done in like 30min
 /*
 app.put('/aha/refresh-tokens', async (req, res) => {
     const services = await Service.findAll()

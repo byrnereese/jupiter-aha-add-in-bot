@@ -53,18 +53,3 @@ app.post('/aha/webhook', async (req, res) => {
     res.status(200);
 	res.send('<!doctype><html><body><script>close()</script></body></html>')
 })
-
-
-// const cardRoute = '/interactive-messages';
-// app.post(cardRoute, async (req, res) => {
-//     try {
-//         await cardHandler(req);
-//     }
-//     catch (e) {
-//         console.log(e);
-//     }
-
-//     res.status(200);
-//     res.json('OK');
-// });
-// console.log(`card interactive message uri: ${process.env.RINGCENTRAL_CHATBOT_SERVER}${cardRoute}`);

@@ -1,9 +1,5 @@
 # Jupiter Aha Add-In Bot
 
-## Add Adaptive Card
-
-Adaptive card can be designed with [Adaptive Cards Designer](https://adaptivecards.io/designer/) where the json data in `CARD PAYLOAD EDITOR` can be save as `xxx.json` and stored under `src/adaptive-cards` folder. Please refer to existing use of `ahaCard.json` as example.
-
 ## Deploy to Heroku
 
 Fork this repo and click below button for your first time deployment. (Note: Heroku Button is to be used for the first time setup. Further changes are to be made on Heroku app web page)
@@ -37,3 +33,13 @@ Note: Aha server seems like using an internal polling mechanism which doesn't se
 Note: if bot's status is `In Sandbox`, then go to `https://app.devtest.ringcentral.com/`. Please also update `RINGCENTRAL_SERVER` in Heroku app env var config if switching between Sandbox and Production
 
 Add the bot to a group chat and type `@{botName} help` or direct message the bot `help`.
+
+## Further Development
+
+### More Bot Commands
+
+Have a look at `src/handlers/botHandler.js`, it's pretty straightforward.
+
+### More Adaptive Cards
+
+Adaptive card can be designed with [Adaptive Cards Designer](https://adaptivecards.io/designer/) where the json data in `CARD PAYLOAD EDITOR` can be save as `xxx.json` and stored under `src/adaptive-cards` folder. Please refer to existing use of `ahaCard.json` as example.
