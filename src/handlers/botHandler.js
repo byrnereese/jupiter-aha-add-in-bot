@@ -37,7 +37,7 @@ const handleMessage4Bot = async event => {
         if (token) {
             await bot.sendMessage(group.id, { text: `It appears you already have an active connection to Aha in this team.` })
         } else {
-            let ahaAuthUrl =`https://${process.env.AHA_SUBDOMAIN}.aha.io/oauth/authorize?client_id=${process.env.CLIENT_ID}&redirect_uri=${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/oauth&response_type=code&state=${group.id}:${bot.id}:${userId}`;
+            let ahaAuthUrl =`https://${process.env.AHA_SUBDOMAIN}.aha.io/oauth/authorize?client_id=${process.env.AHA_CLIENT_ID}&redirect_uri=${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/oauth&response_type=code&state=${group.id}:${bot.id}:${userId}`;
             await bot.sendMessage(group.id, { text: `Let's [authorize me](${ahaAuthUrl}).` })
         }
 
