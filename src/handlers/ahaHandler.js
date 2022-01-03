@@ -13,10 +13,16 @@ const turnDown = new turnDownService()
 const ahaOAuthHandler = async (req, res) => {
     const { state } = req.query
     const [groupId, botId, userId] = state.split(':')
+    console.log(`Requesting installation into chat ID: ${groupId}`)
+    console.log(`Bot ID: ${botId}`)
+    console.log(`User ID: ${userId}`)
 
-    const tokenResponse = await ahaOAuth.code.getToken(`${process.env.RINGCENTRAL_CHATBOT_SERVER}${req.url}`);
+    const tokenUrl = `${process.env.RINGCENTRAL_CHATBOT_SERVER}${req.url}`;
+    console.log(`Token URL: ${tokenUrl}`);
+    const tokenResponse = await ahaOAuth.code.getToken(tokenUrl);
     const token = tokenResponse.data.access_token;
-
+    console.log("Successfully obtained OAuth token")
+    
     // Bearer token in hand. Now let's stash it.
     const query = { groupId, botId }
     const ahaModel = await AhaModel.findOne({ where: query })
