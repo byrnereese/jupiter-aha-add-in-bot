@@ -45,7 +45,7 @@ const ahaOAuthHandler = async (req, res) => {
     // Test to see if token works
     //const r = await rc.get('/restapi/v1.0/account/~/extension/~')
     // Send user confirmation message
-    await bot.sendMessage(groupId, { text: `I have been authorized to fetch data from Aha` })
+    await bot.sendMessage(groupId, { text: `Thank you. The Aha bot has been authorized to fetch data from Aha. Setup is complete.` })
 }
 
 const ahaWebhookHandler = async (req, res) => {
@@ -56,20 +56,21 @@ const ahaWebhookHandler = async (req, res) => {
         res.send('<!doctype><html><body>OK</body></html>')
         return
     }
+    console.log(`Received webhook from Aha (group: ${groupId}, bot: ${botId})...`)
 
     let audit = req.body.audit
-    console.log(`Received webhook from Aha (group: ${groupId}, bot: ${botId})...`)
     let webhook_data = JSON.stringify(audit, null, 2);
     console.log( webhook_data )
-    const bot = await Bot.findByPk(botId)
     if (audit.description.includes('added custom field for')) {
         audit.interesting = false
     }
+
+    const bot = await Bot.findByPk(botId)
     if (bot) {
         if (audit.interesting) {
 	    // Aha is a really noisy webhook engine, sending lots of individual webhooks for
 	    // changes related to a single feature.
-	    // Our strategy is to create a background job that is delayed five minutes. That
+	    // Our strategy is to create a background job that is delayed by n minutes. That
 	    // job will aggregate all the changes related to the same aha entity and post a
 	    // single card for those changes.
 	    
@@ -81,7 +82,7 @@ const ahaWebhookHandler = async (req, res) => {
 		'data'    : webhook_data
 	    });
 	    
-	    // Step 2. Create a job.
+	    // Step 2. Create a job if one does not already exist.
 	    let jobId = `${audit.associated_id}:${audit.associated_type}`;
 	    let job = await workQueue.getJob(jobId);
 	    if (!job) {
@@ -96,13 +97,14 @@ const ahaWebhookHandler = async (req, res) => {
 		    'delay'           : JOB_DELAY,
 		    'removeOnComplete': true
 		});
+		console.log(`Job created: ${job.id}`);
 	    } else {
-		console.log("Job already exists. Skipping job creation.");
+		console.log(`Job already exists: ${job.id}. Skipping job creation.`);
 	    }
 
+	    /* 
 	    // Right now the job will do nothing except delete the accumulated Aha changes
 	    // So for now, leave all the code below alone
-	    
             let changes = []
             let seen_fields = []
             for (var i in audit.changes) {
@@ -156,11 +158,14 @@ const ahaWebhookHandler = async (req, res) => {
                     await bot.sendAdaptiveCard(groupId, card);
                 }
             }
+	    */
+	    console.log("Finished processing activity webhook from Aha")
         }
     }
 }
 
-// Comment from Da: this can be done easily with client-oauth2. Let me know when you want to do it. I can get this done in like 30min
+// Comment from Da:
+// This can be done easily with client-oauth2. Let me know when you want to do it. I can get this done in like 30min
 /*
 app.put('/aha/refresh-tokens', async (req, res) => {
     const services = await Service.findAll()

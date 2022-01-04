@@ -11,7 +11,7 @@ let REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 // See: https://devcenter.heroku.com/articles/node-concurrency for more info
 let workers = process.env.WEB_CONCURRENCY || 2;
 
-let IGNORE_FIELDS = new RegExp('(Created by user|Rank|Assigned to user|Show feature remaining estimate|Reference num)')
+let IGNORE_FIELDS = new RegExp('(Created by user|Rank|Assigned to user|Show feature remaining estimate|Reference num)');
 
 // The maximum number of jobs each worker should process at once. This will need
 // to be tuned for your application. If each job is mostly waiting on network 
@@ -35,7 +35,7 @@ function start() {
 	    }
 	})
 	if (accumulated_changes) {
-	    console.log(`${changes.length} found to aggregate`);
+	    console.log(`WORKER: ${changes.length} found to aggregate`);
 	    let changed_fields = {}
 	    let aha_object = {}
 	    
@@ -56,7 +56,7 @@ function start() {
 		    if (change.value == '' || // empty value
 			(IGNORE_FIELDS.test(change.field_name) && audit.audit_action === "create")
                        ) {
-			console.log(`Skipping changes to field ${change.field_name}`)
+			console.log(`WORKER: Skipping changes to field ${change.field_name}`)
 			continue
                     }
 
@@ -87,7 +87,7 @@ function start() {
                 changes: changed_fields,
                 footNote: `Changes made by TODO at TODO}`
             }
-	    console.log("Card data that will be posted: ", cardData)
+	    console.log("WORKER: Card data that will be posted: ", cardData)
             //const template = new Template(ahaCardTemplate);
             //const card = template.expand({
             //    $root: cardData
@@ -96,7 +96,7 @@ function start() {
 	    // End sending of adaptive card
 	    
 	} else {
-	    console.log(`No changes were found to aggregate. This technically shouldn't happen.`);
+	    console.log(`WORKER: No changes were found to aggregate. This technically shouldn't happen.`);
 	}
 		      
 	// A job can return values that will be stored in Redis as JSON
