@@ -3,7 +3,7 @@ const { AhaModel, ChangesModel } = require('./models/models')
 //const { ChangesModel } = require('./models/changesModel');
 
 let throng = require('throng');
-let Queue = require("bull");
+let Queue  = require("bull");
 
 let REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
@@ -19,19 +19,20 @@ let maxJobsPerWorker = 50;
 
 function start() {
     // Connect to the named work queue
+    console.log("WORKER: Starting job")
     let workQueue = new Queue('work', REDIS_URL);
 
     workQueue.process(maxJobsPerWorker, async (job) => {
-	console.log(`WORKER: job.group_id = ${job.group_id}`)
-	console.log(`WORKER: job.bot_id = ${job.bot_id}`)
-	console.log(`WORKER: job.aha_type = ${job.aha_type}`)
-	console.log(`WORKER: job.aha_id = ${job.aha_id}`)
+	console.log(`WORKER: job.group_id = ${job.data.group_id}`)
+	console.log(`WORKER: job.bot_id = ${job.data.bot_id}`)
+	console.log(`WORKER: job.aha_type = ${job.data.aha_type}`)
+	console.log(`WORKER: job.aha_id = ${job.data.aha_id}`)
 
 	let progress = 0;
 	const changes = await ChangesModel.findAll({
 	    'where': {
-		'ahaType' : job.aha_type,
-		'ahaId'   : job.aha_id
+		'ahaType' : job.data.aha_type,
+		'ahaId'   : job.data.aha_id
 	    }
 	})
 	if (changes) {
