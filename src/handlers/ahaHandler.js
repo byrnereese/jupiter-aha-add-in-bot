@@ -74,11 +74,11 @@ const ahaWebhookHandler = async (req, res) => {
 	    
 	    // Step 1. Store the received change in the database.
 	    console.log(`Storing changes for ${audit.associated_type}, id: ${audit.associated_id}`)
-	    let change = await ChangesModel.create({
+	    let c = await ChangesModel.create({
 		'ahaType' : audit.associated_type,
 		'ahaId'   : audit.associated_id,
 		'data'    : webhook_data
-	    })
+	    });
 	    
 	    // Step 2. Create a job.
 	    let jobId = `${audit.associated_id}:${audit.associated_type}`;
