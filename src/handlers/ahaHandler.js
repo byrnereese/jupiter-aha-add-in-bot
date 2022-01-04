@@ -1,6 +1,6 @@
 //const { AhaModel }        = require('../models/ahaModel');
 //const { ChangesModel }    = require('../models/changesModel');
-const { AhaModel, ChangesModel } = require('./models/models')
+const { AhaModel, ChangesModel } = require('../models/models')
 const { ahaOAuth }        = require('../lib/aha')
 const { AllHtmlEntities } = require('html-entities')
 const { Template }        = require('adaptivecards-templating')
