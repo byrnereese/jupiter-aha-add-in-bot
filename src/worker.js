@@ -29,8 +29,8 @@ function start() {
 	console.log(`WORKER: job.bot_id = ${job.bot_id}`)
 	console.log(`WORKER: job.aha_type = ${job.aha_type}`)
 	console.log(`WORKER: job.aha_id = ${job.aha_id}`)
+
 	let progress = 0;
-	// Wake up and retrieve all related changes
 	const changes = await AhaChangesModel.findAll({
 	    'where': {
 		'ahaType' : job.aha_type,
@@ -42,18 +42,18 @@ function start() {
 	    // Remember, at this point we are not yet doing anything.
 	    // TODO - do something
 	    for (let i = 0; i < changes.length; i++)  {
-		let change = changes[i];
+		let change = changes[i]
 		console.log(`WORKER: Deleting change: ${change.id}`);
-		await.AhaChangesModel.destroy({
+		await AhaChangesModel.destroy({
 		    'where': { 'id': change.id }
 		})
 	    }
 	}
-      }
+    
 		      
-      // A job can return values that will be stored in Redis as JSON
-      // This return value is unused in this demo application.
-      return { value: "This will be stored" };
+	// A job can return values that will be stored in Redis as JSON
+	// This return value is unused in this demo application.
+	return { value: "This will be stored" };
     });
 }
 
