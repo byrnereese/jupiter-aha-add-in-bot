@@ -1,12 +1,13 @@
 {
     "name": "jupiter-aha-bot",
-    "version": "0.0.1",
-    "description": "A template for RingCentral Bot Add-In",
+    "version": "0.1.0",
+    "description": "A RingCentral add-in for Aha product management system",
     "main": "index.js",
     "scripts": {
         "dev": "node -r dotenv/config src/index.js",
         "ngrok": "ngrok http -region us 6066 ",
-        "start": "node src/index.js"
+        "start": "node src/index.js",
+        "work": "node src/worker.js"
     },
     "dependencies": {
         "adaptive-expressions": "^4.15.0",

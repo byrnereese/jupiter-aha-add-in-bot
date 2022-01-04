@@ -17,8 +17,8 @@ const botConfig = {
     adminRoute: '/admin', // optional
     botRoute: '/bot', // optional
     models: { // optional
-        'ahaModel': AhaModel,
-        'changesModel': ChangesModel
+        AhaModel,
+        ChangesModel
     }
 }
 

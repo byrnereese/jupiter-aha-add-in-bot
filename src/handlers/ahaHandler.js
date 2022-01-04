@@ -1,20 +1,19 @@
-const Bot = require('ringcentral-chatbot-core/dist/models/Bot').default;
-const { AhaModel } = require('../models/ahaModel');
-const { ChangesModel } = require('../models/changesModel');
-
-const { ahaOAuth } = require('../lib/aha')
+const { AhaModel }        = require('../models/ahaModel');
+const { ChangesModel }    = require('../models/changesModel');
+const { ahaOAuth }        = require('../lib/aha')
 const { AllHtmlEntities } = require('html-entities')
-const turnDownService = require('turndown')
-const { Template } = require('adaptivecards-templating')
-const ahaCardTemplate = require('../adaptiveCards/ahaCard.json')
+const { Template }        = require('adaptivecards-templating')
+const Bot                 = require('ringcentral-chatbot-core/dist/models/Bot').default;
+const turnDownService     = require('turndown')
+const ahaCardTemplate     = require('../adaptiveCards/ahaCard.json')
+let   Queue               = require('bull');
 
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 let JOB_DELAY = process.env.AGGREGATION_DELAY || 1000;
-let Queue     = require('bull');
-let workQueue = new Queue('work', REDIS_URL);
 
-const entities = new AllHtmlEntities()
-const turnDown = new turnDownService()
+let   workQueue = new Queue('work', REDIS_URL);
+const entities  = new AllHtmlEntities()
+const turnDown  = new turnDownService()
 
 const ahaOAuthHandler = async (req, res) => {
     const { state } = req.query
@@ -74,11 +73,11 @@ const ahaWebhookHandler = async (req, res) => {
 	    // single card for those changes.
 	    
 	    // Step 1. Store the received change in the database.
-	    console.log(`Storing chages for ${audit.associated_type}, id: ${audit.associated_id}`)
+	    console.log(`Storing changes for ${audit.associated_type}, id: ${audit.associated_id}`)
 	    await ChangesModel.create({
 		'ahaType' : audit.associated_type,
 		'ahaId'   : audit.associated_id,
-		'data'    : JSON.stringify(audit)
+		'data'    : webhook_data
 	    })
 	    
 	    // Step 2. Create a job.
