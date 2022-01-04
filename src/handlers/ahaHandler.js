@@ -77,8 +77,8 @@ const ahaWebhookHandler = async (req, res) => {
 	    // Step 1. Store the received change in the database.
 	    console.log(`Storing changes for ${audit.associated_type}, id: ${audit.associated_id}`)
 	    let c = await ChangesModel.create({
-		'ahaType' : audit.associated_type,
-		'ahaId'   : audit.associated_id,
+		'ahaType' : audit.auditable_type,
+		'ahaId'   : audit.auditable_id,
 		'data'    : webhook_data
 	    });
 	    
@@ -86,7 +86,7 @@ const ahaWebhookHandler = async (req, res) => {
 	    let jobId = `${audit.associated_id}:${audit.associated_type}`;
 	    let job = await workQueue.getJob(jobId);
 	    if (!job) {
-		console.log(`Creating job: ${jobId}`);
+		console.log(`Creating job with delay of ${JOB_DELAY}ms: ${jobId}`);
 		job = await workQueue.add({
 		    'group_id' : groupId,
 		    'bot_id'   : botId,

@@ -25,7 +25,7 @@ function start() {
     let workQueue = new Queue('work', REDIS_URL);
 
     workQueue.process(maxJobsPerWorker, async (job) => {
-	console.log(`WORKER: processing ${job.data.aha_type}:${job.data.aha_id}`)
+	console.log(`WORKER: processing ${job.id}`)
 
 	let progress = 0;
 	const accumulated_changes = await ChangesModel.findAll({
