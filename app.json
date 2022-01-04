@@ -4,7 +4,7 @@
     "repository": "",
     "keywords": ["node", "express", "ringcentral add-in", "bot"],
     "addons": [
-	"heroku-redis"
+	"heroku-redis",
 	{
             "plan": "heroku-postgresql"
 	}
