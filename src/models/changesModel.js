@@ -2,7 +2,7 @@ const Sequelize = require('sequelize');
 const { sequelize } = require('./sequelize');
 
 // Model for Aha Change coelescing
-exports.AhaModel = sequelize.define('changesModel', {
+exports.ChangesModel = sequelize.define('changesModel', {
     id: {
 	type: Sequelize.INTEGER,
 	autoIncrement: true,

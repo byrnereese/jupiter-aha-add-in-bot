@@ -17,8 +17,8 @@ const botConfig = {
     adminRoute: '/admin', // optional
     botRoute: '/bot', // optional
     models: { // optional
-        AhaModel,
-        ChangesModel
+        'ahaModel': AhaModel,
+        'changesModel': ChangesModel
     }
 }
 
@@ -26,8 +26,8 @@ const app = express();
 extendApp(app, skills, botHandler, botConfig);
 app.listen(process.env.PORT || process.env.RINGCENTRAL_CHATBOT_EXPRESS_PORT);
 
-console.log('server running...');
-console.log(`bot oauth uri: ${process.env.RINGCENTRAL_CHATBOT_SERVER}${botConfig.botRoute}/oauth`);
+console.log('Server running...');
+console.log(`Bot OAuth URI: ${process.env.RINGCENTRAL_CHATBOT_SERVER}${botConfig.botRoute}/oauth`);
 
 setInterval(() => {
     axios.put(`${process.env.RINGCENTRAL_CHATBOT_SERVER}/admin/maintain`, undefined, {

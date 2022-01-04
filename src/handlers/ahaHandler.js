@@ -9,6 +9,7 @@ const { Template } = require('adaptivecards-templating')
 const ahaCardTemplate = require('../adaptiveCards/ahaCard.json')
 
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+let Queue     = require('bull');
 let workQueue = new Queue('work', REDIS_URL);
 
 const entities = new AllHtmlEntities()
