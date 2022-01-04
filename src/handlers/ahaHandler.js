@@ -9,6 +9,7 @@ const { Template } = require('adaptivecards-templating')
 const ahaCardTemplate = require('../adaptiveCards/ahaCard.json')
 
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+let JOB_DELAY = process.env.AGGREGATION_DELAY || 1000;
 let Queue     = require('bull');
 let workQueue = new Queue('work', REDIS_URL);
 
@@ -58,7 +59,8 @@ const ahaWebhookHandler = async (req, res) => {
 
     let audit = req.body.audit
     console.log(`Received webhook from Aha (group: ${groupId}, bot: ${botId})...`)
-    console.log(JSON.stringify(audit, null, 2))
+    let webhook_data = JSON.stringify(audit, null, 2);
+    console.log( webhook_data )
     const bot = await Bot.findByPk(botId)
     if (audit.description.includes('added custom field for')) {
         audit.interesting = false
@@ -72,6 +74,7 @@ const ahaWebhookHandler = async (req, res) => {
 	    // single card for those changes.
 	    
 	    // Step 1. Store the received change in the database.
+	    console.log(`Storing chages for ${audit.associated_type}, id: ${audit.associated_id}`)
 	    await ChangesModel.create({
 		'ahaType' : audit.associated_type,
 		'ahaId'   : audit.associated_id,
@@ -82,15 +85,15 @@ const ahaWebhookHandler = async (req, res) => {
 	    let jobId = `${audit.associated_id}:${audit.associated_type}`;
 	    let job = await workQueue.getJob(jobId);
 	    if (!job) {
-		console.log("Creating job");
+		console.log(`Creating job: ${jobId}`);
 		job = await workQueue.add({
 		    'group_id' : groupId,
 		    'bot_id'   : botId,
 		    'aha_id'   : audit.associated_id,
 		    'aha_type' : audit.associated_type
 		},{
-		    'jobId'    : jobId,
-		    'delay'    : 1000,
+		    'jobId'           : jobId,
+		    'delay'           : JOB_DELAY,
 		    'removeOnComplete': true
 		});
 	    } else {
