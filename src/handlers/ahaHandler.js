@@ -1,5 +1,6 @@
-const { AhaModel }        = require('../models/ahaModel');
-const { ChangesModel }    = require('../models/changesModel');
+//const { AhaModel }        = require('../models/ahaModel');
+//const { ChangesModel }    = require('../models/changesModel');
+const { AhaModel, ChangesModel } = require('./models/models')
 const { ahaOAuth }        = require('../lib/aha')
 const { AllHtmlEntities } = require('html-entities')
 const { Template }        = require('adaptivecards-templating')
@@ -74,7 +75,7 @@ const ahaWebhookHandler = async (req, res) => {
 	    
 	    // Step 1. Store the received change in the database.
 	    console.log(`Storing changes for ${audit.associated_type}, id: ${audit.associated_id}`)
-	    ChangesModel.create({
+	    let c = await ChangesModel.create({
 		'ahaType' : audit.associated_type,
 		'ahaId'   : audit.associated_id,
 		'data'    : webhook_data

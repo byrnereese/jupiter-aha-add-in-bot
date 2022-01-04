@@ -1,5 +1,6 @@
-const { AhaModel } = require('./models/ahaModel');
-const { AhaChangesModel } = require('./models/changesModel');
+const { AhaModel, ChangesModel } = require('./models/models')
+//const { AhaModel } = require('./models/ahaModel');
+//const { ChangesModel } = require('./models/changesModel');
 
 let throng = require('throng');
 let Queue = require("bull");
@@ -27,7 +28,7 @@ function start() {
 	console.log(`WORKER: job.aha_id = ${job.aha_id}`)
 
 	let progress = 0;
-	const changes = await AhaChangesModel.findAll({
+	const changes = await ChangesModel.findAll({
 	    'where': {
 		'ahaType' : job.aha_type,
 		'ahaId'   : job.aha_id
@@ -40,7 +41,7 @@ function start() {
 	    for (let i = 0; i < changes.length; i++)  {
 		let change = changes[i]
 		console.log(`WORKER: Deleting change: ${change.id}`);
-		await AhaChangesModel.destroy({
+		await ChangesModel.destroy({
 		    'where': { 'id': change.id }
 		})
 	    }

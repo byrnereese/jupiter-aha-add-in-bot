@@ -1,14 +1,14 @@
 const { extendApp } = require('ringcentral-chatbot-core');
 const express       = require('express');
 const axios         = require('axios');
-let Queue           = require('bull');
+let   Queue         = require('bull');
 
-const { botHandler }   = require('./handlers/botHandler');
 const { AhaModel }     = require('./models/ahaModel');
 const { ChangesModel } = require('./models/changesModel')
+const { botHandler }   = require('./handlers/botHandler');
 const { ahaOAuthHandler, ahaWebhookHandler } = require('./handlers/ahaHandler');
 
-let PORT = process.env.PORT || '5000';
+let PORT      = process.env.PORT || '5000';
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 let workQueue = new Queue('work', REDIS_URL);
 
