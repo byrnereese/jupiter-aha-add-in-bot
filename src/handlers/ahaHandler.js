@@ -1,11 +1,15 @@
 const Bot = require('ringcentral-chatbot-core/dist/models/Bot').default;
 const { AhaModel } = require('../models/ahaModel');
+const { AhaChangesModel } = require('../models/changesModel');
 
 const { ahaOAuth } = require('../lib/aha')
 const { AllHtmlEntities } = require('html-entities')
 const turnDownService = require('turndown')
 const { Template } = require('adaptivecards-templating')
 const ahaCardTemplate = require('../adaptiveCards/ahaCard.json')
+
+let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+let workQueue = new Queue('work', REDIS_URL);
 
 const entities = new AllHtmlEntities()
 const turnDown = new turnDownService()
@@ -50,6 +54,7 @@ const ahaWebhookHandler = async (req, res) => {
         res.send('<!doctype><html><body>OK</body></html>')
         return
     }
+
     let audit = req.body.audit
     console.log(`Received webhook from Aha (group: ${groupId}, bot: ${botId})...`)
     console.log(JSON.stringify(audit, null, 2))
@@ -59,6 +64,41 @@ const ahaWebhookHandler = async (req, res) => {
     }
     if (bot) {
         if (audit.interesting) {
+	    // Aha is a really noisy webhook engine, sending lots of individual webhooks for
+	    // changes related to a single feature.
+	    // Our strategy is to create a background job that is delayed five minutes. That
+	    // job will aggregate all the changes related to the same aha entity and post a
+	    // single card for those changes.
+	    
+	    // Step 1. Store the received change in the database.
+	    await AhaChangesModel.create({
+		'ahaType' : audit.associated_type,
+		'ahaId'   : audit.associated_id,
+		'data'    : JSON.stringify(audit)
+	    })
+	    
+	    // Step 2. Create a job.
+	    let jobId = `${audit.associated_id}:${audit.associated_type}`;
+	    let job = await workQueue.getJob(jobId);
+	    if (!job) {
+		console.log("Creating job");
+		job = await workQueue.add({
+		    'group_id' : groupId,
+		    'bot_id'   : botId,
+		    'aha_id'   : audit.associated_id,
+		    'aha_type' : audit.associated_type
+		},{
+		    'jobId'    : jobId,
+		    'delay'    : 1000,
+		    'removeOnComplete': true
+		});
+	    } else {
+		console.log("Job already exists. Skipping job creation.");
+	    }
+
+	    // Right now the job will do nothing except delete the accumulated Aha changes
+	    // So for now, leave all the code below alone
+	    
             let changes = []
             let seen_fields = []
             for (var i in audit.changes) {

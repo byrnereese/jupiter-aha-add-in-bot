@@ -4,11 +4,16 @@
     "repository": "",
     "keywords": ["node", "express", "ringcentral add-in", "bot"],
     "addons": [
-      {
-        "plan": "heroku-postgresql"
-      }
+	"heroku-redis"
+	{
+            "plan": "heroku-postgresql"
+	}
     ],
     "env": {
+      "REDIS_URL": {
+        "description": "RingCentral platform server url",
+        "value": "https://platform.devtest.ringcentral.com"
+      },
       "RINGCENTRAL_SERVER": {
         "description": "RingCentral platform server url",
         "value": "https://platform.devtest.ringcentral.com"
