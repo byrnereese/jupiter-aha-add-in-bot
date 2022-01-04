@@ -5,6 +5,7 @@ let throng = require('throng');
 let Queue = require("bull");
 
 let REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
+console.log(`WORKER: redis url = ${REDIS_URL}`)
 
 // Spin up multiple processes to handle jobs to take advantage of more CPU cores
 // See: https://devcenter.heroku.com/articles/node-concurrency for more info
@@ -15,10 +16,6 @@ let workers = process.env.WEB_CONCURRENCY || 2;
 // responses it can be much higher. If each job is CPU-intensive, it might need
 // to be much lower.
 let maxJobsPerWorker = 50;
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 function start() {
     // Connect to the named work queue
