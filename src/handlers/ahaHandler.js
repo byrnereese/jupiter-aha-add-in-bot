@@ -1,6 +1,6 @@
 const Bot = require('ringcentral-chatbot-core/dist/models/Bot').default;
 const { AhaModel } = require('../models/ahaModel');
-const { AhaChangesModel } = require('../models/changesModel');
+const { ChangesModel } = require('../models/changesModel');
 
 const { ahaOAuth } = require('../lib/aha')
 const { AllHtmlEntities } = require('html-entities')
@@ -72,7 +72,7 @@ const ahaWebhookHandler = async (req, res) => {
 	    // single card for those changes.
 	    
 	    // Step 1. Store the received change in the database.
-	    await AhaChangesModel.create({
+	    await ChangesModel.create({
 		'ahaType' : audit.associated_type,
 		'ahaId'   : audit.associated_id,
 		'data'    : JSON.stringify(audit)
