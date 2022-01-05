@@ -39,10 +39,10 @@ function start() {
 	    
 	    // Aggregate and summarize the changes received. 
 	    for (let i = 0; i < accumulated_changes.length; i++)  {
-		console.log(`Processing audit #${i}`)
+		console.log(`WORKER: Processing audit #${i}`)
 		let data = accumulated_changes[i].data
 		let audit = JSON.parse( data )
-		console.log("Processing data: ", audit)
+		console.log("WORKER: Processing data: ", audit)
 		if (i == 0) {
 		    aha_object[ 'id' ]         = audit.auditable_id
 		    aha_object[ 'type' ]       = audit.auditable_type
@@ -50,9 +50,9 @@ function start() {
 		    aha_object[ 'created_at' ] = audit.created_at
 		}
 		for (var j in audit.changes) {
-		    console.log(`Processing change #${j} in audit #${i}`)
+		    console.log(`WORKER: Processing change #${j} in audit #${i}`)
                     let change = audit.changes[j]
-		    console.log("Change: ", change)
+		    console.log("WORKER: Change: ", change)
 
 		    // Figure out what changes we want to skip/ignore
 		    // Duplicates are ok, because we will just use the most recent value
@@ -61,18 +61,22 @@ function start() {
                        ) {
 			console.log(`WORKER: Skipping changes to field ${change.field_name}`)
 			continue
-                    }
+                    } else {
+			console.log(`WORKER: this field will NOT be skipped`)
+		    }
 
 		    // Format the value we will set the field to
                     let change_value = ''
-                    if (audit.auditable_type === "note" ||
-			change.field_name.includes("Comment by")) {
+                    if (audit.auditable_type === "note" || change.field_name.includes("Comment by")) {
+			console.log(`WORKER: turning down`, change.value)
 			change_value = turnDown.turndown(change.value.toString())
                     } else {
+			console.log(`WORKER: decoding`, change.value)
 			change_value = entities.decode(change.value.toString())
                     }
 
 		    // Add the change to the struct were we are storing all aggregated changes
+		    console.log(`WORKER: setting ${change.field_name} equal to ${change_value} `)
 		    changed_fields[ change.field_name ] = change_value;
 		}
 		// delete the change now that we have aggregated it successfully
