@@ -33,5 +33,12 @@
             "size": "Small",
             "color": "Light"
         }
+    ],
+    "actions": [
+	{
+	    "type": "Action.OpenUrl",
+	    "title": "View ${ahaType}",
+	    "url": "${ahaUrl}"
+	}
     ]
 }

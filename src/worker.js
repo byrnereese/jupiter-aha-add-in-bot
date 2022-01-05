@@ -108,6 +108,7 @@ function start() {
             const cardData = {
                 ahaId: aha_object['aha_id'],
                 ahaUrl: aha_object['url'],
+                ahaType: aha_object['type'],
 		contributors: aha_object['contributors'].map( function(e) { return e.user.name } ).join(", "),
                 actionText: `The following fields were modified ${aha_object['url'`,
                 changes: changed_fields.values(),
