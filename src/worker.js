@@ -1,6 +1,7 @@
 const { AhaModel, ChangesModel } = require('./models/models')
 const { AllHtmlEntities }        = require('html-entities')
 const { Template }               = require('adaptivecards-templating')
+const Bot                        = require('ringcentral-chatbot-core/dist/models/Bot').default;
 const ahaCardTemplate            = require('./adaptiveCards/ahaCard.json')
 const turnDownService            = require('turndown')
 let   throng                     = require('throng');
@@ -38,6 +39,7 @@ function start() {
 		'ahaId'   : job.data.aha_id
 	    }
 	})
+	const bot = await Bot.findByPk( job.data.bot_id )
 	if (accumulated_changes) {
 	    console.log(`WORKER: ${accumulated_changes.length} found to aggregate`);
 	    let changed_fields = {}
@@ -112,6 +114,7 @@ function start() {
             });
 	    console.log("WORKER: posting card:", card)
             await bot.sendAdaptiveCard(groupId, card);
+	    console.log("WORKER: card posted")
 	    // End sending of adaptive card
 	    
 	} else {
