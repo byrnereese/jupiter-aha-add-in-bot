@@ -1,20 +1,12 @@
-//const { AhaModel }        = require('../models/ahaModel');
-//const { ChangesModel }    = require('../models/changesModel');
 const { AhaModel, ChangesModel } = require('../models/models')
 const { ahaOAuth }        = require('../lib/aha')
-const { AllHtmlEntities } = require('html-entities')
-const { Template }        = require('adaptivecards-templating')
 const Bot                 = require('ringcentral-chatbot-core/dist/models/Bot').default;
-const turnDownService     = require('turndown')
-const ahaCardTemplate     = require('../adaptiveCards/ahaCard.json')
 let   Queue               = require('bull');
 
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 let JOB_DELAY = process.env.AGGREGATION_DELAY || 1000;
 
 let   workQueue = new Queue('work', REDIS_URL);
-const entities  = new AllHtmlEntities()
-const turnDown  = new turnDownService()
 
 const ahaOAuthHandler = async (req, res) => {
     const { state } = req.query

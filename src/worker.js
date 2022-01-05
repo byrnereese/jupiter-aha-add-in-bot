@@ -1,7 +1,13 @@
 const { AhaModel, ChangesModel } = require('./models/models')
+const { AllHtmlEntities }        = require('html-entities')
+const { Template }               = require('adaptivecards-templating')
+const ahaCardTemplate            = require('../adaptiveCards/ahaCard.json')
+const turnDownService            = require('turndown')
+let   throng                     = require('throng');
+let   Queue                      = require("bull");
 
-let throng = require('throng');
-let Queue  = require("bull");
+const entities                   = new AllHtmlEntities()
+const turnDown                   = new turnDownService()
 
 let REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
@@ -69,12 +75,12 @@ function start() {
                     let change_value = ''
                     if (audit.auditable_type === "note" || change.field_name.includes("Comment by")) {
 			console.log(`WORKER: turning down`, change.value)
-			//change_value = turnDown.turndown(change.value.toString())
-			change_value = turnDown.turndown(change.value)
+			change_value = turnDown.turndown(change.value.toString())
+			//change_value = turnDown.turndown(change.value)
                     } else {
 			console.log(`WORKER: decoding`, change.value)
-			//change_value = entities.decode(change.value.toString())
-			change_value = entities.decode(change.value)
+			change_value = entities.decode(change.value.toString())
+			//change_value = entities.decode(change.value)
                     }
 
 		    // Add the change to the struct were we are storing all aggregated changes
