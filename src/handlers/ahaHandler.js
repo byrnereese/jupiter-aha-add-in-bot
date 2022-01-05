@@ -47,7 +47,6 @@ const ahaWebhookHandler = async (req, res) => {
         return
     }
     console.log(`Received webhook from Aha (group: ${groupId}, bot: ${botId})...`)
-    console.log(`Whole webhook:`, req)
 
     let audit = req.body.audit
     let webhook_data = JSON.stringify(audit, null, 2);
