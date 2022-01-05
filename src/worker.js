@@ -41,8 +41,8 @@ function start() {
 	    for (let i = 0; i < accumulated_changes.length; i++)  {
 		console.log(`Processing audit #${i}`)
 		let data = accumulated_changes[i].data
-		console.log("Processing data: " , data)
 		let audit = JSON.parse( data )
+		console.log("Processing data: ", audit)
 		if (i == 0) {
 		    aha_object[ 'id' ]         = audit.auditable_id
 		    aha_object[ 'type' ]       = audit.auditable_type
@@ -52,6 +52,7 @@ function start() {
 		for (var j in audit.changes) {
 		    console.log(`Processing change #${j} in audit #${i}`)
                     let change = audit.changes[j]
+		    console.log("Change: ", change)
 
 		    // Figure out what changes we want to skip/ignore
 		    // Duplicates are ok, because we will just use the most recent value
