@@ -39,7 +39,10 @@ function start() {
 	    
 	    // Aggregate and summarize the changes received. 
 	    for (let i = 0; i < accumuluated_changes.length; i++)  {
-		let audit = JSON.parse( accumulated_changes[i].data )
+		console.log(`Processing audit #${i}`)
+		let data = accumulated_changes[i].data
+		console.log("Processing data: " , data)
+		let audit = JSON.parse( data )
 		if (i == 0) {
 		    aha_object[ 'id' ]         = audit.auditable_id
 		    aha_object[ 'type' ]       = audit.auditable_type
@@ -47,6 +50,7 @@ function start() {
 		    aha_object[ 'created_at' ] = audit.created_at
 		}
 		for (var j in audit.changes) {
+		    console.log(`Processing change #${j} in audit #${i}`)
                     let change = audit.changes[j]
 
 		    // Figure out what changes we want to skip/ignore
