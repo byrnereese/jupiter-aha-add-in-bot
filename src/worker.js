@@ -91,7 +91,7 @@ function start() {
 		console.log("WORKER: end of change aggregation");
 
 		// delete the change now that we have aggregated it successfully
-		console.log(`WORKER: Deleting change: ${accumulated_change.id}`);
+		console.log(`WORKER: Deleting change: ${current_change.id}`);
 		await ChangesModel.destroy({
 		    'where': { 'id': accumulated_change.id }
 		})
