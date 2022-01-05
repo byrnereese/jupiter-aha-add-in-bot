@@ -113,7 +113,7 @@ function start() {
                 $root: cardData
             });
 	    console.log("WORKER: posting card:", card)
-            await bot.sendAdaptiveCard(groupId, card);
+            await bot.sendAdaptiveCard( job.data.group_id, card);
 	    console.log("WORKER: card posted")
 	    // End sending of adaptive card
 	    
