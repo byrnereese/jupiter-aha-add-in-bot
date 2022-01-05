@@ -105,6 +105,7 @@ function start() {
 	    // end aggregation for loop
 
 	    // Send an adaptive card summarizing the changes
+	    console.log("WORKER: Preparing card data for", aha_object)
             const cardData = {
                 ahaId: aha_object['aha_id'],
                 ahaUrl: aha_object['url'],
