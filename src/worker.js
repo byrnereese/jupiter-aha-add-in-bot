@@ -1,7 +1,7 @@
 const { AhaModel, ChangesModel } = require('./models/models')
 const { AllHtmlEntities }        = require('html-entities')
 const { Template }               = require('adaptivecards-templating')
-const ahaCardTemplate            = require('../adaptiveCards/ahaCard.json')
+const ahaCardTemplate            = require('./adaptiveCards/ahaCard.json')
 const turnDownService            = require('turndown')
 let   throng                     = require('throng');
 let   Queue                      = require("bull");
@@ -53,6 +53,7 @@ function start() {
 		    aha_object[ 'id' ]         = audit.auditable_id
 		    aha_object[ 'type' ]       = audit.auditable_type
 		    aha_object[ 'url' ]        = audit.auditable_url
+		    aha_object[ 'aha_id' ]     = audit.auditable_url.substring( audit.auditable_url.lastIndexOf('/') )
 		    aha_object[ 'created_at' ] = audit.created_at
 		}
 		for (var j in audit.changes) {
@@ -97,7 +98,7 @@ function start() {
 
 	    // Send an adaptive card summarizing the changes
             const cardData = {
-                actionTitle: `${job.data.aha_type} updated`,
+                actionTitle: `${aha_obj['aha_id']} updated`,
                 actionText: `The following fields were modified ${aha_object['url']}`,
                 changes: changed_fields,
                 footNote: `Changes made by TODO at TODO}`
