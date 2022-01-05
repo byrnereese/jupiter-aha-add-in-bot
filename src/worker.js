@@ -57,7 +57,8 @@ function start() {
 		    aha_object[ 'type' ]       = audit.auditable_type
 		    aha_object[ 'url' ]        = audit.auditable_url
 		    aha_object[ 'aha_id' ]     = audit.auditable_url.substring( audit.auditable_url.lastIndexOf('/') + 1 )
-		    aha_object[ 'created_at' ] = audit.created_at
+		    aha_object[ 'created_at' ]   = audit.created_at
+		    aha_object[ 'contributors' ] = audit.contributors
 		}
 		for (let j = 0; j < audit.changes.length; j++) {
 		    console.log(`WORKER: Processing change #${j} in audit #${i}`)
@@ -87,7 +88,10 @@ function start() {
 
 		    // Add the change to the struct were we are storing all aggregated changes
 		    //console.log(`WORKER: setting "${change.field_name}" equal to: ${change_value}`)
-		    changed_fields[ change.field_name ] = change_value;
+		    changed_fields[ change.field_name ] = {
+			title: change.field_name,
+			value: change_value
+		    }
 		    //console.log("WORKER: changed_files updated");
 		}
 
@@ -102,9 +106,12 @@ function start() {
 
 	    // Send an adaptive card summarizing the changes
             const cardData = {
-                actionTitle: `${aha_object['aha_id']} updated`,
-                actionText: `The following fields were modified ${aha_object['url']}`,
-                changes: changed_fields,
+                ahaId: aha_object['aha_id'],
+                ahaUrl: aha_object['url'],
+		contributors: aha_object['contributors'].map( function(e) { return e.user.name } ).join(", "),
+                actionText: `The following fields were modified ${aha_object['url'`,
+                changes: changed_fields.values(),
+		change_date: aha_object['created_at'],
                 footNote: `Changes made by TODO at TODO`
             }
 	    console.log("WORKER: Card data that will be posted: ", cardData)
