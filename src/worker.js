@@ -46,8 +46,9 @@ function start() {
 	    // Aggregate and summarize the changes received. 
 	    for (let i = 0; i < accumulated_changes.length; i++)  {
 		console.log(`WORKER: Processing audit #${i}`)
-		let data = accumulated_changes[i].data
-		let audit = JSON.parse( data )
+		let current_change = accumulated_changes[i]
+		let data           = current_change.data
+		let audit          = JSON.parse( data )
 		console.log("WORKER: Processing data: ", audit)
 		if (i == 0) {
 		    aha_object[ 'id' ]         = audit.auditable_id
