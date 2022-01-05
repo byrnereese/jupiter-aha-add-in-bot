@@ -110,10 +110,8 @@ function start() {
                 ahaUrl: aha_object['url'],
                 ahaType: aha_object['type'],
 		contributors: aha_object['contributors'].map( function(e) { return e.user.name } ).join(", "),
-                actionText: `The following fields were modified ${aha_object['url'`,
                 changes: changed_fields.values(),
-		change_date: aha_object['created_at'],
-                footNote: `Changes made by TODO at TODO`
+		change_date: aha_object['created_at']
             }
 	    console.log("WORKER: Card data that will be posted: ", cardData)
             const template = new Template(ahaCardTemplate);
