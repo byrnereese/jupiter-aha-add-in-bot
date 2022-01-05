@@ -111,7 +111,7 @@ function start() {
                 ahaUrl: aha_object['url'],
                 ahaType: aha_object['type'],
 		contributors: aha_object['contributors'].map( function(e) { return e.user.name } ).join(", "),
-                changes: changed_fields.values(),
+                changes: Object.keys(changed_fields).map( k => changed_fields[k] ),
 		change_date: aha_object['created_at']
             }
 	    console.log("WORKER: Card data that will be posted: ", cardData)
