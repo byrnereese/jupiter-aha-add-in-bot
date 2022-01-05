@@ -1,6 +1,7 @@
-const { AhaModel } = require('../models/ahaModel');
-const { getAhaClient } = require('../lib/aha');
-const { getOAuthApp } = require('../lib/oauth');
+const { AhaModel, ChangesModel } = require('../models/models')
+//const { AhaModel }        = require('../models/ahaModel');
+const { getAhaClient }    = require('../lib/aha');
+const { getOAuthApp }     = require('../lib/oauth');
 const { continueSession } = require('pg/lib/sasl');
 
 const botHandler = async event => {

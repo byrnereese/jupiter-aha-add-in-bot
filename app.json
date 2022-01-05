@@ -4,11 +4,24 @@
     "repository": "",
     "keywords": ["node", "express", "ringcentral add-in", "bot"],
     "addons": [
-      {
-        "plan": "heroku-postgresql"
-      }
+	"heroku-redis",
+	{
+            "plan": "heroku-postgresql"
+	}
     ],
     "env": {
+      "AGGREGATION_DELAY": {
+        "description": "The time to wait before aggregating events relating to the same Aha object (in milliseconds). Increase this to reduce noisiness.",
+        "value": 1000
+      },
+      "REDIS_URL": {
+        "description": "The URL to connect to the Redis job queue server",
+        "value": "redis://127.0.0.1:6379"
+      },
+      "WEB_CONCURRENCY": {
+        "description": "Spin up multiple processes to handle jobs to take advantage of more CPU cores.",
+        "value": "2"
+      },
       "RINGCENTRAL_SERVER": {
         "description": "RingCentral platform server url",
         "value": "https://platform.devtest.ringcentral.com"

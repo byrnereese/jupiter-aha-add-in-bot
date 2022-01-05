@@ -1,22 +1,32 @@
-const Bot = require('ringcentral-chatbot-core/dist/models/Bot').default;
-const { AhaModel } = require('../models/ahaModel');
-
-const { ahaOAuth } = require('../lib/aha')
+//const { AhaModel }        = require('../models/ahaModel');
+//const { ChangesModel }    = require('../models/changesModel');
+const { AhaModel, ChangesModel } = require('../models/models')
+const { ahaOAuth }        = require('../lib/aha')
 const { AllHtmlEntities } = require('html-entities')
-const turnDownService = require('turndown')
-const { Template } = require('adaptivecards-templating')
-const ahaCardTemplate = require('../adaptiveCards/ahaCard.json')
+const { Template }        = require('adaptivecards-templating')
+const Bot                 = require('ringcentral-chatbot-core/dist/models/Bot').default;
+const turnDownService     = require('turndown')
+const ahaCardTemplate     = require('../adaptiveCards/ahaCard.json')
+let   Queue               = require('bull');
 
-const entities = new AllHtmlEntities()
-const turnDown = new turnDownService()
+let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+let JOB_DELAY = process.env.AGGREGATION_DELAY || 1000;
+
+let   workQueue = new Queue('work', REDIS_URL);
+const entities  = new AllHtmlEntities()
+const turnDown  = new turnDownService()
 
 const ahaOAuthHandler = async (req, res) => {
     const { state } = req.query
     const [groupId, botId, userId] = state.split(':')
+    console.log(`Requesting installation of bot (id:${botId}) into chat (id:${groupId}) by user (id:${userId})`)
 
-    const tokenResponse = await ahaOAuth.code.getToken(`${process.env.RINGCENTRAL_CHATBOT_SERVER}${req.url}`);
+    const tokenUrl = `${process.env.RINGCENTRAL_CHATBOT_SERVER}${req.url}`;
+    console.log(`Token URL: ${tokenUrl}`);
+    const tokenResponse = await ahaOAuth.code.getToken(tokenUrl);
     const token = tokenResponse.data.access_token;
-
+    console.log("Successfully obtained OAuth token")
+    
     // Bearer token in hand. Now let's stash it.
     const query = { groupId, botId }
     const ahaModel = await AhaModel.findOne({ where: query })
@@ -33,7 +43,7 @@ const ahaOAuthHandler = async (req, res) => {
     // Test to see if token works
     //const r = await rc.get('/restapi/v1.0/account/~/extension/~')
     // Send user confirmation message
-    await bot.sendMessage(groupId, { text: `I have been authorized to fetch data from Aha` })
+    await bot.sendMessage(groupId, { text: `Thank you. The Aha bot has been authorized to fetch data from Aha. Setup is complete.` })
 }
 
 const ahaWebhookHandler = async (req, res) => {
@@ -44,15 +54,55 @@ const ahaWebhookHandler = async (req, res) => {
         res.send('<!doctype><html><body>OK</body></html>')
         return
     }
-    let audit = req.body.audit
     console.log(`Received webhook from Aha (group: ${groupId}, bot: ${botId})...`)
-    console.log(JSON.stringify(audit, null, 2))
-    const bot = await Bot.findByPk(botId)
+
+    let audit = req.body.audit
+    let webhook_data = JSON.stringify(audit, null, 2);
+    console.log( webhook_data )
     if (audit.description.includes('added custom field for')) {
         audit.interesting = false
     }
+
+    const bot = await Bot.findByPk(botId)
     if (bot) {
         if (audit.interesting) {
+	    // Aha is a really noisy webhook engine, sending lots of individual webhooks for
+	    // changes related to a single feature.
+	    // Our strategy is to create a background job that is delayed by n minutes. That
+	    // job will aggregate all the changes related to the same aha entity and post a
+	    // single card for those changes.
+	    
+	    // Step 1. Store the received change in the database.
+	    console.log(`Storing changes for ${audit.associated_type}, id: ${audit.associated_id}`)
+	    let c = await ChangesModel.create({
+		'ahaType' : audit.auditable_type,
+		'ahaId'   : audit.auditable_id,
+		'data'    : webhook_data
+	    });
+	    
+	    // Step 2. Create a job if one does not already exist.
+	    let jobId = `${audit.associated_id}:${audit.associated_type}`;
+	    let job = await workQueue.getJob(jobId);
+	    if (!job) {
+		console.log(`Creating job with delay of ${JOB_DELAY}ms: ${jobId}`);
+		job = await workQueue.add({
+		    'group_id' : groupId,
+		    'bot_id'   : botId,
+		    'aha_id'   : audit.auditable_id,
+		    'aha_type' : audit.auditable_type
+		},{
+		    'jobId'           : jobId,
+		    'delay'           : JOB_DELAY,
+		    'removeOnComplete': true
+		});
+		console.log(`Job created: ${job.id}`);
+	    } else {
+		console.log(`Job already exists: ${job.id}. Skipping job creation.`);
+	    }
+
+	    /* 
+	    // Right now the job will do nothing except delete the accumulated Aha changes
+	    // So for now, leave all the code below alone
             let changes = []
             let seen_fields = []
             for (var i in audit.changes) {
@@ -106,11 +156,14 @@ const ahaWebhookHandler = async (req, res) => {
                     await bot.sendAdaptiveCard(groupId, card);
                 }
             }
+	    */
+	    console.log("Finished processing activity webhook from Aha")
         }
     }
 }
 
-// Comment from Da: this can be done easily with client-oauth2. Let me know when you want to do it. I can get this done in like 30min
+// Comment from Da:
+// This can be done easily with client-oauth2. Let me know when you want to do it. I can get this done in like 30min
 /*
 app.put('/aha/refresh-tokens', async (req, res) => {
     const services = await Service.findAll()

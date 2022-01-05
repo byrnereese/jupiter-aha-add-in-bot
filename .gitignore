@@ -1,5 +1,10 @@
 # Extra
 *.sqlite
+*~
+\#*
+\.\#*
+
+package-lock.json
 
 # Logs
 logs

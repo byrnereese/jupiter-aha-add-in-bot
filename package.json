@@ -1,12 +1,13 @@
 {
     "name": "jupiter-aha-bot",
-    "version": "0.0.1",
-    "description": "A template for RingCentral Bot Add-In",
+    "version": "0.1.0",
+    "description": "A RingCentral add-in for Aha product management system",
     "main": "index.js",
     "scripts": {
         "dev": "node -r dotenv/config src/index.js",
         "ngrok": "ngrok http -region us 6066 ",
-        "start": "node src/index.js"
+        "start": "node src/index.js",
+        "work": "node src/worker.js"
     },
     "dependencies": {
         "adaptive-expressions": "^4.15.0",
@@ -20,7 +21,10 @@
         "pg": "^8.7.1",
         "ringcentral-chatbot-core": "^1.0.12",
         "sequelize": "^6.12.0-alpha.1",
-        "turndown": "^7.1.1"
+        "turndown": "^7.1.1",
+	"bull": "^3.7.0",
+	"foreman": "^3.0.1",
+	"throng": "^4.0.0"
     },
     "devDependencies": {
         "dotenv": "^10.0.0",
