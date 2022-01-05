@@ -54,7 +54,7 @@ function start() {
 		    aha_object[ 'id' ]         = audit.auditable_id
 		    aha_object[ 'type' ]       = audit.auditable_type
 		    aha_object[ 'url' ]        = audit.auditable_url
-		    aha_object[ 'aha_id' ]     = audit.auditable_url.substring( audit.auditable_url.lastIndexOf('/') )
+		    aha_object[ 'aha_id' ]     = audit.auditable_url.substring( audit.auditable_url.lastIndexOf('/') + 1 )
 		    aha_object[ 'created_at' ] = audit.created_at
 		}
 		for (let j = 0; j < audit.changes.length; j++) {
@@ -70,25 +70,24 @@ function start() {
 			console.log(`WORKER: Skipping changes to field ${change.field_name}`)
 			continue
                     } else {
-			console.log(`WORKER: this field will NOT be skipped`)
+			//console.log(`WORKER: this field will NOT be skipped`)
 		    }
 
 		    // Format the value we will set the field to
                     let change_value = ''
                     if (audit.auditable_type === "note" || change.field_name.includes("Comment by")) {
-			console.log(`WORKER: turning down`, change.value)
+			//console.log(`WORKER: turning down`, change.value)
 			change_value = turnDown.turndown(change.value.toString())
 	            } else {
-			console.log(`WORKER: decoding`, change.value)
+			//console.log(`WORKER: decoding`, change.value)
 			change_value = entities.decode(change.value.toString())
                     }
 
 		    // Add the change to the struct were we are storing all aggregated changes
-		    console.log(`WORKER: setting "${change.field_name}" equal to: ${change_value}`)
+		    //console.log(`WORKER: setting "${change.field_name}" equal to: ${change_value}`)
 		    changed_fields[ change.field_name ] = change_value;
-		    console.log("WORKER: changed_files updated");
+		    //console.log("WORKER: changed_files updated");
 		}
-		console.log("WORKER: end of change aggregation");
 
 		// delete the change now that we have aggregated it successfully
 		console.log(`WORKER: Deleting change: ${current_change.id}`);
@@ -100,18 +99,18 @@ function start() {
 	    // end aggregation for loop
 
 	    // Send an adaptive card summarizing the changes
-	    console.log("WORKER: composing adaptive card data object");
             const cardData = {
                 actionTitle: `${aha_object['aha_id']} updated`,
                 actionText: `The following fields were modified ${aha_object['url']}`,
                 changes: changed_fields,
-                footNote: `Changes made by TODO at TODO}`
+                footNote: `Changes made by TODO at TODO`
             }
 	    console.log("WORKER: Card data that will be posted: ", cardData)
             const template = new Template(ahaCardTemplate);
             const card = template.expand({
                 $root: cardData
             });
+	    console.log("WORKER: posting card:", card)
             await bot.sendAdaptiveCard(groupId, card);
 	    // End sending of adaptive card
 	    
