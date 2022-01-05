@@ -38,7 +38,7 @@ function start() {
 	    let aha_object = {}
 	    
 	    // Aggregate and summarize the changes received. 
-	    for (let i = 0; i < accumuluated_changes.length; i++)  {
+	    for (let i = 0; i < accumulated_changes.length; i++)  {
 		console.log(`Processing audit #${i}`)
 		let data = accumulated_changes[i].data
 		console.log("Processing data: " , data)
