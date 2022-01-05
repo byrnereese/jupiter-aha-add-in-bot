@@ -57,7 +57,7 @@ function start() {
 		    aha_object[ 'aha_id' ]     = audit.auditable_url.substring( audit.auditable_url.lastIndexOf('/') )
 		    aha_object[ 'created_at' ] = audit.created_at
 		}
-		for (var j in audit.changes) {
+		for (let j = 0; j < audit.changes.length; j++) {
 		    console.log(`WORKER: Processing change #${j} in audit #${i}`)
                     let change = audit.changes[j]
 		    console.log("WORKER: Change: ", change)
