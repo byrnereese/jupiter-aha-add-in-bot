@@ -69,10 +69,12 @@ function start() {
                     let change_value = ''
                     if (audit.auditable_type === "note" || change.field_name.includes("Comment by")) {
 			console.log(`WORKER: turning down`, change.value)
-			change_value = turnDown.turndown(change.value.toString())
+			//change_value = turnDown.turndown(change.value.toString())
+			change_value = turnDown.turndown(change.value)
                     } else {
 			console.log(`WORKER: decoding`, change.value)
-			change_value = entities.decode(change.value.toString())
+			//change_value = entities.decode(change.value.toString())
+			change_value = entities.decode(change.value)
                     }
 
 		    // Add the change to the struct were we are storing all aggregated changes
