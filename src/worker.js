@@ -83,18 +83,21 @@ function start() {
                     }
 
 		    // Add the change to the struct were we are storing all aggregated changes
-		    //console.log(`WORKER: setting ${change.field_name} equal to ${change_value} `)
+		    console.log(`WORKER: setting ${change.field_name} equal to ${change_value} `)
 		    changed_fields[ change.field_name ] = change_value;
+		    console.log("WORKER: changed_files updated");
 		}
 		// delete the change now that we have aggregated it successfully
 		console.log(`WORKER: Deleting change: ${change.id}`);
 		await ChangesModel.destroy({
 		    'where': { 'id': change.id }
 		})
+		console.log("WORKER: end of change aggregation");
 	    }
 	    // end aggregation for loop
 
 	    // Send an adaptive card summarizing the changes
+	    console.log("WORKER: composing adaptive card data object");
             const cardData = {
                 actionTitle: `${aha_object['aha_id']} updated`,
                 actionText: `The following fields were modified ${aha_object['url']}`,
