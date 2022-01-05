@@ -75,10 +75,10 @@ function start() {
 		    // Format the value we will set the field to
                     let change_value = ''
                     if (audit.auditable_type === "note" || change.field_name.includes("Comment by")) {
-			//console.log(`WORKER: turning down`, change.value)
+			console.log(`WORKER: turning down`, change.value)
 			change_value = turnDown.turndown(change.value.toString())
 	            } else {
-			//console.log(`WORKER: decoding`, change.value)
+			console.log(`WORKER: decoding`, change.value)
 			change_value = entities.decode(change.value.toString())
                     }
 
