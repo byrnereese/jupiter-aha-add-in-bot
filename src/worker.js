@@ -75,17 +75,15 @@ function start() {
 		    // Format the value we will set the field to
                     let change_value = ''
                     if (audit.auditable_type === "note" || change.field_name.includes("Comment by")) {
-			console.log(`WORKER: turning down`, change.value)
+			//console.log(`WORKER: turning down`, change.value)
 			change_value = turnDown.turndown(change.value.toString())
-			//change_value = turnDown.turndown(change.value)
-                    } else {
-			console.log(`WORKER: decoding`, change.value)
+	            } else {
+			//console.log(`WORKER: decoding`, change.value)
 			change_value = entities.decode(change.value.toString())
-			//change_value = entities.decode(change.value)
                     }
 
 		    // Add the change to the struct were we are storing all aggregated changes
-		    console.log(`WORKER: setting ${change.field_name} equal to ${change_value} `)
+		    //console.log(`WORKER: setting ${change.field_name} equal to ${change_value} `)
 		    changed_fields[ change.field_name ] = change_value;
 		}
 		// delete the change now that we have aggregated it successfully
@@ -98,17 +96,17 @@ function start() {
 
 	    // Send an adaptive card summarizing the changes
             const cardData = {
-                actionTitle: `${aha_obj['aha_id']} updated`,
+                actionTitle: `${aha_object['aha_id']} updated`,
                 actionText: `The following fields were modified ${aha_object['url']}`,
                 changes: changed_fields,
                 footNote: `Changes made by TODO at TODO}`
             }
 	    console.log("WORKER: Card data that will be posted: ", cardData)
-            //const template = new Template(ahaCardTemplate);
-            //const card = template.expand({
-            //    $root: cardData
-            //});
-            //await bot.sendAdaptiveCard(groupId, card);
+            const template = new Template(ahaCardTemplate);
+            const card = template.expand({
+                $root: cardData
+            });
+            await bot.sendAdaptiveCard(groupId, card);
 	    // End sending of adaptive card
 	    
 	} else {
