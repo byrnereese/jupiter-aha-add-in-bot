@@ -88,8 +88,8 @@ const ahaWebhookHandler = async (req, res) => {
 		job = await workQueue.add({
 		    'group_id' : groupId,
 		    'bot_id'   : botId,
-		    'aha_id'   : audit.associated_id,
-		    'aha_type' : audit.associated_type
+		    'aha_id'   : audit.auditable_id,
+		    'aha_type' : audit.auditable_type
 		},{
 		    'jobId'           : jobId,
 		    'delay'           : JOB_DELAY,
