@@ -19,9 +19,7 @@ const turnDown  = new turnDownService()
 const ahaOAuthHandler = async (req, res) => {
     const { state } = req.query
     const [groupId, botId, userId] = state.split(':')
-    console.log(`Requesting installation into chat ID: ${groupId}`)
-    console.log(`Bot ID: ${botId}`)
-    console.log(`User ID: ${userId}`)
+    console.log(`Requesting installation of bot (id:${botId}) into chat (id:${groupId}) by user (id:${userId})`)
 
     const tokenUrl = `${process.env.RINGCENTRAL_CHATBOT_SERVER}${req.url}`;
     console.log(`Token URL: ${tokenUrl}`);

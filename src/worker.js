@@ -1,6 +1,4 @@
 const { AhaModel, ChangesModel } = require('./models/models')
-//const { AhaModel } = require('./models/ahaModel');
-//const { ChangesModel } = require('./models/changesModel');
 
 let throng = require('throng');
 let Queue  = require("bull");
@@ -21,11 +19,11 @@ let maxJobsPerWorker = 50;
 
 function start() {
     // Connect to the named work queue
-    console.log("WORKER: Starting job")
+    console.log("WORKER: Starting up worker. Waiting for a job.")
     let workQueue = new Queue('work', REDIS_URL);
 
     workQueue.process(maxJobsPerWorker, async (job) => {
-	console.log(`WORKER: processing ${job.id}`)
+	console.log(`WORKER: processing job: ${job.id}`)
 
 	let progress = 0;
 	const accumulated_changes = await ChangesModel.findAll({
@@ -35,7 +33,7 @@ function start() {
 	    }
 	})
 	if (accumulated_changes) {
-	    console.log(`WORKER: ${changes.length} found to aggregate`);
+	    console.log(`WORKER: ${accumulated_changes.length} found to aggregate`);
 	    let changed_fields = {}
 	    let aha_object = {}
 	    
