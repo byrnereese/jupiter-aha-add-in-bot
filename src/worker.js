@@ -32,13 +32,13 @@ function start() {
     let workQueue = new Queue('work', REDIS_URL);
 
     workQueue.process(maxJobsPerWorker, async (job) => {
-	console.log(`WORKER: processing ${job.action} job: ${job.id}`)
-	if (job.action == 'create') {
-	    if (job.aha_type == 'ideas/idea') {
+	console.log(`WORKER: processing ${job.data.action} job: ${job.id}`)
+	if (job.data.action == 'create') {
+	    if (job.data.aha_type == 'ideas/idea') {
 		const ideaId = job.data.audit.auditable_url.substring( audit.auditable_url.lastIndexOf('/') + 1 )
 		const ahaModel = await AhaModel.findOne({
 		    where: {
-			botId: job.bot_id, groupId: job.group_id
+			botId: job.data.bot_id, groupId: job.data.group_id
 		    }
 		})
 		let token = ahaModel ? ahaModel.token : undefined
@@ -61,12 +61,12 @@ function start() {
 		  $root: cardData
 		  });
 		*/
-	    } else if (job.aha_type == 'feature') {
+	    } else if (job.data.aha_type == 'feature') {
 		// TODO
 	    } else {
 		// TODO - error condition
 	    }
-	} else if (job.action == 'update') {
+	} else if (job.data.action == 'update') {
 	    let progress = 0;
 	    const accumulated_changes = await ChangesModel.findAll({
 		'where': {
@@ -162,7 +162,7 @@ function start() {
 	    }
 	
 	} else {
-	    console.log(`WORKER: failing job: unknown job type ${job.action}`)
+	    console.log(`WORKER: failing job: unknown job type ${job.data.action}`)
 	    job.fail();
 	}
 
