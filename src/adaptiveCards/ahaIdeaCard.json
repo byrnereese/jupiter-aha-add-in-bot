@@ -85,6 +85,7 @@
                 "type": "AdaptiveCard",
                 "body": [
 		    {
+			"id": "categories",
 			"type": "Input.ChoiceSet",
 			"choices": [
 			    {
@@ -98,6 +99,7 @@
                 ],
                 "actions": [
                     {
+			"id": "change_category",
                         "type": "Action.Submit",
                         "title": "OK"
                     }
