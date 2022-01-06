@@ -4,6 +4,9 @@ const { getAhaClient }    = require('../lib/aha');
 const { getOAuthApp }     = require('../lib/oauth');
 const { continueSession } = require('pg/lib/sasl');
 
+const { Template } = require('adaptivecards-templating');
+const sampleSubmitButtonCardTemplate = require('../adaptiveCards/sampleSubmitButtonCard.json');
+
 const botHandler = async event => {
     console.log(event.type, 'event')
     switch (event.type) {
@@ -65,6 +68,16 @@ const handleMessage4Bot = async event => {
             await bot.sendMessage(group.id, { text: `It does not appear you have a current connection to Aha in this team.` })
         }
 
+    } else if (text === 'debug submit') {
+        const cardData = {
+            botId : bot.id
+        }
+        const template = new Template(sampleSubmitButtonCardTemplate);
+        const card = template.expand({
+            $root: cardData
+        });
+        console.log("DEBUG: posting card:", card)
+        await bot.sendAdaptiveCard( group.id, card);
     }
 }
 
