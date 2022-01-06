@@ -10,7 +10,8 @@ let   Queue                      = require('bull');
 const entities                   = new AllHtmlEntities();
 const turnDown                   = new turnDownService();
 
-const ahaCardTemplate            = require('./adaptiveCards/ahaCard.json');
+const cardUpdateTemplate         = require('./adaptiveCards/ahaUpdateCard.json');
+const cardIdeaTemplate           = require('./adaptiveCards/ahaIdeaCard.json');
 
 let REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
@@ -53,6 +54,7 @@ function start() {
 		    let productId = idea.product.reference_prefix
 		    console.log(`WORKER: getting idea categories for ${productId}`)
 		    aha.product.ideaCategories( productId, function (err, data, response) {
+			console.log("WORKER: categories fetched from aha: ", data)
 			const cardData = {
 			    ahaId: job.data.audit.auditable_id,
 			    ahaUrl: job.data.audit.auditable_url,
@@ -62,7 +64,7 @@ function start() {
 			    categories: data.idea_categories
 			}
 			console.log("WORKER: Card data that will be posted: ", cardData)
-			const template = new Template(ahaIdeaCardTemplate);
+			const template = new Template(cardIdeaTemplate);
 			const card = template.expand({
 			    $root: cardData
 			});
@@ -163,7 +165,7 @@ function start() {
 		    change_date: aha_object['created_at']
 		}
 		console.log("WORKER: Card data that will be posted: ", cardData)
-		const template = new Template(ahaCardTemplate);
+		const template = new Template(cardUpdateTemplate);
 		const card = template.expand({
 		    $root: cardData
 		});

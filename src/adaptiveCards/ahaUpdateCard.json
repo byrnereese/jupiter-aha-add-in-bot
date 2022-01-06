@@ -1,0 +1,44 @@
+{
+    "type": "AdaptiveCard",
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.5",
+    "body": [
+        {
+            "type": "TextBlock",
+            "text": "${ahaId} updated",
+            "wrap": true,
+            "weight": "Bolder",
+            "size": "Large"
+        },
+        {
+            "type": "TextBlock",
+            "text": "The following fields were updated.",
+            "wrap": true
+        },
+        {
+            "type": "FactSet",
+            "$data": "${changes}",
+            "facts": [
+                {
+                    "title": "${title}",
+                    "value": "${value}"
+                }
+            ],
+            "separator": true
+        },
+        {
+            "type": "TextBlock",
+            "text": "Changes made by ${contributors} on ${change_date}",
+            "wrap": true,
+            "size": "Small",
+            "color": "Light"
+        }
+    ],
+    "actions": [
+	{
+	    "type": "Action.OpenUrl",
+	    "title": "View ${ahaType}",
+	    "url": "${ahaUrl}"
+	}
+    ]
+}
