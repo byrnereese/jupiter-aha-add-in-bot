@@ -1,44 +1,127 @@
 {
     "type": "AdaptiveCard",
-    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-    "version": "1.5",
     "body": [
         {
             "type": "TextBlock",
-            "text": "${ahaId} updated",
-            "wrap": true,
+            "size": "Medium",
             "weight": "Bolder",
-            "size": "Large"
+            "text": "${title}"
+        },
+        {
+            "type": "ColumnSet",
+            "columns": [
+                {
+                    "type": "Column",
+                    "items": [
+                        {
+                            "type": "Image",
+                            "style": "Person",
+                            "url": "${idea.created_by_user.avatar_url}",
+                            "size": "Small"
+                        }
+                    ],
+                    "width": "auto"
+                },
+                {
+                    "type": "Column",
+                    "items": [
+                        {
+                            "type": "TextBlock",
+                            "weight": "Bolder",
+                            "text": "${idea.created_by_user.name}",
+                            "wrap": true
+                        },
+                        {
+                            "type": "TextBlock",
+                            "spacing": "None",
+                            "text": "Created {{DATE(${idea.created_at},SHORT)}}",
+                            "isSubtle": true,
+                            "wrap": true
+                        }
+                    ],
+                    "width": "stretch"
+                }
+            ]
         },
         {
             "type": "TextBlock",
-            "text": "The following fields were updated.",
+            "text": "${idea.name}",
+            "wrap": true,
+            "size": "Medium",
+            "weight": "Bolder"
+        },
+        {
+            "type": "TextBlock",
+            "text": "${idea.description.body}",
             "wrap": true
         },
         {
             "type": "FactSet",
-            "$data": "${changes}",
             "facts": [
                 {
-                    "title": "${title}",
-                    "value": "${value}"
-                }
+                    "title": "Status",
+                    "value": "${idea.workdlow_status.name}"
+                },
+                {
+                    "title": "Visibility",
+                    "value": "${idea.visibility}"
+                },
+                {
+                    "title": "Product",
+                    "value": "${idea.product.name}"
+                },
+                {
+                    "title": "",
+                    "value": ""
+                },
             ],
             "separator": true
-        },
+        }
         {
-            "type": "TextBlock",
-            "text": "Changes made by ${contributors} on ${change_date}",
-            "wrap": true,
-            "size": "Small",
-            "color": "Light"
+            "type": "FactSet",
+            "facts": [
+                {
+                    "$data": "${properties}",
+                    "title": "${key}:",
+                    "value": "${value}"
+                }
+            ]
         }
     ],
     "actions": [
-	{
-	    "type": "Action.OpenUrl",
-	    "title": "View ${ahaType}",
-	    "url": "${ahaUrl}"
-	}
-    ]
+        {
+            "type": "Action.ShowCard",
+            "title": "Change category",
+            "card": {
+                "type": "AdaptiveCard",
+                "body": [
+		    {
+			"type": "Input.ChoiceSet",
+			"$data": "${categories}",
+			"choices": [
+			    {
+				"title": "${name}",
+				"value": "${id}"
+			    }
+			],
+			"placeholder": "Select idea category"
+		    }
+                ],
+                "actions": [
+                    {
+                        "type": "Action.Submit",
+                        "title": "OK"
+                    }
+                ],
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
+            }
+        },
+        {
+            "type": "Action.OpenUrl",
+            "title": "View idea",
+            "url": "${idea.url}"
+        }
+    ],
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.5"
 }
