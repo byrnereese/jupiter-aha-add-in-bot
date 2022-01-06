@@ -103,7 +103,6 @@
                 ],
                 "actions": [
                     {
-			"id": "change_category",
                         "type": "Action.Submit",
                         "title": "OK"
                     }
