@@ -37,7 +37,7 @@ function start() {
 	if (job.data.action == 'create') {
 	    if (job.data.aha_type == 'ideas/idea') {
 		console.log("WORKER: processing new idea job")
-		const ideaId = job.data.audit.auditable_url.substring( audit.auditable_url.lastIndexOf('/') + 1 )
+		const ideaId = job.data.audit.auditable_url.substring( job.data.audit.auditable_url.lastIndexOf('/') + 1 )
 		const ahaModel = await AhaModel.findOne({
 		    where: {
 			botId: job.data.bot_id, groupId: job.data.group_id
