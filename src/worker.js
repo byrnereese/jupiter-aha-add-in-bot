@@ -50,12 +50,12 @@ function start() {
 
 		console.log(`WORKER: aha client initialized, getting ${ideaId}`)
 		aha.idea.get(ideaId, function (err, data, response) {
-		    console.log("WORKER: idea fetched from aha: ", data)
+		    //console.log("WORKER: idea fetched from aha: ", data)
 		    let idea = data.idea
 		    let productId = idea.product.reference_prefix
-		    console.log(`WORKER: getting idea categories for ${productId}`)
-		    aha.product.ideaCategories( productId, function (err, data, response) {
-			console.log("WORKER: categories fetched from aha: ", data)
+		    //console.log(`WORKER: getting idea categories for ${productId}`)
+		    let promise1 = aha.product.ideaCategories( productId, function (err, data, response) {
+			//console.log("WORKER: categories fetched from aha: ", data)
 			const cardData = {
 			    ahaId: job.data.audit.auditable_id,
 			    ahaUrl: job.data.audit.auditable_url,
@@ -69,8 +69,10 @@ function start() {
 			const card = template.expand({
 			    $root: cardData
 			});
-			console.log("WORKER: posting card:", JSON.stringify(card))
-			let promise = bot.sendAdaptiveCard( job.data.group_id, card);
+			//console.log("WORKER: posting card:", JSON.stringify(card))
+			bot.sendAdaptiveCard( job.data.group_id, card).catch( (err) => {
+			    console.log(`WORKER: error posting card: ${err}`)
+			});
 			console.log(`WORKER: card posted`)
 		    })
 		})
@@ -186,7 +188,8 @@ function start() {
 
 	// A job can return values that will be stored in Redis as JSON
 	// This return value is unused in this demo application.
-	job.moveToCompleted("Update job completed.", true)
+	console.log("WORKER: marking job as complete")
+	job.moveToCompleted("Job completed.", true)
 	return { value: `Card posted for ${job.data.aha_id}` };
     });
 }
