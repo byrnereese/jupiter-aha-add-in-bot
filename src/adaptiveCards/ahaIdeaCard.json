@@ -62,7 +62,7 @@
             "facts": [
                 {
                     "title": "Status",
-                    "value": "${idea.workdlow_status.name}"
+                    "value": "${idea.workflow_status.name}"
                 },
                 {
                     "title": "Visibility",
@@ -78,13 +78,18 @@
     ],
     "actions": [
         {
+            "type": "Action.OpenUrl",
+            "title": "View ${ahaIdeaId}",
+            "url": "${idea.url}"
+        },
+        {
             "type": "Action.ShowCard",
             "title": "Change category",
             "card": {
                 "type": "AdaptiveCard",
                 "body": [
 		    {
-			"id": "categories",
+			"id": "category",
 			"type": "Input.ChoiceSet",
 			"choices": [
 			    {
@@ -105,11 +110,6 @@
                 ],
                 "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
             }
-        },
-        {
-            "type": "Action.OpenUrl",
-            "title": "View idea",
-            "url": "${idea.url}"
         }
     ]
 }
