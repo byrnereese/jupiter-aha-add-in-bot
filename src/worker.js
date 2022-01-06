@@ -47,12 +47,11 @@ function start() {
 		let aha = getAhaClient(token)
 
 		console.log(`WORKER: aha client initialized, getting ${ideaId}`)
-		const ideaResponse = aha.idea.get(ideaId, function (err, data, response) {
-		    const idea = ideaResponse.data
+		aha.idea.get(ideaId, function (err, idea, response) {
 		    console.log("WORKER: idea fetched from aha: ", idea)
 		    let productId = idea.body.idea.product.reference_prefix
 		    console.log(`WORKER: getting idea categories for ${productId}`)
-		    let categories = aha.product.ideaCategories( productId, function (err, data, response) {
+		    aha.product.ideaCategories( productId, function (err, categories, response) {
 			const cardData = {
 			    ahaId: job.data.audit.auditable_id,
 			    ahaUrl: job.data.audit.auditable_url,
