@@ -58,38 +58,56 @@ const ahaWebhookHandler = async (req, res) => {
     const bot = await Bot.findByPk(botId)
     if (bot) {
         if (audit.interesting) {
-	    // Aha is a really noisy webhook engine, sending lots of individual webhooks for
-	    // changes related to a single feature.
-	    // Our strategy is to create a background job that is delayed by n minutes. That
-	    // job will aggregate all the changes related to the same aha entity and post a
-	    // single card for those changes.
-	    
-	    // Step 1. Store the received change in the database.
-	    console.log(`Storing changes for ${audit.associated_type}, id: ${audit.associated_id}`)
-	    let c = await ChangesModel.create({
-		'ahaType' : audit.auditable_type,
-		'ahaId'   : audit.auditable_id,
-		'data'    : webhook_data
-	    });
-	    
-	    // Step 2. Create a job if one does not already exist.
-	    let jobId = `${audit.associated_id}:${audit.associated_type}`;
-	    let job = await workQueue.getJob(jobId);
-	    if (!job) {
-		console.log(`Creating job with delay of ${JOB_DELAY}ms: ${jobId}`);
+	    let jobId = `${audit.audit_action}:${audit.associated_id}:${audit.associated_type}`;
+
+	    if (audit.audit_action == "update") {
+		// Aha is a really noisy webhook engine, sending lots of individual webhooks for
+		// changes related to a single feature.
+		// Our strategy is to create a background job that is delayed by n minutes. That
+		// job will aggregate all the changes related to the same aha entity and post a
+		// single card for those changes.
+		
+		// Step 1. Store the received change in the database.
+		console.log(`Storing changes for ${audit.associated_type}, id: ${audit.associated_id}`)
+		let c = await ChangesModel.create({
+		    'ahaType' : audit.auditable_type,
+		    'ahaId'   : audit.auditable_id,
+		    'data'    : webhook_data
+		});
+		
+		// Step 2. Create a job if one does not already exist.
+		let job = await workQueue.getJob(jobId);
+		if (!job) {
+		    console.log(`Creating job with delay of ${JOB_DELAY}ms: ${jobId}`);
+		    job = await workQueue.add({
+			'group_id' : groupId,
+			'bot_id'   : botId,
+			'action'   : audit.audit_action,
+			'aha_id'   : audit.auditable_id,
+			'aha_type' : audit.auditable_type
+		    },{
+			'jobId'           : jobId,
+			'delay'           : JOB_DELAY,
+			'removeOnComplete': true
+		    });
+		    console.log(`Job created: ${job.id}`);
+		} else {
+		    console.log(`Job already exists: ${job.id}. Skipping job creation.`);
+		}
+		
+	    } else if (audit.audit_action == "create") {
 		job = await workQueue.add({
 		    'group_id' : groupId,
 		    'bot_id'   : botId,
+		    'action'   : audit.audit_action,
 		    'aha_id'   : audit.auditable_id,
-		    'aha_type' : audit.auditable_type
+		    'aha_type' : audit.auditable_type,
+		    'audit'    : audit
 		},{
 		    'jobId'           : jobId,
-		    'delay'           : JOB_DELAY,
 		    'removeOnComplete': true
 		});
 		console.log(`Job created: ${job.id}`);
-	    } else {
-		console.log(`Job already exists: ${job.id}. Skipping job creation.`);
 	    }
 	    console.log("Finished processing activity webhook from Aha")
         }
