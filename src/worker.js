@@ -46,11 +46,11 @@ function start() {
 		let token = ahaModel ? ahaModel.token : undefined
 		console.log("WORKER: token loaded")
 		let aha = getAhaClient(token)
-		console.log("WORKER: aha client initialized")
-		let resp = aha.ideas.get(ideaId, function (err, data, response) {
+		console.log(`WORKER: aha client initialized, getting ${ideaId}`)
+		let resp = aha.idea.get(ideaId, function (err, data, response) {
+		    console.log("WORKER: idea fetched from aha")
 		    console.log( resp )
 		})
-		console.log("WORKER: idea fetchd from aha")
 		/*
 		  const cardData = {
 		  ahaId: aha_object['aha_id'],
