@@ -44,33 +44,39 @@ function start() {
 		    }
 		})
 		let token = ahaModel ? ahaModel.token : undefined
-		console.log("WORKER: token loaded")
 		let aha = getAhaClient(token)
+
 		console.log(`WORKER: aha client initialized, getting ${ideaId}`)
-		let resp = aha.idea.get(ideaId, function (err, data, response) {
-		    console.log("WORKER: idea fetched from aha: ", data)
-		})
-		console.log( "WORKER: response is ", resp )
-		/*
-		  const cardData = {
-		  ahaId: aha_object['aha_id'],
-		  ahaUrl: aha_object['url'],
-		  ahaType: aha_object['type'],
-		  contributors: aha_object['contributors'].map( function(e) { return e.user.name } ).join(", "),
-		  changes: Object.keys(changed_fields).map( k => changed_fields[k] ),
-		  change_date: aha_object['created_at']
-		  }
-		  console.log("WORKER: Card data that will be posted: ", cardData)
-		  const template = new Template(ahaCardTemplate);
-		  const card = template.expand({
-		  $root: cardData
-		  });
-		*/
+		let idea = await aha.idea.get(ideaId)
+		console.log("WORKER: idea fetched from aha: ", idea.body)
+		
+		let productId = idea.body.idea.product.reference_prefix
+		console.log(`WORKER: getting idea categories for ${productId}`)
+		let categories = await aha.product.ideaCategories( productId )
+
+		const cardData = {
+		    ahaId: job.data.audit.auditable_id,
+		    ahaUrl: job.data.audit.auditable_url,
+		    ahaType: job.data.audit.auditable_type,
+		    ahaIdeaId: ideaId,
+		    idea: data,
+		    categories: {}
+		}
+		console.log("WORKER: Card data that will be posted: ", cardData)
+		const template = new Template(ahaIdeaCardTemplate);
+		const card = template.expand({
+		    $root: cardData
+		});
+		job.moveToCompleted("Idea created notification posted.", true)
+		
 	    } else if (job.data.aha_type == 'feature') {
 		// TODO
+		job.moveToFailed({ message: "Feature creation notification not implemented." })
 	    } else {
 		// TODO - error condition
+		job.moveToFailed({ message: "Unknown Aha object type." })
 	    }
+	    
 	} else if (job.data.action == 'update') {
 	    console.log("WORKER: processing updates to an object")
 	    let progress = 0;
@@ -166,9 +172,11 @@ function start() {
 	    } else {
 		console.log(`WORKER: No changes were found to aggregate. This technically shouldn't happen.`);
 	    }
+	    job.moveToCompleted("Update job completed.", true)
 	
 	} else {
 	    console.log(`WORKER: failing job: unknown job type ${job.data.action}`)
+	    job.moveToFailed({ message: "Idea created notification posted." })
 	    job.fail();
 	}
 
