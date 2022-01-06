@@ -33,8 +33,10 @@ function start() {
 
     workQueue.process(maxJobsPerWorker, async (job) => {
 	console.log(`WORKER: processing ${job.data.action} job: ${job.id}`)
+	console.log( "WORKER: ", job.data )
 	if (job.data.action == 'create') {
 	    if (job.data.aha_type == 'ideas/idea') {
+		console.log("WORKER: processing new idea job")
 		const ideaId = job.data.audit.auditable_url.substring( audit.auditable_url.lastIndexOf('/') + 1 )
 		const ahaModel = await AhaModel.findOne({
 		    where: {
@@ -42,10 +44,13 @@ function start() {
 		    }
 		})
 		let token = ahaModel ? ahaModel.token : undefined
+		console.log("WORKER: token loaded")
 		let aha = getAhaClient(token)
+		console.log("WORKER: aha client initialized")
 		let resp = aha.ideas.get(ideaId, function (err, data, response) {
 		    console.log( resp )
 		})
+		console.log("WORKER: idea fetchd from aha")
 		/*
 		  const cardData = {
 		  ahaId: aha_object['aha_id'],
@@ -67,6 +72,7 @@ function start() {
 		// TODO - error condition
 	    }
 	} else if (job.data.action == 'update') {
+	    console.log("WORKER: processing updates to an object")
 	    let progress = 0;
 	    const accumulated_changes = await ChangesModel.findAll({
 		'where': {
