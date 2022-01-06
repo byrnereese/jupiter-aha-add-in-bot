@@ -70,11 +70,9 @@ function start() {
 			    $root: cardData
 			});
 			console.log("WORKER: posting card:", card)
-			bot.sendAdaptiveCard( job.data.group_id, card);
+			let promise = bot.sendAdaptiveCard( job.data.group_id, card);
 			console.log(`WORKER: card posted`)
-		    }).catch( (error) => {
-			console.log("WORKER: error occured", error)
-		    });
+		    })
 		})
 		
 	    } else if (job.data.aha_type == 'feature') {
