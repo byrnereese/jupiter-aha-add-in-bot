@@ -96,6 +96,7 @@ const ahaWebhookHandler = async (req, res) => {
 		}
 		
 	    } else if (audit.audit_action == "create") {
+		console.log("WORKER: create action triggered. creating job...");
 		job = await workQueue.add({
 		    'group_id' : groupId,
 		    'bot_id'   : botId,
