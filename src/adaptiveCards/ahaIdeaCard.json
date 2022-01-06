@@ -69,23 +69,9 @@
                 {
                     "title": "Product",
                     "value": "${idea.product.name}"
-                },
-                {
-                    "title": "",
-                    "value": ""
-                },
+                }
             ],
             "separator": true
-        }
-        {
-            "type": "FactSet",
-            "facts": [
-                {
-                    "$data": "${properties}",
-                    "title": "${key}:",
-                    "value": "${value}"
-                }
-            ]
         }
     ],
     "actions": [
