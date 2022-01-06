@@ -35,6 +35,7 @@ function start() {
     workQueue.process(maxJobsPerWorker, async (job) => {
 	console.log(`WORKER: processing ${job.data.action} job: ${job.id}`)
 	console.log( "WORKER: ", job.data )
+	const bot = await Bot.findByPk( job.data.bot_id )
 	if (job.data.action == 'create') {
 	    if (job.data.aha_type == 'ideas/idea') {
 		console.log("WORKER: processing new idea job")
@@ -91,7 +92,6 @@ function start() {
 		    'ahaId'   : job.data.aha_id
 		}
 	    })
-	    const bot = await Bot.findByPk( job.data.bot_id )
 	    if (accumulated_changes) {
 		console.log(`WORKER: ${accumulated_changes.length} found to aggregate`);
 		let changed_fields = {}
