@@ -69,7 +69,7 @@ function start() {
 			const card = template.expand({
 			    $root: cardData
 			});
-			console.log("WORKER: posting card:", card)
+			console.log("WORKER: posting card:", JSON.stringify(card))
 			let promise = bot.sendAdaptiveCard( job.data.group_id, card);
 			console.log(`WORKER: card posted`)
 		    })

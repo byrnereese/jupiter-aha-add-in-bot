@@ -1,11 +1,13 @@
 {
     "type": "AdaptiveCard",
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.5",
     "body": [
         {
             "type": "TextBlock",
             "size": "Medium",
             "weight": "Bolder",
-            "text": "${title}"
+            "text": "New idea submitted"
         },
         {
             "type": "ColumnSet",
@@ -107,7 +109,5 @@
             "title": "View idea",
             "url": "${idea.url}"
         }
-    ],
-    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-    "version": "1.5"
+    ]
 }
