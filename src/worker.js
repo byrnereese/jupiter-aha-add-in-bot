@@ -1,7 +1,14 @@
 const { AhaModel, ChangesModel } = require('./models/models')
+const { AllHtmlEntities }        = require('html-entities')
+const { Template }               = require('adaptivecards-templating')
+const Bot                        = require('ringcentral-chatbot-core/dist/models/Bot').default;
+const ahaCardTemplate            = require('./adaptiveCards/ahaCard.json')
+const turnDownService            = require('turndown')
+let   throng                     = require('throng');
+let   Queue                      = require("bull");
 
-let throng = require('throng');
-let Queue  = require("bull");
+const entities                   = new AllHtmlEntities()
+const turnDown                   = new turnDownService()
 
 let REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
@@ -32,6 +39,7 @@ function start() {
 		'ahaId'   : job.data.aha_id
 	    }
 	})
+	const bot = await Bot.findByPk( job.data.bot_id )
 	if (accumulated_changes) {
 	    console.log(`WORKER: ${accumulated_changes.length} found to aggregate`);
 	    let changed_fields = {}
@@ -40,16 +48,19 @@ function start() {
 	    // Aggregate and summarize the changes received. 
 	    for (let i = 0; i < accumulated_changes.length; i++)  {
 		console.log(`WORKER: Processing audit #${i}`)
-		let data = accumulated_changes[i].data
-		let audit = JSON.parse( data )
+		let current_change = accumulated_changes[i]
+		let data           = current_change.data
+		let audit          = JSON.parse( data )
 		console.log("WORKER: Processing data: ", audit)
 		if (i == 0) {
 		    aha_object[ 'id' ]         = audit.auditable_id
 		    aha_object[ 'type' ]       = audit.auditable_type
 		    aha_object[ 'url' ]        = audit.auditable_url
-		    aha_object[ 'created_at' ] = audit.created_at
+		    aha_object[ 'aha_id' ]     = audit.auditable_url.substring( audit.auditable_url.lastIndexOf('/') + 1 )
+		    aha_object[ 'created_at' ]   = audit.created_at
+		    aha_object[ 'contributors' ] = audit.contributors
 		}
-		for (var j in audit.changes) {
+		for (let j = 0; j < audit.changes.length; j++) {
 		    console.log(`WORKER: Processing change #${j} in audit #${i}`)
                     let change = audit.changes[j]
 		    console.log("WORKER: Change: ", change)
@@ -62,46 +73,55 @@ function start() {
 			console.log(`WORKER: Skipping changes to field ${change.field_name}`)
 			continue
                     } else {
-			console.log(`WORKER: this field will NOT be skipped`)
+			//console.log(`WORKER: this field will NOT be skipped`)
 		    }
 
 		    // Format the value we will set the field to
                     let change_value = ''
                     if (audit.auditable_type === "note" || change.field_name.includes("Comment by")) {
-			console.log(`WORKER: turning down`, change.value)
-			//change_value = turnDown.turndown(change.value.toString())
-			change_value = turnDown.turndown(change.value)
-                    } else {
-			console.log(`WORKER: decoding`, change.value)
-			//change_value = entities.decode(change.value.toString())
-			change_value = entities.decode(change.value)
+			//console.log(`WORKER: turning down`, change.value)
+			change_value = turnDown.turndown(change.value.toString())
+	            } else {
+			//console.log(`WORKER: decoding`, change.value)
+			change_value = entities.decode(change.value.toString())
                     }
 
 		    // Add the change to the struct were we are storing all aggregated changes
-		    console.log(`WORKER: setting ${change.field_name} equal to ${change_value} `)
-		    changed_fields[ change.field_name ] = change_value;
+		    //console.log(`WORKER: setting "${change.field_name}" equal to: ${change_value}`)
+		    changed_fields[ change.field_name ] = {
+			title: change.field_name,
+			value: change_value
+		    }
+		    //console.log("WORKER: changed_files updated");
 		}
+
 		// delete the change now that we have aggregated it successfully
-		console.log(`WORKER: Deleting change: ${change.id}`);
+		console.log(`WORKER: Deleting change: ${current_change.id}`);
 		await ChangesModel.destroy({
-		    'where': { 'id': change.id }
+		    'where': { 'id': current_change.id }
 		})
+
 	    }
 	    // end aggregation for loop
 
 	    // Send an adaptive card summarizing the changes
+	    console.log("WORKER: Preparing card data for", aha_object)
             const cardData = {
-                actionTitle: `${job.data.aha_type} updated`,
-                actionText: `The following fields were modified ${aha_object['url']}`,
-                changes: changed_fields,
-                footNote: `Changes made by TODO at TODO}`
+                ahaId: aha_object['aha_id'],
+                ahaUrl: aha_object['url'],
+                ahaType: aha_object['type'],
+		contributors: aha_object['contributors'].map( function(e) { return e.user.name } ).join(", "),
+                changes: Object.keys(changed_fields).map( k => changed_fields[k] ),
+		change_date: aha_object['created_at']
             }
 	    console.log("WORKER: Card data that will be posted: ", cardData)
-            //const template = new Template(ahaCardTemplate);
-            //const card = template.expand({
-            //    $root: cardData
-            //});
-            //await bot.sendAdaptiveCard(groupId, card);
+            const template = new Template(ahaCardTemplate);
+            const card = template.expand({
+                $root: cardData
+            });
+	    console.log("WORKER: posting card:", card)
+            await bot.sendAdaptiveCard( job.data.group_id, card);
+	    console.log("WORKER: card posted")
 	    // End sending of adaptive card
 	    
 	} else {

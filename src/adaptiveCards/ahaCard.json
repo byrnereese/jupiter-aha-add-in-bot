@@ -5,19 +5,14 @@
     "body": [
         {
             "type": "TextBlock",
-            "text": "${actionTitle}",
+            "text": "${ahaId} updated",
             "wrap": true,
             "weight": "Bolder",
             "size": "Large"
         },
         {
             "type": "TextBlock",
-            "text": "${actionText}",
-            "wrap": true
-        },
-        {
-            "type": "TextBlock",
-            "text": " ",
+            "text": "The following fields were updated.",
             "wrap": true
         },
         {
@@ -33,10 +28,17 @@
         },
         {
             "type": "TextBlock",
-            "text": "${footNote}",
+            "text": "Changes made by ${contributors} on ${change_date}",
             "wrap": true,
             "size": "Small",
             "color": "Light"
         }
+    ],
+    "actions": [
+	{
+	    "type": "Action.OpenUrl",
+	    "title": "View ${ahaType}",
+	    "url": "${ahaUrl}"
+	}
     ]
 }
