@@ -47,7 +47,9 @@ function start() {
 		let aha = getAhaClient(token)
 
 		console.log(`WORKER: aha client initialized, getting ${ideaId}`)
-		let idea = await aha.idea.get(ideaId)
+		const ideaResponse = await aha.idea.get(ideaId)
+		console.log("WORKER: response received: ", ideaResponse)
+		const idea = ideaResponse.data
 		console.log("WORKER: idea fetched from aha: ", idea)
 		
 		let productId = idea.body.idea.product.reference_prefix
