@@ -34,7 +34,7 @@ function start() {
 
     workQueue.process(maxJobsPerWorker, async (job) => {
 	console.log(`WORKER: processing ${job.data.action} job: ${job.id}`)
-	console.log( "WORKER: ", job.data )
+	console.log("WORKER: ", job.data)
 	const bot = await Bot.findByPk( job.data.bot_id )
 	if (job.data.action == 'create') {
 	    if (job.data.aha_type == 'ideas/idea') {
