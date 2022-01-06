@@ -48,7 +48,7 @@ function start() {
 
 		console.log(`WORKER: aha client initialized, getting ${ideaId}`)
 		let idea = await aha.idea.get(ideaId)
-		console.log("WORKER: idea fetched from aha: ", idea.body)
+		console.log("WORKER: idea fetched from aha: ", idea)
 		
 		let productId = idea.body.idea.product.reference_prefix
 		console.log(`WORKER: getting idea categories for ${productId}`)
