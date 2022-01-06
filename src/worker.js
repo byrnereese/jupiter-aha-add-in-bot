@@ -48,9 +48,9 @@ function start() {
 		let aha = getAhaClient(token)
 		console.log(`WORKER: aha client initialized, getting ${ideaId}`)
 		let resp = aha.idea.get(ideaId, function (err, data, response) {
-		    console.log("WORKER: idea fetched from aha")
-		    console.log( resp )
+		    console.log("WORKER: idea fetched from aha: ", data)
 		})
+		console.log( "WORKER: response is ", resp )
 		/*
 		  const cardData = {
 		  ahaId: aha_object['aha_id'],
