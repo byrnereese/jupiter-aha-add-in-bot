@@ -68,7 +68,9 @@ function start() {
 			const card = template.expand({
 			    $root: cardData
 			});
-			job.moveToCompleted("Idea created notification posted.", true)
+			console.log("WORKER: posting card:", card)
+			await bot.sendAdaptiveCard( job.data.group_id, card);
+			console.log(`WORKER: card posted`)
 		    })
 		})
 		
@@ -175,7 +177,6 @@ function start() {
 	    } else {
 		console.log(`WORKER: No changes were found to aggregate. This technically shouldn't happen.`);
 	    }
-	    job.moveToCompleted("Update job completed.", true)
 	
 	} else {
 	    console.log(`WORKER: failing job: unknown job type ${job.data.action}`)
@@ -185,6 +186,7 @@ function start() {
 
 	// A job can return values that will be stored in Redis as JSON
 	// This return value is unused in this demo application.
+	job.moveToCompleted("Update job completed.", true)
 	return { value: `Card posted for ${job.data.aha_id}` };
     });
 }
