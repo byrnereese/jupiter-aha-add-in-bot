@@ -35,18 +35,21 @@ function start() {
     workQueue.process(maxJobsPerWorker, async (job) => {
 	console.log(`WORKER: processing ${job.data.action} job: ${job.id}`)
 	console.log("WORKER: ", job.data)
+
+	// initialize job with bot and aha client
 	const bot = await Bot.findByPk( job.data.bot_id )
+	const ahaModel = await AhaModel.findOne({
+	    where: {
+		botId: job.data.bot_id, groupId: job.data.group_id
+	    }
+	})
+	let token = ahaModel ? ahaModel.token : undefined
+	let aha = getAhaClient(token)
+
 	if (job.data.action == 'create') {
 	    if (job.data.aha_type == 'ideas/idea') {
 		console.log("WORKER: processing new idea job")
 		const ideaId = job.data.audit.auditable_url.substring( job.data.audit.auditable_url.lastIndexOf('/') + 1 )
-		const ahaModel = await AhaModel.findOne({
-		    where: {
-			botId: job.data.bot_id, groupId: job.data.group_id
-		    }
-		})
-		let token = ahaModel ? ahaModel.token : undefined
-		let aha = getAhaClient(token)
 
 		console.log(`WORKER: aha client initialized, getting ${ideaId}`)
 		aha.idea.get(ideaId, function (err, data, response) {
@@ -64,7 +67,7 @@ function start() {
 			    idea: idea,
 			    categories: data.idea_categories
 			}
-			console.log("WORKER: Card data that will be posted: ", cardData)
+			//console.log("WORKER: Card data that will be posted: ", cardData)
 			const template = new Template(cardIdeaTemplate);
 			const card = template.expand({
 			    $root: cardData
@@ -77,11 +80,9 @@ function start() {
 		    })
 		})
 		
-	    } else if (job.data.aha_type == 'feature') {
-		// TODO
-		job.moveToFailed({ message: "Feature creation notification not implemented." })
 	    } else {
 		// TODO - error condition
+		console.log(`WORKER: create job failed, unknown auditable_type = ${job.data.aha_type}`)
 		job.moveToFailed({ message: "Unknown Aha object type." })
 	    }
 	    
