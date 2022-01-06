@@ -49,7 +49,7 @@ function start() {
 		console.log(`WORKER: aha client initialized, getting ${ideaId}`)
 		aha.idea.get(ideaId, function (err, idea, response) {
 		    console.log("WORKER: idea fetched from aha: ", idea)
-		    let productId = idea.body.idea.product.reference_prefix
+		    let productId = idea.product.reference_prefix
 		    console.log(`WORKER: getting idea categories for ${productId}`)
 		    aha.product.ideaCategories( productId, function (err, categories, response) {
 			const cardData = {
