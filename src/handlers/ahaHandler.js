@@ -58,7 +58,7 @@ const ahaWebhookHandler = async (req, res) => {
     const bot = await Bot.findByPk(botId)
     if (bot) {
         if (audit.interesting) {
-	    let jobId = `${audit.audit_action}:${audit.associated_id}:${audit.associated_type}`;
+	    let jobId = `${audit.audit_action}:${audit.auditable_id}:${audit.auditable_type}`;
 
 	    if (audit.audit_action == "update") {
 		// Aha is a really noisy webhook engine, sending lots of individual webhooks for
@@ -68,7 +68,7 @@ const ahaWebhookHandler = async (req, res) => {
 		// single card for those changes.
 		
 		// Step 1. Store the received change in the database.
-		console.log(`Storing changes for ${audit.associated_type}, id: ${audit.associated_id}`)
+		console.log(`Storing changes for ${audit.auditable_type}, id: ${audit.auditable_id}`)
 		let c = await ChangesModel.create({
 		    'ahaType' : audit.auditable_type,
 		    'ahaId'   : audit.auditable_id,
