@@ -78,6 +78,7 @@
     ],
     "actions": [
         {
+	    "id": "show_card",
             "type": "Action.ShowCard",
             "title": "Change category",
             "card": {
@@ -105,6 +106,7 @@
             }
         },
         {
+	    "id": "open_url",
             "type": "Action.OpenUrl",
             "title": "View idea",
             "url": "${idea.url}"
