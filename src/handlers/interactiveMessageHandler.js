@@ -1,10 +1,13 @@
-const Bot = require('ringcentral-chatbot-core/dist/models/Bot').default;
-const { Template } = require('adaptivecards-templating');
+const Bot                    = require('ringcentral-chatbot-core/dist/models/Bot').default;
+const { Template }           = require('adaptivecards-templating');
 const sampleTextCardTemplate = require('../adaptiveCards/sampleTextCard.json');
+
 const interactiveMessageHandler = async req => {
     const submitData = req.body.data;
-    const cardId = req.body.card.id;
+    const cardId     = req.body.card.id;
+
     console.log(`=====incomingCardSubmit=====\n${JSON.stringify(req.body, null, 2)}`);
+
     const bot = await Bot.findByPk(submitData.botId);
     switch (submitData.actionType) {
         case 'update':
