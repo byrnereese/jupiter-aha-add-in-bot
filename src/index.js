@@ -2,11 +2,13 @@ const { extendApp } = require('ringcentral-chatbot-core');
 const express       = require('express');
 const axios         = require('axios');
 let   Queue         = require('bull');
+const crypto        = require('crypto');
 
 const { AhaModel }     = require('./models/ahaModel');
 const { ChangesModel } = require('./models/changesModel')
 const { botHandler }   = require('./handlers/botHandler');
 const { ahaOAuthHandler, ahaWebhookHandler } = require('./handlers/ahaHandler');
+const { interactiveMessageHandler } = require('./handlers/interactiveMessageHandler');
 
 let PORT      = process.env.PORT || '5000';
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
@@ -65,3 +67,27 @@ app.post('/aha/webhook', async (req, res) => {
     res.status(200);
 	res.send('<!doctype><html><body><script>close()</script></body></html>')
 })
+
+app.post('/interactive-messages', async (req, res) => {
+    try {
+        // Shared secret can be found on RingCentral developer portal, under your app Settings
+        const SHARED_SECRET = process.env.IM_SHARED_SECRET;
+        if (SHARED_SECRET) {
+            const signature = req.get('X-Glip-Signature', 'sha1=');
+            const encryptedBody =
+                crypto.createHmac('sha1', SHARED_SECRET).update(JSON.stringify(req.body)).digest('hex');
+            if (encryptedBody !== signature) {
+                res.status(401).send('Incorrect SHARED_SECRET.');
+                return;
+                }
+            }
+        
+        await interactiveMessageHandler(req);
+        }
+    catch (e) {
+        console.log(e);
+    }
+
+    res.status(200);
+    res.json('OK');
+});
