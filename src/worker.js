@@ -57,17 +57,19 @@ function start() {
 		    let idea = data.idea
 		    let productId = idea.product.reference_prefix
 		    //console.log(`WORKER: getting idea categories for ${productId}`)
-		    let promise1 = aha.product.workflows( productId, function (err, data, response) {
+		    let promise1 = aha.product.workflow( productId, function (err, data, response) {
 			console.log("WORKER: workflow states: ", JSON.stringify(data))
 			let states = []
 			let promise2 = aha.product.ideaCategories( productId, function (err, data, response) {
 			    //console.log("WORKER: categories fetched from aha: ", data)
+			    let desc = turnDown.turndown( idea.description.toString() )
 			    const cardData = {
 				ahaId: job.data.audit.auditable_id,
 				ahaUrl: job.data.audit.auditable_url,
 				ahaType: job.data.audit.auditable_type,
 				ahaIdeaId: ideaId,
 				idea: idea,
+				idea_description: desc,
 				categories: data.idea_categories,
 				workflow_states: states
 			    }
