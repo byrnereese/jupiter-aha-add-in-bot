@@ -57,8 +57,9 @@ function start() {
 		    let idea = data.idea
 		    let productId = idea.product.reference_prefix
 		    console.log(`WORKER: getting workflow and categories for ${productId}`, idea)
-		    let promise1 = aha.product.workflows( productId, function (err, data, response) {
-			console.log(`WORKER: workflow states for ${productId}: `, data)
+		    let promise1 = aha.product.workflows( productId, function (err, data2, response) {
+			console.log("WORKER: call to workflows complete")
+			console.log(`WORKER: workflow states for ${productId}: `, data2)
 			let states = []
 			let promise2 = aha.product.ideaCategories( productId, function (err, data, response) {
 			    //console.log("WORKER: categories fetched from aha: ", data)
