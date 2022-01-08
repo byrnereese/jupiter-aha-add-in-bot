@@ -56,7 +56,7 @@ function start() {
 		    //console.log("WORKER: idea fetched from aha: ", data)
 		    let idea = data.idea
 		    let productId = idea.product.reference_prefix
-		    //console.log(`WORKER: getting idea categories for ${productId}`)
+		    console.log(`WORKER: getting workflow and categories for ${productId}`)
 		    let promise1 = aha.product.workflows( productId, function (err, data, response) {
 			console.log("WORKER: workflow states: ", JSON.stringify(data))
 			let states = []
