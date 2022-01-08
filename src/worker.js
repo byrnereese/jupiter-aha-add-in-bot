@@ -45,7 +45,7 @@ function start() {
 	})
 	let token = ahaModel ? ahaModel.token : undefined
 	let aha = getAhaClient(token)
-
+	try {
 	if (job.data.action == 'create') {
 	    if (job.data.aha_type == 'ideas/idea') {
 		console.log("WORKER: processing new idea job")
@@ -194,7 +194,10 @@ function start() {
 	    job.moveToFailed({ message: "Idea created notification posted." })
 	    job.fail();
 	}
-
+	} catch (error) {
+	    console.log("ERROR-----------------", error)
+	}
+	    
 	// A job can return values that will be stored in Redis as JSON
 	// This return value is unused in this demo application.
 	console.log("WORKER: marking job as complete")
