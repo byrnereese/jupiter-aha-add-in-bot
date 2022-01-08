@@ -98,35 +98,36 @@
                     {
                         "id": "idea_name",
                         "type": "Input.Text",
-                        "placeholder": "Placeholder text",
-                        "label": "Name"
+                        "placeholder": "Enter the name of the idea",
+                        "label": "Name",
+			"value": "${idea.name}"
                     },
                     {
                         "id": "idea_description",
                         "type": "Input.Text",
-                        "placeholder": "Placeholder text",
+                        "placeholder": "Enter a detailed description of the idea",
                         "isMultiline": true,
-                        "label": "Description"
+                        "label": "Description",
+			"value": "${idea.description.body}"
                     },
                     {
                         "id": "idea_status",
                         "type": "Input.ChoiceSet",
+			"value": "${idea.workflow_status.name}",
                         "choices": [
                             {
-                                "title": "Choice 1",
-                                "value": "Choice 1"
-                            },
-                            {
-                                "title": "Choice 2",
-                                "value": "Choice 2"
+				"$data": "${workflow_states}",
+                                "title": "{label}",
+                                "value": "{value}"
                             }
                         ],
-                        "placeholder": "Placeholder text",
+                        "placeholder": "Select status",
                         "label": "Status"
                     },
                     {
                         "id": "idea_category",
                         "type": "Input.ChoiceSet",
+			"value": "${selectedCategory}",
                         "choices": [
                             {
                                 "$data": "${categories}",
@@ -134,7 +135,7 @@
                                 "value": "${id}"
                             }
                         ],
-                        "placeholder": "Placeholder text",
+                        "placeholder": "Select a product category",
                         "label": "Category"
                     }
                 ],
@@ -156,7 +157,7 @@
                     {
                         "id": "comment_text",
                         "type": "Input.Text",
-                        "placeholder": "Placeholder text",
+                        "placeholder": "Enter your comment",
                         "isMultiline": true,
                         "label": "Comment text"
                     }

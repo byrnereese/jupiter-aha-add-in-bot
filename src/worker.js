@@ -57,26 +57,31 @@ function start() {
 		    let idea = data.idea
 		    let productId = idea.product.reference_prefix
 		    //console.log(`WORKER: getting idea categories for ${productId}`)
-		    let promise1 = aha.product.ideaCategories( productId, function (err, data, response) {
-			//console.log("WORKER: categories fetched from aha: ", data)
-			const cardData = {
-			    ahaId: job.data.audit.auditable_id,
-			    ahaUrl: job.data.audit.auditable_url,
-			    ahaType: job.data.audit.auditable_type,
-			    ahaIdeaId: ideaId,
-			    idea: idea,
-			    categories: data.idea_categories
-			}
-			//console.log("WORKER: Card data that will be posted: ", cardData)
-			const template = new Template(cardIdeaTemplate);
-			const card = template.expand({
-			    $root: cardData
-			});
-			//console.log("WORKER: posting card:", JSON.stringify(card))
-			bot.sendAdaptiveCard( job.data.group_id, card).catch( (err) => {
-			    console.log(`WORKER: error posting card: ${err}`)
-			});
-			console.log(`WORKER: card posted`)
+		    let promise1 = aha.product.workflows( productId, function (err, data, response) {
+			console.log("WORKER: workflow states: ", JSON.stringify(data))
+			let states = []
+			let promise2 = aha.product.ideaCategories( productId, function (err, data, response) {
+			    //console.log("WORKER: categories fetched from aha: ", data)
+			    const cardData = {
+				ahaId: job.data.audit.auditable_id,
+				ahaUrl: job.data.audit.auditable_url,
+				ahaType: job.data.audit.auditable_type,
+				ahaIdeaId: ideaId,
+				idea: idea,
+				categories: data.idea_categories,
+				workflow_states: states
+			    }
+			    //console.log("WORKER: Card data that will be posted: ", cardData)
+			    const template = new Template(cardIdeaTemplate);
+			    const card = template.expand({
+				$root: cardData
+			    });
+			    //console.log("WORKER: posting card:", JSON.stringify(card))
+			    bot.sendAdaptiveCard( job.data.group_id, card).catch( (err) => {
+				console.log(`WORKER: error posting card: ${err}`)
+			    });
+			    console.log(`WORKER: card posted`)
+			})
 		    })
 		})
 		
