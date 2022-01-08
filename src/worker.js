@@ -62,7 +62,8 @@ function start() {
 			let states = []
 			let promise2 = aha.product.ideaCategories( productId, function (err, data, response) {
 			    //console.log("WORKER: categories fetched from aha: ", data)
-			    let desc = turnDown.turndown( idea.description.body.toString() )
+			    console.log(`WORKER: description = ${idea.description.body}` )
+			    let desc = turnDown.turndown( idea.description.body )
 			    const cardData = {
 				ahaId: job.data.audit.auditable_id,
 				ahaUrl: job.data.audit.auditable_url,
