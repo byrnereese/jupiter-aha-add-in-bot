@@ -12,7 +12,7 @@
     "dependencies": {
         "adaptive-expressions": "^4.15.0",
         "adaptivecards-templating": "^2.2.0",
-        "aha-io": "github:byrnereese/node-ahaio#master",
+        "aha-io": "github:byrnereese/node-ahaio#993b4fef8a90759cafc1efaf20fcb570cb55c2a7",
         "aha-io-oauth": "0.0.3",
         "axios": "^0.24.0",
         "bull": "^3.7.0",
