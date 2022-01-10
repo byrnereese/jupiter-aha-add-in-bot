@@ -37,7 +37,6 @@ const interactiveMessageHandler = async req => {
 
     case 'post_idea_comment':
 	// user updated an idea
-	console.log(`MESSAGING: posting comment ${submitData.ideaId}:`, comment)
 	bot.rc.get(`account/${submitData.user.accountId}/extension/${submitData.user.extId}`).then( function( resp ) {
 	    let respj = resp.json()
 	    console.log("MESSAGING: got poster info", respj)
@@ -45,6 +44,7 @@ const interactiveMessageHandler = async req => {
 		body: submitData.comment_text,
 		email: respj.contact.email
 	    }
+	    console.log(`MESSAGING: posting comment ${submitData.ideaId}:`, comment)
             aha.idea.addPublicComment(submitData.ideaId, comment, function (err, data, response) {
 		console.log(`MESSAGING: posted public comment to idea`)
 	    });
