@@ -63,16 +63,23 @@ const loadProjectWorkflows = ( aha, productId ) => {
 
 const postMessage = ( bot, group_id, tmpl, cardData ) => {
     console.log("WORKER: posting message with card data", cardData)
-    const template = new Template(tmpl);
-    const card = template.expand({
-	$root: cardData
-    });
-    //console.log("WORKER: posting card:", JSON.stringify(card))
-    bot.sendAdaptiveCard( group_id, card).catch( (err) => {
-	console.log(`WORKER: error posting card: ${err}`)
-    });
-    console.log(`WORKER: card posted`)
-    console.log("DONE")
+    const promise = new Promise( (resolve, reject) => {
+	const template = new Template(tmpl);
+	const card = template.expand({
+	    $root: cardData
+	});
+	//console.log("WORKER: posting card:", JSON.stringify(card))
+	bot.sendAdaptiveCard( group_id, card).catch( (err) => {
+	    console.log(`WORKER: error posting card: ${err}`)
+	});
+	console.log(`WORKER: card posted`)
+    })
+    return promise
+}
+
+const completeJob = ( job ) => {
+    console.log(`WORKER: marking job as completed: ${job.id}`)
+    job.moveToCompleted("Job completed.", true)
 }
 
 function get_workflows( workflows, name ) {
@@ -81,6 +88,89 @@ function get_workflows( workflows, name ) {
             return workflows[i].workflow_statuses
         }
     }
+}
+
+const loadChanges = ( type, id ) => {
+    const promise = new Promise( (resolve, reject) => {
+	ChangesModel.findAll({
+	    'where': {
+		'ahaType' : type,
+		'ahaId'   : id
+	    }
+	}).then( function( accumulated_changes ) {
+	    resolve( accumulated_changes )
+	})
+    })
+    return promise
+}
+
+const aggregateChanges = ( accumulated_changes ) => {
+    const promise = new Promise( (resolve, reject) => {
+	let changed_fields = {}
+	let aha_object = {}
+	if (accumulated_changes) {
+	    console.log(`WORKER: ${accumulated_changes.length} found to aggregate`);
+	    // Aggregate and summarize the changes received. 
+	    for (let i = 0; i < accumulated_changes.length; i++)  {
+		console.log(`WORKER: Processing audit #${i}`)
+		let current_change = accumulated_changes[i]
+		let data           = current_change.data
+		let audit          = JSON.parse( data )
+		console.log("WORKER: Processing data: ", audit)
+		if (i == 0) {
+		    aha_object[ 'id' ]         = audit.auditable_id
+		    aha_object[ 'type' ]       = audit.auditable_type
+		    aha_object[ 'url' ]        = audit.auditable_url
+		    aha_object[ 'aha_id' ]     = audit.auditable_url.substring( audit.auditable_url.lastIndexOf('/') + 1 )
+		    aha_object[ 'created_at' ]   = audit.created_at
+		    aha_object[ 'contributors' ] = audit.contributors
+		}
+		for (let j = 0; j < audit.changes.length; j++) {
+		    console.log(`WORKER: Processing change #${j} in audit #${i}`)
+		    let change = audit.changes[j]
+		    console.log("WORKER: Change: ", change)
+		    
+		    // Figure out what changes we want to skip/ignore
+		    // Duplicates are ok, because we will just use the most recent value
+		    if (change.value == '' || // empty value
+			(IGNORE_FIELDS.test(change.field_name) && audit.audit_action === "create")
+		       ) {
+			console.log(`WORKER: Skipping changes to field ${change.field_name}`)
+			continue
+		    } else {
+			//console.log(`WORKER: this field will NOT be skipped`)
+		    }
+		    
+		    // Format the value we will set the field to
+		    let change_value = ''
+		    if (audit.auditable_type === "note" || change.field_name.includes("Comment by")) {
+			//console.log(`WORKER: turning down`, change.value)
+			change_value = turnDown.turndown(change.value.toString())
+		    } else {
+			//console.log(`WORKER: decoding`, change.value)
+			change_value = entities.decode(change.value.toString())
+		    }
+		    
+		    // Add the change to the struct were we are storing all aggregated changes
+		    //console.log(`WORKER: setting "${change.field_name}" equal to: ${change_value}`)
+		    changed_fields[ change.field_name ] = {
+			title: change.field_name,
+			value: change_value
+		    }
+		    //console.log("WORKER: changed_files updated");
+		}
+		
+		// delete the change now that we have aggregated it successfully
+		console.log(`WORKER: Deleting change: ${current_change.id}`);
+		ChangesModel.destroy({
+		    'where': { 'id': current_change.id }
+		})
+	    }
+	}
+	resolve( aha_object, changed_fields )
+    })
+    console.log("WORKER: returning from aggregateChanges")
+    return promise
 }
 
 function start() {
@@ -102,150 +192,70 @@ function start() {
 	let token = ahaModel ? ahaModel.token : undefined
 	let aha = getAhaClient(token)
 	try {
-	if (job.data.action == 'create') {
-	    if (job.data.aha_type == 'ideas/idea') {
-		console.log("WORKER: processing new idea job")
-		const ideaId = job.data.audit.auditable_url.substring( job.data.audit.auditable_url.lastIndexOf('/') + 1 )
+	    if (job.data.action == 'create') {
+		if (job.data.aha_type == 'ideas/idea') {
+		    console.log("WORKER: processing new idea job")
+		    const ideaId = job.data.audit.auditable_url.substring( job.data.audit.auditable_url.lastIndexOf('/') + 1 )
+		    
+		    console.log(`WORKER: aha client initialized, getting ${ideaId}`)
+		    const cardData = {
+			ahaId: job.data.audit.auditable_id,
+			ahaUrl: job.data.audit.auditable_url,
+			ahaType: job.data.audit.auditable_type,
+			ahaIdeaId: ideaId
+		    }
+		    
+		    loadIdea( aha, ideaId ).then( idea => {
+			console.log("WORKER: loaded idea", idea)
+			cardData['idea'] = idea.idea
+			return loadIdeaCategories( aha, idea.idea.product.reference_prefix )
+		    }).then( categories => {
+			console.log("WORKER: loaded categories", categories)
+			cardData['categories'] = categories.idea_categories
+			return loadProjectWorkflows( aha, cardData["idea"].product.reference_prefix )
+		    }).then( workflows => {
+			console.log("WORKER: loaded workflows", workflows)
+			cardData['workflows'] = get_workflows(workflows.workflows, "Product idea workflow" )
+			console.log("WORKER: finished loading all idea metadata")
+			return postMessage( bot, job.data.group_id, cardIdeaTemplate, cardData )
+		    }).then( function() {
+			completeJob(job)
+		    })
+		    
+		} else {
+		    // TODO - error condition
+		    console.log(`WORKER: create job failed, unknown auditable_type = ${job.data.aha_type}`)
+		    job.moveToFailed({ message: "Unknown Aha object type." })
+		}
+		
+	    } else if (job.data.action == 'update') {
 
-		console.log(`WORKER: aha client initialized, getting ${ideaId}`)
-
+		console.log("WORKER: processing updates to an object")
 		const cardData = {
 		    ahaId: job.data.audit.auditable_id,
 		    ahaUrl: job.data.audit.auditable_url,
 		    ahaType: job.data.audit.auditable_type,
 		    ahaIdeaId: ideaId
 		}
-		
-		loadIdea( aha, ideaId ).then( idea => {
-		    console.log("WORKER: loaded idea", idea)
-		    cardData['idea'] = idea.idea
-		    return loadIdeaCategories( aha, idea.idea.product.reference_prefix )
-		}).then( categories => {
-		    console.log("WORKER: loaded categories", categories)
-		    cardData['categories'] = categories.idea_categories
-		    return loadProjectWorkflows( aha, cardData["idea"].product.reference_prefix )
-		}).then( workflows => {
-		    console.log("WORKER: loaded workflows", workflows)
-		    cardData['workflows'] = get_workflows(workflows.workflows, "Product idea workflow" )
-		    console.log("WORKER: finished loading all idea metadata")
-		    return postMessage( bot, job.data.group_id, cardIdeaTemplate, cardData )
-		})
-
-	    } else {
-		// TODO - error condition
-		console.log(`WORKER: create job failed, unknown auditable_type = ${job.data.aha_type}`)
-		job.moveToFailed({ message: "Unknown Aha object type." })
+		loadChanges( job.data.aha_type, job.data.aha_id ).then( accumulated_changes => {
+		    return aggregateChanges( job.data.aha_type, job.data.aha_id )
+		}).then( aha_obj, changes => {
+		    cardData['contributors'] = aha_obj['contributors'].map(
+			function(e) { return e.user.name } ).join(", ")
+		    cardData['changes'] = Object.keys(changes).map( k => changes[k] )
+		    cardData['change_date'] = aha_object['created_at']
+		    console.log("WORKER: Card data that will be posted: ", cardData)
+		    console.log(`WORKER: ${changes.length} aggregated for job ${job.id}.`)
+		    return postMessage( bot, job.data.group_id, cardUpdateTemplate, cardData )
+		}).then( function() {
+		    completeJob(job)
+		}) 
 	    }
-	    
-	} else if (job.data.action == 'update') {
-	    console.log("WORKER: processing updates to an object")
-	    let progress = 0;
-	    const accumulated_changes = await ChangesModel.findAll({
-		'where': {
-		    'ahaType' : job.data.aha_type,
-		    'ahaId'   : job.data.aha_id
-		}
-	    })
-	    if (accumulated_changes) {
-		console.log(`WORKER: ${accumulated_changes.length} found to aggregate`);
-		let changed_fields = {}
-		let aha_object = {}
-		
-		// Aggregate and summarize the changes received. 
-		for (let i = 0; i < accumulated_changes.length; i++)  {
-		    console.log(`WORKER: Processing audit #${i}`)
-		    let current_change = accumulated_changes[i]
-		    let data           = current_change.data
-		    let audit          = JSON.parse( data )
-		    console.log("WORKER: Processing data: ", audit)
-		    if (i == 0) {
-			aha_object[ 'id' ]         = audit.auditable_id
-			aha_object[ 'type' ]       = audit.auditable_type
-			aha_object[ 'url' ]        = audit.auditable_url
-			aha_object[ 'aha_id' ]     = audit.auditable_url.substring( audit.auditable_url.lastIndexOf('/') + 1 )
-			aha_object[ 'created_at' ]   = audit.created_at
-			aha_object[ 'contributors' ] = audit.contributors
-		    }
-		    for (let j = 0; j < audit.changes.length; j++) {
-			console.log(`WORKER: Processing change #${j} in audit #${i}`)
-			let change = audit.changes[j]
-			console.log("WORKER: Change: ", change)
-			
-			// Figure out what changes we want to skip/ignore
-			// Duplicates are ok, because we will just use the most recent value
-			if (change.value == '' || // empty value
-			    (IGNORE_FIELDS.test(change.field_name) && audit.audit_action === "create")
-			   ) {
-			    console.log(`WORKER: Skipping changes to field ${change.field_name}`)
-			    continue
-			} else {
-			    //console.log(`WORKER: this field will NOT be skipped`)
-			}
-			
-			// Format the value we will set the field to
-			let change_value = ''
-			if (audit.auditable_type === "note" || change.field_name.includes("Comment by")) {
-			    //console.log(`WORKER: turning down`, change.value)
-			    change_value = turnDown.turndown(change.value.toString())
-			} else {
-			    //console.log(`WORKER: decoding`, change.value)
-			    change_value = entities.decode(change.value.toString())
-			}
-			
-			// Add the change to the struct were we are storing all aggregated changes
-			//console.log(`WORKER: setting "${change.field_name}" equal to: ${change_value}`)
-			changed_fields[ change.field_name ] = {
-			    title: change.field_name,
-			    value: change_value
-			}
-			//console.log("WORKER: changed_files updated");
-		    }
-		    
-		    // delete the change now that we have aggregated it successfully
-		    console.log(`WORKER: Deleting change: ${current_change.id}`);
-		    await ChangesModel.destroy({
-			'where': { 'id': current_change.id }
-		    })
-		    
-		}
-		// end aggregation for loop
-		
-		// Send an adaptive card summarizing the changes
-		console.log("WORKER: Preparing card data for", aha_object)
-		const cardData = {
-		    ahaId: aha_object['aha_id'],
-		    ahaUrl: aha_object['url'],
-		    ahaType: aha_object['type'],
-		    contributors: aha_object['contributors'].map( function(e) { return e.user.name } ).join(", "),
-		    changes: Object.keys(changed_fields).map( k => changed_fields[k] ),
-		    change_date: aha_object['created_at']
-		}
-		console.log("WORKER: Card data that will be posted: ", cardData)
-		const template = new Template(cardUpdateTemplate);
-		const card = template.expand({
-		    $root: cardData
-		});
-		console.log("WORKER: posting card:", card)
-		await bot.sendAdaptiveCard( job.data.group_id, card);
-		console.log(`WORKER: ${changes.length} aggregated for ${job.data.aha_type} with id of ${job.data.aha_id}.`)
-	    } else {
-		console.log(`WORKER: No changes were found to aggregate. This technically shouldn't happen.`);
-	    }
-	
-	} else {
-	    console.log(`WORKER: failing job: unknown job type ${job.data.action}`)
-	    job.moveToFailed({ message: "Idea created notification posted." })
-	    job.fail();
-	}
 	} catch (error) {
 	    console.log("ERROR-----------------", error)
 	}
 	    
-	// A job can return values that will be stored in Redis as JSON
-	// This return value is unused in this demo application.
-	console.log("WORKER: marking job as complete")
-	job.moveToCompleted("Job completed.", true)
-	return { value: `Card posted for ${job.data.aha_id}` };
+	return { value: `Worker finished` };
     });
 }
 
