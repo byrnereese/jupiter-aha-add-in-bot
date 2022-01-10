@@ -117,8 +117,8 @@
                         "choices": [
                             {
 				"$data": "${workflows}",
-                                "title": "{name}",
-                                "value": "{id}"
+                                "title": "${name}",
+                                "value": "${id}"
                             }
                         ],
                         "placeholder": "Select status",
