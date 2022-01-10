@@ -29,6 +29,10 @@ const interactiveMessageHandler = async req => {
 	    workflow_status: submitData.idea_status,
 	    categories: submitData.idea_category
 	}
+	console.log(`MESSAGING: updating ${submitData.ideaId}:`, update_data)
+        aha.idea.update(ideaId, update_data, function (err, data, response) {
+	    console.log(`MESSAGING: updated idea`)
+	});
 	break;
 
     case 'update':

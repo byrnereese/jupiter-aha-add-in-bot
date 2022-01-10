@@ -145,6 +145,7 @@
                         "title": "Save",
 			"data": {
                             "actionType": "update_idea",
+                            "ideaId": "${ahaIdeaId}",
                             "botId": "${botId}",
                             "groupId": "${groupId}"
 			}
