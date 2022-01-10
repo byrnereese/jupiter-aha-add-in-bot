@@ -75,6 +75,13 @@ const postMessage = ( bot, group_id, tmpl, cardData ) => {
     console.log("DONE")
 }
 
+function get_workflows( workflows, name ) {
+    for (let i = 0; i < workflows.length; i++) {
+        if (workflows[i].name == name) {
+            return workflows[i].workflow_statuses
+        }
+    }
+}
 
 function start() {
     // Connect to the named work queue
@@ -119,7 +126,7 @@ function start() {
 		    return loadProjectWorkflows( aha, cardData["idea"].product.reference_prefix )
 		}).then( workflows => {
 		    console.log("WORKER: loaded workflows", workflows)
-		    cardData['workflows'] = workflows.workflows
+		    cardData['workflows'] = get_workflows(workflows.workflows, "Product idea workflow" )
 		    console.log("WORKER: finished loading all idea metadata")
 		    return postMessage( bot, job.data.group_id, cardIdeaTemplate, cardData )
 		})
