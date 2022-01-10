@@ -1,4 +1,4 @@
-const { AhaModel, ChangesModel } = require('./models/models')
+const { AhaModel, ChangesModel } = require('../models/models')
 const { Template }               = require('adaptivecards-templating');
 const { getAhaClient }           = require('./lib/aha');
 
