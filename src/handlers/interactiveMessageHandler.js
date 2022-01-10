@@ -30,7 +30,7 @@ const interactiveMessageHandler = async req => {
 	    categories: submitData.idea_category
 	}
 	console.log(`MESSAGING: updating ${submitData.ideaId}:`, update_data)
-        aha.idea.update(ideaId, update_data, function (err, data, response) {
+        aha.idea.update(submitData.ideaId, update_data, function (err, data, response) {
 	    console.log(`MESSAGING: updated idea`)
 	});
 	break;
