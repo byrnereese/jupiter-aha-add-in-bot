@@ -232,7 +232,7 @@ function start() {
 
 		console.log("WORKER: processing updates to an object")
 		loadChanges( job.data.aha_type, job.data.aha_id ).then( accumulated_changes => {
-		    return aggregateChanges( job.data.aha_type, job.data.aha_id )
+		    return aggregateChanges( accumulated_changes )
 		}).then( aha_obj, changes => {
 		    const cardData = {
 			ahaId: aha_obj['aha_id'],
