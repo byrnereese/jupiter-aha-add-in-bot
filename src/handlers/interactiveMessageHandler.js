@@ -38,15 +38,16 @@ const interactiveMessageHandler = async req => {
     case 'post_idea_comment':
 	// user updated an idea
 	console.log(`MESSAGING: posting comment ${submitData.ideaId}:`, comment)
-	let resp = await bot.rc.get(`account/${submitData.user.accountId}/extension/${submitData.user.extId}`)
-	let respj = resp.json()
-	console.log("MESSAGING: got poster info", respj)
-	let comment = {
-	    body: submitData.comment_text,
-	    email: respj.contact.email
-	}
-        aha.idea.addPublicComment(submitData.ideaId, comment, function (err, data, response) {
-	    console.log(`MESSAGING: posted public comment to idea`)
+	bot.rc.get(`account/${submitData.user.accountId}/extension/${submitData.user.extId}`).then( function( resp ) {
+	    let respj = resp.json()
+	    console.log("MESSAGING: got poster info", respj)
+	    let comment = {
+		body: submitData.comment_text,
+		email: respj.contact.email
+	    }
+            aha.idea.addPublicComment(submitData.ideaId, comment, function (err, data, response) {
+		console.log(`MESSAGING: posted public comment to idea`)
+	    });
 	});
 	break;
 	
