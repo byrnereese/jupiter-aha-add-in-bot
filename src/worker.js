@@ -31,6 +31,8 @@ const loadIdea = ( aha, ideaId ) => {
     console.log(`WORKER: loading idea ${ideaId}`)
     const promise = new Promise( (resolve, reject) => {
         aha.idea.get(ideaId, function (err, data, response) {
+	    let desc = turnDown.turndown( data.idea.description.body )
+	    data.idea.description["body_nohtml"] = desc
             resolve( data )
         })
     })

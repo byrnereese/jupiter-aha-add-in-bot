@@ -61,7 +61,7 @@
         },
         {
             "type": "TextBlock",
-            "text": "${idea.description.body}",
+            "text": "${idea.description.body_nohtml}",
             "wrap": true
         },
         {
@@ -108,7 +108,7 @@
                         "placeholder": "Enter a detailed description of the idea",
                         "isMultiline": true,
                         "label": "Description",
-			"value": "${idea.description.body}"
+			"value": "${idea.description.body_nohtml}"
                     },
                     {
                         "id": "idea_status",
