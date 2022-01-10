@@ -1,6 +1,6 @@
 const { AhaModel, ChangesModel } = require('../models/models')
 const { Template }               = require('adaptivecards-templating');
-const { getAhaClient }           = require('./lib/aha');
+const { getAhaClient }           = require('../lib/aha');
 
 const Bot                    = require('ringcentral-chatbot-core/dist/models/Bot').default;
 const sampleTextCardTemplate = require('../adaptiveCards/sampleTextCard.json');
