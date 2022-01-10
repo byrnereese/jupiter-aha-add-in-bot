@@ -115,11 +115,11 @@ function start() {
 		    return loadIdeaCategories( aha, idea.idea.product.reference_prefix )
 		}).then( categories => {
 		    console.log("WORKER: loaded categories", categories)
-		    cardData['categories'] = categories
-		    return loadProjectWorkflows( aha, cardData["idea"].idea.product.reference_prefix )
+		    cardData['categories'] = categories.idea_categories
+		    return loadProjectWorkflows( aha, cardData["idea"].product.reference_prefix )
 		}).then( workflows => {
 		    console.log("WORKER: loaded workflows", workflows)
-		    cardData['workflows'] = workflows
+		    cardData['workflows'] = workflows.workflows
 		    console.log("WORKER: finished loading all idea metadata")
 		    return postMessage( bot, job.data.group_id, cardIdeaTemplate, cardData )
 		})
