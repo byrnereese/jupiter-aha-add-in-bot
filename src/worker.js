@@ -239,7 +239,7 @@ function start() {
 			ahaUrl: aha_obj['url'],
 			ahaType: aha_obj['type'],
 			contributors: aha_obj['contributors'].map( function(e) { return e.user.name } ).join(", "),
-			changes: Object.keys(changes).map( k => changes[k] )
+			changes: Object.keys(changes).map( k => changes[k] ),
 			change_date: aha_obj['created_at']
 		    }
 		    console.log("WORKER: Card data that will be posted: ", cardData)
