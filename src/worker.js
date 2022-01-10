@@ -124,44 +124,6 @@ function start() {
 		    return postMessage( bot, job.data.group_id, cardIdeaTemplate, cardData )
 		})
 
-		/*
-		aha.idea.get(ideaId, function (err, data, response) {
-		    //console.log("WORKER: idea fetched from aha: ", data)
-		    let idea = data.idea
-		    let productId = idea.product.reference_prefix
-		    console.log(`WORKER: getting workflow and categories for ${productId}`, idea)
-		    let promise1 = aha.product.workflows( productId, function (err, data2, response) {
-			console.log("WORKER: call to workflows complete")
-			console.log(`WORKER: workflow states for ${productId}: `, data2)
-			let states = []
-			let promise2 = aha.product.ideaCategories( productId, function (err, data, response) {
-			    //console.log("WORKER: categories fetched from aha: ", data)
-			    console.log(`WORKER: description = ${idea.description.body}` )
-			    let desc = turnDown.turndown( idea.description.body )
-			    const cardData = {
-				ahaId: job.data.audit.auditable_id,
-				ahaUrl: job.data.audit.auditable_url,
-				ahaType: job.data.audit.auditable_type,
-				ahaIdeaId: ideaId,
-				idea: idea,
-				idea_description: desc,
-				categories: data.idea_categories,
-				workflow_states: states
-			    }
-			    //console.log("WORKER: Card data that will be posted: ", cardData)
-			    const template = new Template(cardIdeaTemplate);
-			    const card = template.expand({
-				$root: cardData
-			    });
-			    //console.log("WORKER: posting card:", JSON.stringify(card))
-			    bot.sendAdaptiveCard( job.data.group_id, card).catch( (err) => {
-				console.log(`WORKER: error posting card: ${err}`)
-			    });
-			    console.log(`WORKER: card posted`)
-			})
-		    })
-		})
-		*/		
 	    } else {
 		// TODO - error condition
 		console.log(`WORKER: create job failed, unknown auditable_type = ${job.data.aha_type}`)

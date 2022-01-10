@@ -116,9 +116,9 @@
 			"value": "${idea.workflow_status.name}",
                         "choices": [
                             {
-				"$data": "${workflow_states}",
-                                "title": "{label}",
-                                "value": "{value}"
+				"$data": "${workflows}",
+                                "title": "{name}",
+                                "value": "{id}"
                             }
                         ],
                         "placeholder": "Select status",
