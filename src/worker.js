@@ -255,7 +255,8 @@ function start() {
 	    console.log("ERROR-----------------", error)
 	}
 	    
-	return { value: `Worker finished` };
+	return Promise.resolve()
+	//return { value: `Worker finished` };
     });
 }
 
