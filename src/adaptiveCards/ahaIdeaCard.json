@@ -113,7 +113,7 @@
                     {
                         "id": "idea_status",
                         "type": "Input.ChoiceSet",
-			"value": "${idea.workflow_status.name}",
+			"value": "${idea.workflow_status.id}",
                         "choices": [
                             {
 				"$data": "${workflows}",
@@ -142,7 +142,12 @@
                 "actions": [
                     {
                         "type": "Action.Submit",
-                        "title": "Save"
+                        "title": "Save",
+			"data": {
+                            "actionType": "update_idea",
+                            "botId": "${botId}",
+                            "groupId": "${groupId}"
+			}
                     }
                 ],
                 "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"

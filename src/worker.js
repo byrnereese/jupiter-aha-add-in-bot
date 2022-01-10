@@ -201,6 +201,8 @@ function start() {
 		    
 		    console.log(`WORKER: aha client initialized, getting ${ideaId}`)
 		    const cardData = {
+			botId: job.data.bot_id,
+			groupId: job.data.group_id,
 			ahaId: job.data.audit.auditable_id,
 			ahaUrl: job.data.audit.auditable_url,
 			ahaType: job.data.audit.auditable_type,
@@ -239,6 +241,8 @@ function start() {
 		    let aha_obj = result[0]
 		    let changes = result[1]
 		    const cardData = {
+			botId:        job.data.bot_id,
+			groupId:      job.data.group_id,
 			ahaId:        aha_obj['aha_id'],
 			ahaUrl:       aha_obj['url'],
 			ahaType:      aha_obj['type'],
