@@ -42,7 +42,7 @@ const interactiveMessageHandler = async req => {
 	    console.log("MESSAGING: got poster info", resp)
 	    let comment = {
 		body: submitData.comment_text,
-		email: resp.body.contact.email
+		email: resp.data.contact.email
 	    }
 	    console.log(`MESSAGING: posting comment ${submitData.ideaId}:`, comment)
             aha.idea.addPublicComment(submitData.ideaId, comment, function (err, data, response) {
