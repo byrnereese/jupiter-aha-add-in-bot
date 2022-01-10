@@ -231,19 +231,17 @@ function start() {
 	    } else if (job.data.action == 'update') {
 
 		console.log("WORKER: processing updates to an object")
-		const cardData = {
-		    ahaId: job.data.audit.auditable_id,
-		    ahaUrl: job.data.audit.auditable_url,
-		    ahaType: job.data.audit.auditable_type,
-		    ahaIdeaId: ideaId
-		}
 		loadChanges( job.data.aha_type, job.data.aha_id ).then( accumulated_changes => {
 		    return aggregateChanges( job.data.aha_type, job.data.aha_id )
 		}).then( aha_obj, changes => {
-		    cardData['contributors'] = aha_obj['contributors'].map(
-			function(e) { return e.user.name } ).join(", ")
-		    cardData['changes'] = Object.keys(changes).map( k => changes[k] )
-		    cardData['change_date'] = aha_object['created_at']
+		    const cardData = {
+			ahaId: aha_obj['aha_id'],
+			ahaUrl: aha_obj['url'],
+			ahaType: aha_obj['type'],
+			contributors: aha_obj['contributors'].map( function(e) { return e.user.name } ).join(", "),
+			changes: Object.keys(changes).map( k => changes[k] )
+			change_date: aha_obj['created_at']
+		    }
 		    console.log("WORKER: Card data that will be posted: ", cardData)
 		    console.log(`WORKER: ${changes.length} aggregated for job ${job.id}.`)
 		    return postMessage( bot, job.data.group_id, cardUpdateTemplate, cardData )
