@@ -128,7 +128,7 @@ const aggregateChanges = ( accumulated_changes ) => {
 		for (let j = 0; j < audit.changes.length; j++) {
 		    console.log(`WORKER: Processing change #${j} in audit #${i}`)
 		    let change = audit.changes[j]
-		    console.log("WORKER: Change: ", change)
+		    //console.log("WORKER: Change: ", change)
 		    
 		    // Figure out what changes we want to skip/ignore
 		    // Duplicates are ok, because we will just use the most recent value
@@ -167,7 +167,7 @@ const aggregateChanges = ( accumulated_changes ) => {
 		})
 	    }
 	}
-	resolve( aha_object, changed_fields )
+	resolve( [ aha_object, changed_fields ] )
     })
     console.log("WORKER: returning from aggregateChanges")
     return promise
@@ -235,12 +235,12 @@ function start() {
 		    return aggregateChanges( accumulated_changes )
 		}).then( aha_obj, changes => {
 		    const cardData = {
-			ahaId: aha_obj['aha_id'],
-			ahaUrl: aha_obj['url'],
-			ahaType: aha_obj['type'],
+			ahaId:        aha_obj['aha_id'],
+			ahaUrl:       aha_obj['url'],
+			ahaType:      aha_obj['type'],
 			contributors: aha_obj['contributors'].map( function(e) { return e.user.name } ).join(", "),
-			changes: Object.keys(changes).map( k => changes[k] ),
-			change_date: aha_obj['created_at']
+			changes:      Object.keys(changes).map( k => changes[k] ),
+			change_date:  aha_obj['created_at']
 		    }
 		    console.log("WORKER: Card data that will be posted: ", cardData)
 		    console.log(`WORKER: ${changes.length} aggregated for job ${job.id}.`)
