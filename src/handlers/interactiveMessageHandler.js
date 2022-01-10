@@ -37,7 +37,7 @@ const interactiveMessageHandler = async req => {
 
     case 'post_idea_comment':
 	// user updated an idea
-	bot.rc.get(`account/${submitData.user.accountId}/extension/${submitData.user.extId}`).then( function( resp ) {
+	bot.rc.get(`/restapi/v1.0/account/${req.body.user.accountId}/extension/${req.body.user.extId}`).then( function( resp ) {
 	    let respj = resp.json()
 	    console.log("MESSAGING: got poster info", respj)
 	    let comment = {
