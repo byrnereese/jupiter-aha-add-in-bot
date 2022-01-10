@@ -171,7 +171,13 @@
                 "actions": [
                     {
                         "type": "Action.Submit",
-                        "title": "Post public comment"
+                        "title": "Post public comment",
+			"data": {
+                            "actionType": "post_idea_comment",
+                            "ideaId": "${ahaIdeaId}",
+                            "botId": "${botId}",
+                            "groupId": "${groupId}"
+			}
                     }
                 ]
             }

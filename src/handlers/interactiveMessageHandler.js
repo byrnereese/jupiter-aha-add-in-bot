@@ -35,6 +35,18 @@ const interactiveMessageHandler = async req => {
 	});
 	break;
 
+    case 'post_idea_comment':
+	// user updated an idea
+	let comment = {
+	    body: submitData.comment_text,
+	    email: submitData.user.email
+	}
+	console.log(`MESSAGING: posting comment ${submitData.ideaId}:`, comment)
+        aha.idea.addPublicComment(submitData.ideaId, comment, function (err, data, response) {
+	    console.log(`MESSAGING: posted public comment to idea`)
+	});
+	break;
+	
     case 'update':
 	// test hander - ignore this for now
         const template = new Template(sampleTextCardTemplate);
