@@ -27,6 +27,55 @@ let IGNORE_FIELDS = new RegExp('(Created by user|Rank|Assigned to user|Show feat
 // to be much lower.
 let maxJobsPerWorker = 50;
 
+const loadIdea = ( aha, ideaId ) => {
+    console.log(`WORKER: loading idea ${ideaId}`)
+    const promise = new Promise( (resolve, reject) => {
+        aha.idea.get(ideaId, function (err, data, response) {
+            resolve( data )
+        })
+    })
+    console.log("WORKER: returning from loadIdea")
+    return promise
+}
+
+const loadIdeaCategories = ( aha, productId ) => {
+    console.log(`WORKER: loading idea categories for ${productId}`)
+    const promise = new Promise( (resolve, reject) => {
+        aha.product.ideaCategories( productId, function (err, data, response) {
+            resolve( data )
+        })
+    })
+    console.log("WORKER: returning from loadIdeaCategories")
+    return promise
+}
+
+const loadProjectWorkflows = ( aha, productId ) => {
+    console.log(`WORKER: loading workflows for ${productId}`)
+    const promise = new Promise( (resolve, reject) => {
+        aha.product.workflows( productId, function (err, data, response) {
+            console.log( "err: " , err )
+            resolve( data )
+        })
+    })
+    console.log("WORKER: returning from loadWorkflows")
+    return promise
+}
+
+const postMessage = ( bot, group_id, tmpl, cardData ) => {
+    console.log("WORKER: posting message with card data", cardData)
+    const template = new Template(tmpl);
+    const card = template.expand({
+	$root: cardData
+    });
+    //console.log("WORKER: posting card:", JSON.stringify(card))
+    bot.sendAdaptiveCard( group_id, card).catch( (err) => {
+	console.log(`WORKER: error posting card: ${err}`)
+    });
+    console.log(`WORKER: card posted`)
+    console.log("DONE")
+}
+
+
 function start() {
     // Connect to the named work queue
     console.log("WORKER: Starting up worker. Waiting for a job.")
@@ -52,6 +101,30 @@ function start() {
 		const ideaId = job.data.audit.auditable_url.substring( job.data.audit.auditable_url.lastIndexOf('/') + 1 )
 
 		console.log(`WORKER: aha client initialized, getting ${ideaId}`)
+
+		const cardData = {
+		    ahaId: job.data.audit.auditable_id,
+		    ahaUrl: job.data.audit.auditable_url,
+		    ahaType: job.data.audit.auditable_type,
+		    ahaIdeaId: ideaId
+		}
+		
+		loadIdea( aha, ideaId ).then( idea => {
+		    console.log("WORKER: loaded idea", idea)
+		    cardData['idea'] = idea
+		    return loadIdeaCategories( aha, idea.idea.product.reference_prefix )
+		}).then( categories => {
+		    console.log("WORKER: loaded categories", categories)
+		    cardData['categories'] = categories
+		    return loadProjectWorkflows( aha, stash["idea"].idea.product.reference_prefix )
+		}).then( workflows => {
+		    console.log("WORKER: loaded workflows", workflows)
+		    cardData['workflows'] = workflows
+		    console.log("WORKER: finished loading all idea metadata")
+		    return postMessage( bot, job.data.group_id, cardIdeaTemplate, cardData )
+		})
+
+		/*
 		aha.idea.get(ideaId, function (err, data, response) {
 		    //console.log("WORKER: idea fetched from aha: ", data)
 		    let idea = data.idea
@@ -88,7 +161,7 @@ function start() {
 			})
 		    })
 		})
-		
+		*/		
 	    } else {
 		// TODO - error condition
 		console.log(`WORKER: create job failed, unknown auditable_type = ${job.data.aha_type}`)

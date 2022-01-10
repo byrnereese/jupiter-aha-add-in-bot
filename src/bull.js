@@ -3,7 +3,6 @@ const Queue = require('bull')
 const QueueMQ = require('bullmq')
 const { createBullBoard } = require('@bull-board/api')
 const { BullAdapter } = require('@bull-board/api/bullAdapter')
-const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter')
 const { ExpressAdapter } = require('@bull-board/express')
 
 let REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";

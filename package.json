@@ -11,10 +11,11 @@
         "queue": "node src/bull.js"
     },
     "dependencies": {
+        "@bull-board/api": "^3.8.1",
         "@bull-board/express": "^3.8.1",
         "adaptive-expressions": "^4.15.0",
         "adaptivecards-templating": "^2.2.0",
-        "aha-io": "github:byrnereese/node-ahaio#e45cc1b07d09ec9856af95939f1e09e5023f034a",
+        "aha-io": "github:byrnereese/node-ahaio#1d7a076f1f52be17e8f9ec257582715769356e41",
         "aha-io-oauth": "0.0.3",
         "axios": "^0.24.0",
         "bull": "^3.7.0",
