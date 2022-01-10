@@ -111,7 +111,7 @@ function start() {
 		
 		loadIdea( aha, ideaId ).then( idea => {
 		    console.log("WORKER: loaded idea", idea)
-		    cardData['idea'] = idea
+		    cardData['idea'] = idea.idea
 		    return loadIdeaCategories( aha, idea.idea.product.reference_prefix )
 		}).then( categories => {
 		    console.log("WORKER: loaded categories", categories)
