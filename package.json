@@ -7,15 +7,19 @@
         "dev": "node -r dotenv/config src/index.js",
         "ngrok": "ngrok http -region us 6066 ",
         "start": "node src/index.js",
-        "work": "node src/worker.js"
+        "work": "node src/worker.js",
+        "queue": "node src/bull.js"
     },
     "dependencies": {
+        "@bull-board/api": "^3.8.1",
+        "@bull-board/express": "^3.8.1",
         "adaptive-expressions": "^4.15.0",
         "adaptivecards-templating": "^2.2.0",
-        "aha-io": "github:byrnereese/node-ahaio#master",
+        "aha-io": "github:byrnereese/node-ahaio#aade017167b0feffe57f37d740a0b1eb24653884",
         "aha-io-oauth": "0.0.3",
         "axios": "^0.24.0",
         "bull": "^3.7.0",
+        "bullmq": "^1.64.0",
         "client-oauth2": "^4.3.3",
         "crypto": "^1.0.1",
         "express": "^4.17.1",

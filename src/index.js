@@ -75,19 +75,18 @@ app.post('/interactive-messages', async (req, res) => {
         if (SHARED_SECRET) {
             const signature = req.get('X-Glip-Signature', 'sha1=');
             const encryptedBody =
-                crypto.createHmac('sha1', SHARED_SECRET).update(JSON.stringify(req.body)).digest('hex');
+                  crypto.createHmac('sha1', SHARED_SECRET).update(JSON.stringify(req.body)).digest('hex');
             if (encryptedBody !== signature) {
                 res.status(401).send('Incorrect SHARED_SECRET.');
                 return;
-                }
             }
+        }
         
         await interactiveMessageHandler(req);
-        }
-    catch (e) {
+    } catch (e) {
         console.log(e);
     }
-
+    
     res.status(200);
     res.json('OK');
 });
