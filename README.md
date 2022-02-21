@@ -1,5 +1,7 @@
 # Jupiter Aha Add-In Bot
 
+<details>
+  <summary>Deploy to AWS</summary>
 ## Deploy to AWS (Lambda + Postgres)
 
 We use [serverless framework](https://www.serverless.com/) as the main deployment tool, which utilizes YAML config files to define deployment parameters so to simply the process.
@@ -31,8 +33,10 @@ We strongly suggest that you should add a RDS proxy in-between your lambda and R
    7. `Create Proxy`
 4. To validate connectivity, in command line, do `aws rds describe-db-proxy-targets --db-proxy-name $DB_PROXY_NAME` (replace `$DB_PROXY_NAME` with your proxy name). A successful connection will return state as `AVAILABLE`.
 5. Now go to [here](#configure-on-ringcentral-developer-portal) to create your bot instance.
+</details>
 
-
+<details>
+  <summary>Deploy to Heroku</summary>
 ## Deploy to Heroku
 
 Fork this repo and click below button for your first time deployment. (Note: Heroku Button is to be used for the first time setup. Further changes are to be made on Heroku app web page)
@@ -51,6 +55,7 @@ Right after the deployment, make sure taking following steps to configure it:
 1. Go to app's `Deploy` tab
 2. In `Deployment method` section, connect it with your Github repo.
 3. Enable `Automatic deploys`. It will then deploy upon every git push to your git remote repo.
+</details>
 
 ## Configure on RingCentral Developer Portal
 
