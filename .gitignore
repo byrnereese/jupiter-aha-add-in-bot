@@ -101,6 +101,9 @@ dist
 
 # Serverless directories
 .serverless/
+serverless-deploy/*
+!serverless-deploy/sample.serverless.yml
+!serverless-deploy/sample.env.yml
 
 # FuseBox cache
 .fusebox/

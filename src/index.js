@@ -90,3 +90,5 @@ app.post('/interactive-messages', async (req, res) => {
     res.status(200);
     res.json('OK');
 });
+
+exports.app = app;
