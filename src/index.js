@@ -4,7 +4,7 @@ const axios         = require('axios');
 let   Queue         = require('bull');
 const crypto        = require('crypto');
 
-const { AhaTokens }     = require('./models/ahaModel');
+const { AhaTokens }    = require('./models/ahaTokens');
 const { ChangesModel } = require('./models/changesModel')
 const { botHandler }   = require('./handlers/botHandler');
 const { ahaOAuthHandler, ahaWebhookHandler } = require('./handlers/ahaHandler');

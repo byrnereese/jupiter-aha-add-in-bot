@@ -1,9 +1,9 @@
 const { AhaTokens, ChangesModel } = require('../models/models')
-const { ahaOAuth }        = require('../lib/aha')
-const Bot                 = require('ringcentral-chatbot-core/dist/models/Bot').default;
-let   Queue               = require('bull');
-const { Template }        = require('adaptivecards-templating');
-const gettingStartedCardTemplate = require('../adaptiveCards/setupSubscriptionCard.json');
+const { ahaOAuth         }        = require('../lib/aha')
+const Bot                         = require('ringcentral-chatbot-core/dist/models/Bot').default;
+let   Queue                       = require('bull');
+const { Template }                = require('adaptivecards-templating');
+const gettingStartedCardTemplate  = require('../adaptiveCards/setupSubscriptionCard.json');
 
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 let JOB_DELAY = process.env.AGGREGATION_DELAY || 1000;
