@@ -2,17 +2,31 @@ const { AhaModel, ChangesModel } = require('../models/models')
 const { ahaOAuth }        = require('../lib/aha')
 const Bot                 = require('ringcentral-chatbot-core/dist/models/Bot').default;
 let   Queue               = require('bull');
+const { Template }        = require('adaptivecards-templating');
+const gettingStartedCardTemplate = require('../adaptiveCards/setupSubscriptionCard.json');
 
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 let JOB_DELAY = process.env.AGGREGATION_DELAY || 1000;
 
 let   workQueue = new Queue('work', REDIS_URL);
 
+const loadProducts = ( aha ) => {
+    console.log(`WORKER: loading workspaces`)
+    const promise = new Promise( (resolve, reject) => {
+        aha.products( function (err, data, response) {
+            resolve( data )
+        })
+    })
+    console.log("WORKER: returning from loadProducts")
+    return promise
+}
+
 const ahaOAuthHandler = async (req, res) => {
     const { state } = req.query
     const [groupId, botId, userId] = state.split(':')
     console.log(`Requesting installation of bot (id:${botId}) into chat (id:${groupId}) by user (id:${userId})`)
 
+    const bot = await Bot.findByPk(botId)
     const tokenUrl = `${process.env.RINGCENTRAL_CHATBOT_SERVER}${req.url}`;
     console.log(`Token URL: ${tokenUrl}`);
     const tokenResponse = await ahaOAuth.code.getToken(tokenUrl);
@@ -31,11 +45,19 @@ const ahaOAuthHandler = async (req, res) => {
         await AhaModel.create({ ...query, userId, token })
     }
 
-    const bot = await Bot.findByPk(botId)
-    // Test to see if token works
-    //const r = await rc.get('/restapi/v1.0/account/~/extension/~')
-    // Send user confirmation message
-    await bot.sendMessage(groupId, { text: `Thank you. The Aha bot has been authorized to fetch data from Aha. Setup is complete.` })
+    const cardData = {
+    };
+    loadProducts( aha ).then( products => {
+	console.log("DEBUG: product list is: ", products)
+	const template = new Template(setupSubscriptionCardTemplate);
+	cardData['products'] = products.products
+	const card = template.expand({
+            $root: cardData
+	});
+	console.log("DEBUG: posting card:", card)
+	await bot.sendAdaptiveCard( group.id, card);
+	return
+    })
 }
 
 const ahaWebhookHandler = async (req, res) => {

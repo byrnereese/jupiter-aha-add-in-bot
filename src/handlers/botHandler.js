@@ -22,10 +22,10 @@ const botHandler = async event => {
 
 const handleBotJoiningGroup = async event => {
     console.log("DEBUG: received BotJoinGroup event: ", event)
-    const { bot, group, userId } = event
+    const { bot, group } = event
     const template = new Template(gettingStartedCardTemplate);
     const cardData = {
-        loginUrl: `https://${process.env.AHA_SUBDOMAIN}.aha.io/oauth/authorize?client_id=${process.env.AHA_CLIENT_ID}&redirect_uri=${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/oauth&response_type=code&state=${group.id}:${bot.id}:${userId}`
+        loginUrl: `https://${process.env.AHA_SUBDOMAIN}.aha.io/oauth/authorize?client_id=${process.env.AHA_CLIENT_ID}&redirect_uri=${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/oauth&response_type=code&state=${group.id}:${bot.id}`
     };
     const card = template.expand({
         $root: cardData
@@ -34,7 +34,7 @@ const handleBotJoiningGroup = async event => {
     await bot.sendAdaptiveCard( group.id, card);
 }
 
-const handleBotrReceivedMessage = async event => {
+const handleBotReceivedMessage = async event => {
     const { group, bot, text, userId } = event
     const ahaModel = await AhaModel.findOne({
         where: {
@@ -43,20 +43,21 @@ const handleBotrReceivedMessage = async event => {
     })
 
     if (text === "help") {
-        await bot.sendMessage(group.id, { text: `Here are the commands I am able to respond to:\n* **bind** - connect to your Aha account\n* **unbind** - disconnect from your Aha account\n* **subscribe <product ID>** - pass in the three letter product id and get directions on how to start receiving notifications for changes in that product` })
+        await bot.sendMessage(group.id, { text: `Here are the commands I am able to respond to:\n* **hello** - restart the setup process in this team\n* **goodbye** - disconnect from your Aha account\n* **subscribe <product ID>** - pass in the three letter product id and get directions on how to start receiving notifications for changes in that product` })
         return
     }
 
     let token = ahaModel ? ahaModel.token : undefined
-    if (text === 'bind') {
+    if (text === 'hello') {
         if (token) {
             await bot.sendMessage(group.id, { text: `It appears you already have an active connection to Aha in this team.` })
         } else {
-            let ahaAuthUrl =`https://${process.env.AHA_SUBDOMAIN}.aha.io/oauth/authorize?client_id=${process.env.AHA_CLIENT_ID}&redirect_uri=${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/oauth&response_type=code&state=${group.id}:${bot.id}:${userId}`;
-            await bot.sendMessage(group.id, { text: `Let's [authorize me](${ahaAuthUrl}).` })
+            await handleBotJoiningGroup(event)
+//            let ahaAuthUrl =`https://${process.env.AHA_SUBDOMAIN}.aha.io/oauth/authorize?client_id=${process.env.AHA_CLIENT_ID}&redirect_uri=${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/oauth&response_type=code&state=${group.id}:${bot.id}:${userId}`;
+//            await bot.sendMessage(group.id, { text: `Let's [authorize me](${ahaAuthUrl}).` })
         }
 
-    } else if (text === 'unbind') {
+    } else if (text === 'goodbye') {
         if (token) {
             // TODO - remove all tokens and subscriptions
             await bot.sendMessage(group.id, { text: `TODO: remove all tokens and subscriptions` })

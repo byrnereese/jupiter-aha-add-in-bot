@@ -1,0 +1,41 @@
+{
+    "type": "AdaptiveCard",
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.5",
+    "body": [
+        {
+            "type": "TextBlock",
+            "text": "Help me update Aha",
+            "wrap": true,
+            "size": "ExtraLarge",
+            "weight": "Bolder"
+        },
+        {
+            "type": "TextBlock",
+            "text": "Aha won't let me create what is called a \"webhook.\" So I need your help. We need an Aha admin to setup Aha to tell me about important events. First, select an Aha workspace you want to subscribe to.",
+            "wrap": true
+        },
+        {
+            "type": "Input.ChoiceSet",
+            "id": "product",
+            "choices": [
+                {
+		    "$data": "${products}",
+                    "title": "${name}",
+                    "value": "${reference_prefix}"
+                }
+            ],
+            "placeholder": "Select an Aha workspace"
+        },
+        {
+            "type": "ActionSet",
+            "actions": [
+                {
+                    "type": "Action.Submit",
+                    "title": "Setup subscription",
+                    "style": "positive"
+                }
+            ]
+        }
+    ]
+}
