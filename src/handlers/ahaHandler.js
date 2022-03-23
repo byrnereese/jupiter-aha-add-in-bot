@@ -49,6 +49,7 @@ const ahaOAuthHandler = async (req, res) => {
 
     const cardData = {
     };
+    let aha = getAhaClient(token)
     loadProducts( aha ).then( products => {
 	console.log("DEBUG: product list is: ", products)
 	const template = new Template(setupSubscriptionCardTemplate);
