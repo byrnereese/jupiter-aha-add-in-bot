@@ -16,15 +16,15 @@ const ahaTokens = sequelize.define('ahaTokens', {
     },
     botId: {
         type: Sequelize.STRING
-    },
-    {
-	indexes: [
-	    {
-		unique: true,
-		fields: [ 'groupId', 'botId' ]
-	    }
-	    ]
     }
+},
+{
+    indexes: [
+	{
+	    unique: true,
+	    fields: [ 'groupId', 'botId' ]
+	}
+    ]
 });
 
 // Model for Aha Change coelescing
