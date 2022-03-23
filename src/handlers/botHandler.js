@@ -4,25 +4,37 @@ const { getOAuthApp }     = require('../lib/oauth');
 const { continueSession } = require('pg/lib/sasl');
 
 const { Template } = require('adaptivecards-templating');
-const sampleSubmitButtonCardTemplate = require('../adaptiveCards/sampleSubmitButtonCard.json');
+const gettingStartedCardTemplate = require('../adaptiveCards/gettingStartedCard.json');
 
 const botHandler = async event => {
     console.log(event.type, 'event')
     switch (event.type) {
         case 'Message4Bot':
-            await handleMessage4Bot(event)
+            await handleBotReceivedMessage(event)
             break
         case 'BotJoinGroup': // bot user joined a new group
-            const { bot, group } = event
-            const groupId = group.id;
-            await bot.sendMessage(groupId, { text: `Hello, I am ![:Person](${bot.id}).` })
+            await handleBotJoiningGroup(event)
             break
         default:
             break
     }
 }
 
-const handleMessage4Bot = async event => {
+const handleBotJoiningGroup = async event => {
+    console.log("DEBUG: received BotJoinGroup event: ", event)
+    const { bot, group, userId } = event
+    const template = new Template(gettingStartedCardTemplate);
+    const cardData = {
+        loginUrl: `https://${process.env.AHA_SUBDOMAIN}.aha.io/oauth/authorize?client_id=${process.env.AHA_CLIENT_ID}&redirect_uri=${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/oauth&response_type=code&state=${group.id}:${bot.id}:${userId}`
+    };
+    const card = template.expand({
+        $root: cardData
+    });
+    console.log("DEBUG: posting card:", card)
+    await bot.sendAdaptiveCard( group.id, card);
+}
+
+const handleBotrReceivedMessage = async event => {
     const { group, bot, text, userId } = event
     const ahaModel = await AhaModel.findOne({
         where: {
@@ -66,17 +78,6 @@ const handleMessage4Bot = async event => {
         } else {
             await bot.sendMessage(group.id, { text: `It does not appear you have a current connection to Aha in this team.` })
         }
-
-    } else if (text === 'debug submit') {
-        const cardData = {
-            botId : bot.id
-        }
-        const template = new Template(sampleSubmitButtonCardTemplate);
-        const card = template.expand({
-            $root: cardData
-        });
-        console.log("DEBUG: posting card:", card)
-        await bot.sendAdaptiveCard( group.id, card);
     }
 }
 

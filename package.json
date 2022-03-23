@@ -27,6 +27,7 @@
         "express": "^4.17.1",
         "foreman": "^3.0.1",
         "html-entities": "^1.2.1",
+        "object-hash": "^3.0.0",
         "pg": "^8.7.1",
         "ringcentral-chatbot-core": "^1.0.12",
         "sequelize": "^6.12.0-alpha.1",

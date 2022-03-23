@@ -1,0 +1,31 @@
+{
+    "type": "AdaptiveCard",
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.5",
+    "body": [
+        {
+            "type": "TextBlock",
+            "text": "Hello.",
+            "wrap": true,
+            "style": "heading",
+            "size": "ExtraLarge",
+            "weight": "Bolder"
+        },
+        {
+            "type": "TextBlock",
+            "text": "My name is AhaBot. I am here to help you work more closely with Aha, a product management tool. Before I can start though, I need you to connect to your Aha account. Thanks!",
+            "wrap": true
+        },
+        {
+            "type": "ActionSet",
+            "actions": [
+                {
+                    "type": "Action.OpenUrl",
+                    "title": "Login to Aha",
+                    "url": "${loginUrl}",
+                    "style": "positive"
+                }
+            ]
+        }
+    ]
+}
