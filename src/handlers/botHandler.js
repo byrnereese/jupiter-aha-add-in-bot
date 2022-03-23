@@ -57,17 +57,8 @@ const handleBotReceivedMessage = async event => {
 
     } else if (text === 'goodbye') {
         if (token) {
-	    const ahaModel = await AhaModel.findOne({
-		where: {
-		    'token': token
-		}
-	    })
-	    if (ahaModel) {
-		console.log("DEBUG: destroying tokens in database")
-		await ahaModel.destroy()
-	    } else {
-		console.log("DEBUG: no token found for destroying tokens in database")
-	    }
+	    console.log("DEBUG: destroying tokens in database")
+	    await ahaModel.destroy()
             await bot.sendMessage(group.id, { text: `You have just unlinked your Aha account. Say "hello" to me, and we can start fresh.` })
         } else {
             await bot.sendMessage(group.id, { text: `It does not appear you have a current connection to Aha in this team. Say "hello" to me and we can get started.` })
