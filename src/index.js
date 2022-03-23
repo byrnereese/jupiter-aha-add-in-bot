@@ -4,7 +4,7 @@ const axios         = require('axios');
 let   Queue         = require('bull');
 const crypto        = require('crypto');
 
-const { AhaModel }     = require('./models/ahaModel');
+const { AhaTokens }     = require('./models/ahaModel');
 const { ChangesModel } = require('./models/changesModel')
 const { botHandler }   = require('./handlers/botHandler');
 const { ahaOAuthHandler, ahaWebhookHandler } = require('./handlers/ahaHandler');
@@ -19,7 +19,7 @@ const botConfig = {
     adminRoute: '/admin', // optional
     botRoute: '/bot', // optional
     models: { // optional
-        AhaModel,
+        AhaTokens,
         ChangesModel
     }
 }

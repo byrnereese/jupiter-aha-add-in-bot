@@ -2,19 +2,28 @@ const Sequelize = require('sequelize');
 const { sequelize } = require('./sequelize');
 
 // Model for User data
-const ahaModel = sequelize.define('ahaModel', {
-    userId:{
+const ahaTokens = sequelize.define('ahaTokens', {
+//    userId:{
+//        type: Sequelize.STRING,
+//        primaryKey: true
+//    },
+    token:{
         type: Sequelize.STRING,
         primaryKey: true
-    },
-    token:{
-        type: Sequelize.STRING
     },
     groupId:{
         type: Sequelize.STRING
     },
     botId: {
         type: Sequelize.STRING
+    },
+    {
+	indexes: [
+	    {
+		unique: true,
+		fields: [ 'groupId', 'botId' ]
+	    }
+	    ]
     }
 });
 
@@ -38,5 +47,5 @@ const changesModel = sequelize.define('changesModel', {
     ]
 });
 
-exports.AhaModel = ahaModel;
+exports.AhaTokens = ahaTokens;
 exports.ChangesModel = changesModel;

@@ -1,4 +1,4 @@
-const { AhaModel, ChangesModel } = require('../models/models')
+const { AhaTokens, ChangesModel } = require('../models/models')
 const { ahaOAuth }        = require('../lib/aha')
 const Bot                 = require('ringcentral-chatbot-core/dist/models/Bot').default;
 let   Queue               = require('bull');
@@ -35,14 +35,16 @@ const ahaOAuthHandler = async (req, res) => {
     
     // Bearer token in hand. Now let's stash it.
     const query = { groupId, botId }
-    const ahaModel = await AhaModel.findOne({ where: query })
-    if (ahaModel) {
-        await ahaModel.update({
-            userId,
+    const ahaTokens = await AhaTokens.findOne({ where: query })
+    if (ahaTokens) {
+        await ahaTokens.update({
+//            userId,
             token
         })
     } else {
-        await AhaModel.create({ ...query, userId, token })
+        await AhaTokens.create({ ...query,
+				 //userId,
+				 token })
     }
 
     const cardData = {

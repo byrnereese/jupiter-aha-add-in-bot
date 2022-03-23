@@ -1,4 +1,4 @@
-const { AhaModel, ChangesModel } = require('../models/models')
+const { AhaTokens, ChangesModel } = require('../models/models')
 const { getAhaClient }    = require('../lib/aha');
 const { getOAuthApp }     = require('../lib/oauth');
 const { continueSession } = require('pg/lib/sasl');
@@ -36,7 +36,7 @@ const handleBotJoiningGroup = async event => {
 
 const handleBotReceivedMessage = async event => {
     const { group, bot, text, userId } = event
-    const ahaModel = await AhaModel.findOne({
+    const ahaTokens = await AhaTokens.findOne({
         where: {
             'botId': bot.id, 'groupId': group.id
         }
@@ -47,7 +47,7 @@ const handleBotReceivedMessage = async event => {
         return
     }
 
-    let token = ahaModel ? ahaModel.token : undefined
+    let token = ahaTokens ? ahaTokens.token : undefined
     if (text === 'hello') {
         if (token) {
             await bot.sendMessage(group.id, { text: `It appears you already have an active connection to Aha in this team.` })
@@ -58,7 +58,7 @@ const handleBotReceivedMessage = async event => {
     } else if (text === 'goodbye') {
         if (token) {
 	    console.log("DEBUG: destroying tokens in database")
-	    await ahaModel.destroy()
+	    await ahaTokens.destroy()
             await bot.sendMessage(group.id, { text: `You have just unlinked your Aha account. Say "hello" to me, and we can start fresh.` })
         } else {
             await bot.sendMessage(group.id, { text: `It does not appear you have a current connection to Aha in this team. Say "hello" to me and we can get started.` })

@@ -1,4 +1,4 @@
-const { AhaModel, ChangesModel } = require('../models/models')
+const { AhaTokens, ChangesModel } = require('../models/models')
 const { Template }               = require('adaptivecards-templating');
 const { getAhaClient }           = require('../lib/aha');
 
@@ -9,12 +9,12 @@ const interactiveMessageHandler = async req => {
     const submitData = req.body.data;
     const cardId     = req.body.card.id;
 
-    const ahaModel = await AhaModel.findOne({
+    const ahaTokens = await AhaTokens.findOne({
 	where: {
 	    botId: submitData.botId, groupId: submitData.groupId
 	}
     })
-    let token = ahaModel ? ahaModel.token : undefined
+    let token = ahaTokens ? ahaTokens.token : undefined
     let aha = getAhaClient(token)
     
     console.log(`=====incomingCardSubmit=====\n${JSON.stringify(req.body, null, 2)}`);
