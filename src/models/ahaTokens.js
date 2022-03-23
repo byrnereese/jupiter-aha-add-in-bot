@@ -3,7 +3,7 @@ const { sequelize } = require('./sequelize');
 
 // Model for User data
 exports.AhaTokens = sequelize.define('ahaTokens', {
-    token:{
+    token: {
         type: Sequelize.STRING,
         primaryKey: true
     },
@@ -12,13 +12,13 @@ exports.AhaTokens = sequelize.define('ahaTokens', {
     },
     botId: {
         type: Sequelize.STRING
-    },
-    {
-	indexes: [
-	    {
-		unique: true,
-		fields: [ 'groupId', 'botId' ]
-	    }
-	    ]
     }
+},
+{
+    indexes: [
+	{
+	    unique: true,
+	    fields: [ 'groupId', 'botId' ]
+	}
+    ]
 });
