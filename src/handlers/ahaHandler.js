@@ -13,7 +13,7 @@ let   workQueue = new Queue('work', REDIS_URL);
 const loadProducts = ( aha ) => {
     console.log(`WORKER: loading workspaces`)
     const promise = new Promise( (resolve, reject) => {
-        aha.products( function (err, data, response) {
+        aha.product.list( function (err, data, response) {
             resolve( data )
         })
     })
