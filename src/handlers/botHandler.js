@@ -59,7 +59,7 @@ const handleBotReceivedMessage = async event => {
         if (token) {
 	    const ahaModel = await AhaModel.findOne({
 		where: {
-		    'userId': userId, 'groupId': group.id //, 'botId': bot.id
+		    'token': token
 		}
 	    })
 	    if (ahaModel) {
