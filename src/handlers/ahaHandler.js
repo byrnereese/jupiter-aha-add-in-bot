@@ -1,5 +1,5 @@
 const { AhaTokens, ChangesModel } = require('../models/models')
-const { ahaOAuth         }        = require('../lib/aha')
+const { getAhaClient, ahaOAuth }  = require('../lib/aha')
 const Bot                         = require('ringcentral-chatbot-core/dist/models/Bot').default;
 let   Queue                       = require('bull');
 const { Template }                = require('adaptivecards-templating');
