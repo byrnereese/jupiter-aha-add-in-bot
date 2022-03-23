@@ -50,13 +50,14 @@ const ahaOAuthHandler = async (req, res) => {
     const cardData = {
     };
     let aha = getAhaClient(token)
-    loadProducts( aha ).then( products => {
+    loadProducts( aha ).then( records => {
 	console.log("DEBUG: product list is: ", products)
 	const template = new Template(setupSubscriptionCardTemplate);
-	cardData['products'] = products.products
+	cardData['products'] = records.products
 	const card = template.expand({
             $root: cardData
 	});
+	console.log("DEBUG: card data:", cardData)
 	console.log("DEBUG: posting card:", card)
 	bot.sendAdaptiveCard( groupId, card);
 	return
