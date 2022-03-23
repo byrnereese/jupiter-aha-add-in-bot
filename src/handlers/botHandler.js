@@ -38,7 +38,7 @@ const handleBotReceivedMessage = async event => {
     const { group, bot, text, userId } = event
     const ahaModel = await AhaModel.findOne({
         where: {
-            botId: bot.id, groupId: group.id
+            'botId': bot.id, 'groupId': group.id
         }
     })
 
@@ -53,14 +53,19 @@ const handleBotReceivedMessage = async event => {
             await bot.sendMessage(group.id, { text: `It appears you already have an active connection to Aha in this team.` })
         } else {
             await handleBotJoiningGroup(event)
-//            let ahaAuthUrl =`https://${process.env.AHA_SUBDOMAIN}.aha.io/oauth/authorize?client_id=${process.env.AHA_CLIENT_ID}&redirect_uri=${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/oauth&response_type=code&state=${group.id}:${bot.id}:${userId}`;
-//            await bot.sendMessage(group.id, { text: `Let's [authorize me](${ahaAuthUrl}).` })
         }
 
     } else if (text === 'goodbye') {
         if (token) {
-            // TODO - remove all tokens and subscriptions
-            await bot.sendMessage(group.id, { text: `TODO: remove all tokens and subscriptions` })
+	    const ahaModel = await AhaModel.findOne({
+		where: {
+		    'userId': userId, 'groupId': group.id, 'botId': bot.id
+		}
+	    })
+	    if (ahaModel) {
+		await ahaModel.destroy()
+	    }
+            await bot.sendMessage(group.id, { text: `You have just unlinked your Aha account. Say "hello" to me, and we start fresh.` })
         } else {
             await bot.sendMessage(group.id, { text: `It does not appear you have a current connection to Aha in this team.` })
         }
