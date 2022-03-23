@@ -58,7 +58,7 @@ const ahaOAuthHandler = async (req, res) => {
             $root: cardData
 	});
 	console.log("DEBUG: posting card:", card)
-	bot.sendAdaptiveCard( group.id, card);
+	bot.sendAdaptiveCard( groupId, card);
 	return
     })
 }
