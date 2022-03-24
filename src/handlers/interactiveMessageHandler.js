@@ -31,7 +31,7 @@ const interactiveMessageHandler = async req => {
 	const card = template.expand({
             $root: cardData
 	});
-	console.log("DEBUG: posting card to group "+groupId+":", card)
+	console.log("DEBUG: posting card to group "+submitData.groupId+":", card)
 	bot.sendAdaptiveCard( submitData.groupId, card);
 	break;
     case 'update_idea':
