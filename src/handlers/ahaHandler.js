@@ -80,7 +80,7 @@ const ahaWebhookHandler = async (req, res) => {
     let foo = querystring.parse(qs)
     console.log('foo: ', foo)
     const { groupId, botId } = querystring.parse(qs)
-    console.log(`groupId=${groudId} and botId=${botId}`)
+    console.log(`groupId=${groupId} and botId=${botId}`)
     if (typeof groupId === "undefined" || typeof botId === "undefined") {
         console.log("Received a webhook but the group and bot IDs were empty. Something is wrong.")
         // TODO - communicate this to the user so they can fix. 
