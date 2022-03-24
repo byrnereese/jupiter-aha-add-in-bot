@@ -76,6 +76,9 @@ const ahaWebhookHandler = async (req, res) => {
     console.log('The encoded string is: ' + webhookStr);
     let buff = new Buffer(webhookStr, 'base64');
     let qs = buff.toString('ascii');
+    console.log(`qs = ${qs}`)
+    let foo = querystring.parse(qs)
+    console.log('foo: ', foo)
     const { groupId, botId } = querystring.parse(qs)
     console.log(`groupId=${groudId} and botId=${botId}`)
     if (typeof groupId === "undefined" || typeof botId === "undefined") {
