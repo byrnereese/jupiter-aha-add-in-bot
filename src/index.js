@@ -57,7 +57,7 @@ app.get('/aha/oauth', async (req, res) => {
 	res.send('<!doctype><html><body><script>close()</script></body></html>')
 })
 
-app.post('/aha/webhook', async (req, res) => {
+app.post('/aha/webhook/:webhookStr', async (req, res) => {
     try {
         await ahaWebhookHandler(req, res);
     }

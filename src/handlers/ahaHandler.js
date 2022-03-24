@@ -72,8 +72,8 @@ const ahaOAuthHandler = async (req, res) => {
 const getLastPathItem = thePath => thePath.substring(thePath.lastIndexOf('/') + 1)
 
 const ahaWebhookHandler = async (req, res) => {
-    let encodedString = getLastPathItem(req.url);
-    console.log('The encoded string is: ' + encodedString);
+    let { webhookStr } = req.params;
+    console.log('The encoded string is: ' + webhookStr;
     let buff = new Buffer(encodedString, 'base64');
     let qs = buff.toString('ascii');
     const { groupId, botId } = querystring.parse(qs)
