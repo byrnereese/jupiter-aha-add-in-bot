@@ -41,12 +41,19 @@
         },
         {
             "type": "Media",
+            "poster": "https://i.postimg.cc/xCtMkbpw/Artboard.png",
             "sources": [
                 {
                     "mimeType": "video/mp4",
                     "url": "https://www.youtube.com/embed/sYQGRDPHPjA"
                 }
             ]
+        },
+        {
+            "type": "TextBlock",
+            "text": "https://www.youtube.com/watch?v=sYQGRDPHPjA",
+            "wrap": true,
+            "size": "Small"
         },
         {
             "type": "ActionSet",
