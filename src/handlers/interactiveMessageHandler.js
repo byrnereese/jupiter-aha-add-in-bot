@@ -23,7 +23,10 @@ const interactiveMessageHandler = async req => {
     switch (submitData.actionType) {
     case 'setup_subscription':
 	console.log(`MESSAGING: facilitating subscription process for ${submitData.product}`)
-        let hookUrl = `${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/webhook?groupId=${submitData.groupId}&botId=${bot.id}`
+	let hookQs = `groupId=${submitData.groupId}&botId=${bot.id}`
+	let buff = new Buffer(hookQs)
+	let buffe = buff.toString('base64')
+        let hookUrl = `${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/webhook/${buffe}`
 	const cardData = {
 	    'botId': submitData.botId,
 	    'groupId': submitData.groupId,
