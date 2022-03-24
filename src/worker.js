@@ -41,6 +41,8 @@ const loadIdea = ( aha, ideaId ) => {
 }
 
 const loadIdeaCategories = ( aha, productId ) => {
+    // TODO - loadIdeaCategories needs to iterate over a number of pages, compile a complete list
+    // and then resolve the promise
     console.log(`WORKER: loading idea categories for ${productId}`)
     const promise = new Promise( (resolve, reject) => {
         aha.product.ideaCategories( productId, function (err, data, response) {

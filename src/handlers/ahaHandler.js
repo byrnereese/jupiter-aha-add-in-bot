@@ -57,6 +57,7 @@ const ahaOAuthHandler = async (req, res) => {
     let aha = getAhaClient(token)
     loadProducts( aha ).then( records => {
 	console.log("DEBUG: product list is: ", records)
+	// TODO - add HOWTO video to card
 	const template = new Template(setupSubscriptionCardTemplate);
 	cardData['products'] = records.products
 	const card = template.expand({
@@ -76,11 +77,8 @@ const ahaWebhookHandler = async (req, res) => {
     console.log('The encoded string is: ' + webhookStr);
     let buff = new Buffer(webhookStr, 'base64');
     let qs = buff.toString('ascii');
-    console.log(`qs = ${qs}`)
-    let foo = querystring.parse(qs)
-    console.log('foo: ', foo)
     const { groupId, botId } = querystring.parse(qs)
-    console.log(`groupId=${groupId} and botId=${botId}`)
+    //console.log(`groupId=${groupId} and botId=${botId}`)
     if (typeof groupId === "undefined" || typeof botId === "undefined") {
         console.log("Received a webhook but the group and bot IDs were empty. Something is wrong.")
         // TODO - communicate this to the user so they can fix. 

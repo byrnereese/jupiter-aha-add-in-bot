@@ -31,8 +31,22 @@
         },
         {
             "type": "TextBlock",
-            "text": "Almost done. Next, I need you to select the events you want to subscribe to. I only support the following events:\r- Everything related to features\r- Ideas > Name\r- Ideas > Status\r- Ideas > Public comment\r\rHere is a video to show you what to do.",
+            "text": "Almost done. Next, I need you to select the events you want to subscribe to. I only support the following events:\r- Everything related to features\r- Ideas > Name\r- Ideas > Status\r- Ideas > Public comment.",
             "wrap": true
+        },
+        {
+            "type": "TextBlock",
+            "text": "Here is a video to show you how:",
+            "wrap": true
+        },
+        {
+            "type": "Media",
+            "sources": [
+                {
+                    "mimeType": "video/mp4",
+                    "url": "https://youtu.be/sYQGRDPHPjA"
+                }
+            ]
         },
         {
             "type": "ActionSet",
