@@ -2,6 +2,7 @@ const { AhaTokens, ChangesModel }   = require('../models/models')
 const { getAhaClient, ahaOAuth }    = require('../lib/aha')
 const Bot                           = require('ringcentral-chatbot-core/dist/models/Bot').default;
 let   Queue                         = require('bull');
+const querystring                   = require('querystring');
 const { Template }                  = require('adaptivecards-templating');
 const setupSubscriptionCardTemplate = require('../adaptiveCards/setupSubscriptionCard.json');
 
@@ -68,8 +69,15 @@ const ahaOAuthHandler = async (req, res) => {
     })
 }
 
+const getLastPathItem = thePath => thePath.substring(thePath.lastIndexOf('/') + 1)
+
 const ahaWebhookHandler = async (req, res) => {
-    const { groupId, botId } = req.query
+    let encodedString = getLastPathItem(req.url);
+    console.log('The encoded string is: ' + encodedString);
+    let buff = new Buffer(encodedString, 'base64');
+    let qs = buff.toString('ascii');
+    const { groupId, botId } = querystring.parse(qs)
+    console.log(`groupId=${groudId} and botId=${botId}`)
     if (typeof groupId === "undefined" || typeof botId === "undefined") {
         console.log("Received a webhook but the group and bot IDs were empty. Something is wrong.")
         // TODO - communicate this to the user so they can fix. 

@@ -71,7 +71,10 @@ const handleBotReceivedMessage = async event => {
             let productCode = found[1]
             let aha = getAhaClient(token)
             let server = process.env.RINGCENTRAL_CHATBOT_SERVER
-            let hookUrl = server + `/aha/webhook?groupId=${group.id}&botId=${bot.id}`
+	    let hookQs = `groupId=${group.id}&botId=${bot.id}`
+	    let buff = new Buffer(hookQs)
+	    let buffe = buff.toString('base64')
+            let hookUrl = server + `/aha/webhook/${buffe}`
             let resp = aha.product.get(productCode, function (err, data, response) {
                 bot.sendMessage(group.id, { text: `To receive updates in this Team from Aha:\n1. [Create a new Activity Webhook in Aha](https://${process.env.AHA_SUBDOMAIN}.aha.io/settings/projects/${productCode}/integrations/new)\n2. In the Hook URL field, enter: ${hookUrl}\n3. Select the activities you would like to subscribe to.` })
             });
