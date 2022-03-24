@@ -73,7 +73,7 @@ const getLastPathItem = thePath => thePath.substring(thePath.lastIndexOf('/') + 
 
 const ahaWebhookHandler = async (req, res) => {
     let { webhookStr } = req.params;
-    console.log('The encoded string is: ' + webhookStr;
+    console.log('The encoded string is: ' + webhookStr);
     let buff = new Buffer(encodedString, 'base64');
     let qs = buff.toString('ascii');
     const { groupId, botId } = querystring.parse(qs)
