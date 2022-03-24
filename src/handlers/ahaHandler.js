@@ -12,6 +12,8 @@ let   workQueue = new Queue('work', REDIS_URL);
 
 const loadProducts = ( aha ) => {
     console.log(`WORKER: loading workspaces`)
+    // TODO - loadProducts needs to iterate over a number of pages, compile a complete list
+    // and then resolve the promise
     const promise = new Promise( (resolve, reject) => {
         aha.product.list( function (err, data, response) {
             resolve( data )
@@ -48,17 +50,19 @@ const ahaOAuthHandler = async (req, res) => {
     }
 
     const cardData = {
+	'botId': botId,
+	'groupId': groupId
     };
     let aha = getAhaClient(token)
     loadProducts( aha ).then( records => {
-	console.log("DEBUG: product list is: ", products)
+	console.log("DEBUG: product list is: ", records)
 	const template = new Template(setupSubscriptionCardTemplate);
 	cardData['products'] = records.products
 	const card = template.expand({
             $root: cardData
 	});
 	console.log("DEBUG: card data:", cardData)
-	console.log("DEBUG: posting card:", card)
+	console.log("DEBUG: posting card to group "+groupId+":", card)
 	bot.sendAdaptiveCard( groupId, card);
 	return
     })

@@ -2,8 +2,8 @@ const { AhaTokens, ChangesModel } = require('../models/models')
 const { Template }               = require('adaptivecards-templating');
 const { getAhaClient }           = require('../lib/aha');
 
-const Bot                    = require('ringcentral-chatbot-core/dist/models/Bot').default;
-const sampleTextCardTemplate = require('../adaptiveCards/sampleTextCard.json');
+const Bot                        = require('ringcentral-chatbot-core/dist/models/Bot').default;
+const subscriptionCardTemplate   = require('../adaptiveCards/subscriptionCard.json');
 
 const interactiveMessageHandler = async req => {
     const submitData = req.body.data;
@@ -21,6 +21,19 @@ const interactiveMessageHandler = async req => {
 
     const bot = await Bot.findByPk(submitData.botId);
     switch (submitData.actionType) {
+    case 'setup_subscription':
+	console.log(`MESSAGING: facilitating subscription process for ${submitData.product}`)
+	const cardData = {
+	    'botId': submitData.botId,
+	    'ahaUrl': `https://${process.env.AHA_SUBDOMAIN}.aha.io/settings/projects/${submitData.product}/integrations/new`
+	};
+	const template = new Template(subscriptionCardTemplate);
+	const card = template.expand({
+            $root: cardData
+	});
+	console.log("DEBUG: posting card to group "+groupId+":", card)
+	bot.sendAdaptiveCard( submitData.groupId, card);
+	break;
     case 'update_idea':
 	// user updated an idea
 	let update_data = {
@@ -50,19 +63,6 @@ const interactiveMessageHandler = async req => {
 	    });
 	});
 	break;
-	
-    case 'update':
-	// test hander - ignore this for now
-        const template = new Template(sampleTextCardTemplate);
-        const cardData = {
-            title: 'Updated',
-            text: 'This card has been updated.'
-        };
-        const card = template.expand({
-            $root: cardData
-        });
-        await bot.updateAdaptiveCard(cardId, card);
-        break;
     }
 }
 

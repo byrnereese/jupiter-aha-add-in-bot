@@ -1,0 +1,52 @@
+{
+    "type": "AdaptiveCard",
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.5",
+    "body": [
+        {
+            "type": "TextBlock",
+            "text": "Create an \"Activity Webhook\"",
+            "wrap": true,
+            "size": "ExtraLarge",
+            "weight": "Bolder"
+        },
+        {
+            "type": "TextBlock",
+            "text": "Next, I need you to login to Aha and create something called an \"Activity webhook.\" The button below will take you where you need to go.",
+            "wrap": true
+        },
+        {
+            "type": "TextBlock",
+            "wrap": true,
+            "text": "Once you are in, I need you to enter the following into the \"Hook URL\" field."
+        },
+        {
+            "type": "FactSet",
+            "facts": [
+                {
+                    "title": "Hook URL",
+                    "value": "${hookUrl}"
+                }
+            ]
+        },
+        {
+            "type": "TextBlock",
+            "text": "Next, I need you to select the events you want to subscribe to. I only support the following events:\r- Everything related to features\r- Ideas > Name\r- Ideas > Status\r- Ideas > Public comment\r\rHere is a video to show you what to do.",
+            "wrap": true
+        },
+        {
+            "type": "Media"
+        },
+        {
+            "type": "ActionSet",
+            "actions": [
+                {
+                    "type": "Action.OpenUrl",
+                    "title": "Create activity webhook",
+                    "url": "${ahaUrl}",
+                    "style": "positive"
+                }
+            ]
+        }
+    ]
+}

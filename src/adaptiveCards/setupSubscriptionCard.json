@@ -33,7 +33,12 @@
                 {
                     "type": "Action.Submit",
                     "title": "Setup subscription",
-                    "style": "positive"
+                    "style": "positive",
+		    "data": {
+                        "actionType": "setup_subscription",
+                        "botId": "${botId}",
+                        "groupId": "${groupId}"
+		    }
                 }
             ]
         }
