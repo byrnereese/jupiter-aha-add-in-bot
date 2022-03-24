@@ -18,7 +18,12 @@
         {
             "type": "TextBlock",
             "wrap": true,
-            "text": "Once you are in, I need you to enter the following into the \"Hook URL\" field."
+            "text": "Once you are in, scroll down until you find the \"Activity Webhood\" option under API header."
+        },
+        {
+            "type": "TextBlock",
+            "wrap": true,
+            "text": "Did you find it? Good. Now, I need you to enter the following into the \"Hook URL\" field."
         },
         {
             "type": "FactSet",
