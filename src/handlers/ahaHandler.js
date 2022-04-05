@@ -26,6 +26,8 @@ const loadProducts = ( aha ) => {
 
 const ahaOAuthHandler = async (req, res) => {
     const { state } = req.query
+    console.log("Received auth request for new bot install: " + req.query)
+    console.log("state = " + state)
     const [groupId, botId, userId] = state.split(':')
     console.log(`Requesting installation of bot (id:${botId}) into chat (id:${groupId}) by user (id:${userId})`)
 
