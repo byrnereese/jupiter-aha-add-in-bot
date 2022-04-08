@@ -71,9 +71,7 @@ const interactiveMessageHandler = async req => {
 	    } else {
 		let comment = {
 		    body: submitData.comment_text,
-		    user: {
-			email: resp.data.contact.email
-		    }
+		    user: resp.data.contact.email
 		}
 		console.log(`MESSAGING: posting private comment ${submitData.ideaId}:`, comment)
 		aha.idea.addPrivateComment(submitData.ideaId, comment, function (err, data, response) {
