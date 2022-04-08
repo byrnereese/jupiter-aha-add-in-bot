@@ -212,6 +212,7 @@ function start() {
 		    }
 		    
 		    loadIdea( aha, ideaId ).then( idea => {
+			idea.idea.created_at_fmt = new Date( idea.idea.created_at ).toDateString()
 			console.log("WORKER: loaded idea", idea)
 			cardData['idea'] = idea.idea
 			cardData['selectedCategory'] = idea.idea.categories[0].id

@@ -42,7 +42,7 @@
                         {
                             "type": "TextBlock",
                             "spacing": "None",
-                            "text": "Created {{DATE(${idea.created_at},SHORT)}}",
+                            "text": "Created ${idea.created_at_fmt}",
                             "isSubtle": true,
                             "wrap": true,
                             "size": "Small"
