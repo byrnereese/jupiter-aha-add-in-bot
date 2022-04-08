@@ -218,6 +218,7 @@ function start() {
 		    }).then( categories => {
 			console.log("WORKER: loaded categories", categories)
 			cardData['categories'] = categories.idea_categories
+			cardData['selectedCategory'] = idea.idea.categories[0].id
 			return loadProjectWorkflows( aha, cardData["idea"].product.reference_prefix )
 		    }).then( workflows => {
 			console.log("WORKER: loaded workflows", workflows)

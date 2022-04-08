@@ -96,7 +96,7 @@
                         "type": "Input.Text",
                         "placeholder": "Enter the name of the idea",
                         "label": "Name",
-			"value": "${idea.name}"
+                        "value": "${idea.name}"
                     },
                     {
                         "id": "idea_description",
@@ -104,7 +104,7 @@
                         "placeholder": "Enter a detailed description of the idea",
                         "isMultiline": true,
                         "label": "Description",
-			"value": "${idea.description.body_nohtml}"
+                        "value": "${idea.description.body_nohtml}"
                     },
                     {
                         "id": "idea_status",
