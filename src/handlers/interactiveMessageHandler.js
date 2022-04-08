@@ -69,6 +69,8 @@ const interactiveMessageHandler = async req => {
 		    console.log(`MESSAGING: posted public comment to idea`)
 		});
 	    } else {
+		let poster = resp.data.contact.firstName + " " + resp.data.contact.lastName
+		let body = submitData.comment_text + "<p><i>Comment posted by AhaBot on behalf of " + poster + "</i></p>"
 		let comment = {
 		    body: submitData.comment_text,
 		    user: resp.data.contact.email
