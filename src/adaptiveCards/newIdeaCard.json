@@ -112,6 +112,7 @@
                         "value": "${idea.workflow_status.id}",
                         "placeholder": "Select status",
                         "label": "Status",
+                        "isMultiSelect": false,
                         "choices": [
                             {
 			                 	"$data": "${workflows}",
@@ -185,7 +186,7 @@
                 "actions": [
                     {
                         "type": "Action.Submit",
-                        "title": "Post public comment",
+                        "title": "Post comment",
 			"data": {
                             "actionType": "post_idea_comment",
                             "ideaId": "${ahaIdeaId}",
