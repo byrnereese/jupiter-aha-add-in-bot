@@ -214,11 +214,11 @@ function start() {
 		    loadIdea( aha, ideaId ).then( idea => {
 			console.log("WORKER: loaded idea", idea)
 			cardData['idea'] = idea.idea
+			cardData['selectedCategory'] = idea.idea.categories[0].id
 			return loadIdeaCategories( aha, idea.idea.product.reference_prefix )
 		    }).then( categories => {
 			console.log("WORKER: loaded categories", categories)
 			cardData['categories'] = categories.idea_categories
-			cardData['selectedCategory'] = idea.idea.categories[0].id
 			return loadProjectWorkflows( aha, cardData["idea"].product.reference_prefix )
 		    }).then( workflows => {
 			console.log("WORKER: loaded workflows", workflows)
