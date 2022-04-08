@@ -59,14 +59,27 @@ const interactiveMessageHandler = async req => {
 	bot.rc.get(`/restapi/v1.0/account/${req.body.user.accountId}/extension/${req.body.user.extId}`).then( function( resp ) {
 	    //let respj = resp.json()
 	    console.log("MESSAGING: got poster info", resp)
-	    let comment = {
-		body: submitData.comment_text,
-		email: resp.data.contact.email
+	    if (submitData.comment_privacy == "public") {
+		let comment = {
+		    body: submitData.comment_text,
+		    email: resp.data.contact.email
+		}
+		console.log(`MESSAGING: posting public comment ${submitData.ideaId}:`, comment)
+		aha.idea.addPublicComment(submitData.ideaId, comment, function (err, data, response) {
+		    console.log(`MESSAGING: posted public comment to idea`)
+		});
+	    } else {
+		let comment = {
+		    body: submitData.comment_text,
+		    user: {
+			email: resp.data.contact.email
+		    }
+		}
+		console.log(`MESSAGING: posting private comment ${submitData.ideaId}:`, comment)
+		aha.idea.addPrivateComment(submitData.ideaId, comment, function (err, data, response) {
+		    console.log(`MESSAGING: posted private comment to idea`)
+		});
 	    }
-	    console.log(`MESSAGING: posting comment ${submitData.ideaId}:`, comment)
-            aha.idea.addPublicComment(submitData.ideaId, comment, function (err, data, response) {
-		console.log(`MESSAGING: posted public comment to idea`)
-	    });
 	});
 	break;
     }

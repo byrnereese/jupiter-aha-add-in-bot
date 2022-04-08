@@ -68,10 +68,6 @@
             "type": "FactSet",
             "facts": [
                 {
-                    "title": "Status",
-                    "value": "${idea.workflow_status.name}"
-                },
-                {
                     "title": "Visibility",
                     "value": "${idea.visibility}"
                 },
@@ -113,30 +109,30 @@
                     {
                         "id": "idea_status",
                         "type": "Input.ChoiceSet",
-			"value": "${idea.workflow_status.id}",
+                        "value": "${idea.workflow_status.id}",
+                        "placeholder": "Select status",
+                        "label": "Status",
                         "choices": [
                             {
-				"$data": "${workflows}",
+			                 	"$data": "${workflows}",
                                 "title": "${name}",
                                 "value": "${id}"
                             }
-                        ],
-                        "placeholder": "Select status",
-                        "label": "Status"
+                        ]
                     },
                     {
                         "id": "idea_category",
                         "type": "Input.ChoiceSet",
-			"value": "${selectedCategory}",
+            			"value": "${selectedCategory}",
+                        "placeholder": "Select a product category",
+                        "label": "Category",
                         "choices": [
                             {
                                 "$data": "${categories}",
                                 "title": "${name}",
                                 "value": "${id}"
                             }
-                        ],
-                        "placeholder": "Select a product category",
-                        "label": "Category"
+                        ]
                     }
                 ],
                 "actions": [
@@ -166,6 +162,24 @@
                         "placeholder": "Enter your comment",
                         "isMultiline": true,
                         "label": "Comment text"
+                    },
+                    {
+                        "id": "comment_privacy",
+                        "type": "Input.ChoiceSet",
+                        "choices": [
+                            {
+                                "title": "Public comment",
+                                "value": "public"
+                            },
+                            {
+                                "title": "Private comment",
+                                "value": "private"
+                            }
+                        ],
+                        "placeholder": "Select privacy level",
+                        "style": "expanded",
+                        "spacing": "Small",
+                        "value": "public"
                     }
                 ],
                 "actions": [

@@ -11,7 +11,7 @@ const entities                    = new AllHtmlEntities();
 const turnDown                    = new turnDownService();
 
 const cardUpdateTemplate          = require('./adaptiveCards/ahaUpdateCard.json');
-const cardIdeaTemplate            = require('./adaptiveCards/ahaIdeaCard.json');
+const cardIdeaTemplate            = require('./adaptiveCards/newIdeaCard.json');
 
 let REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
