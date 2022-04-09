@@ -1,7 +1,7 @@
 {
     "type": "AdaptiveCard",
     "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-    "version": "1.3",
+    "version": "1.5",
     "body": [
         {
             "type": "TextBlock",
@@ -81,125 +81,159 @@
                 }
             ],
             "separator": true
-        }
-    ],
-    "actions": [
-        {
-            "type": "Action.OpenUrl",
-            "title": "View in Aha!",
-            "url": "${idea.url}"
         },
         {
-            "type": "Action.ShowCard",
-            "title": "Edit details",
-            "card": {
-                "type": "AdaptiveCard",
-                "body": [
-                    {
-                        "id": "idea_name",
-                        "type": "Input.Text",
-                        "placeholder": "Enter the name of the idea",
-                        "label": "Name",
-                        "value": "${idea.name}"
-                    },
-                    {
-                        "id": "idea_description",
-                        "type": "Input.Text",
-                        "placeholder": "Enter a detailed description of the idea",
-                        "isMultiline": true,
-                        "label": "Description",
-                        "value": "${idea.description.body_nohtml}"
-                    },
-                    {
-                        "id": "idea_status",
-                        "type": "Input.ChoiceSet",
-                        "value": "${idea.workflow_status.id}",
-                        "placeholder": "Select status",
-                        "label": "Status",
-                        "isMultiSelect": false,
-                        "choices": [
+            "type": "ActionSet",
+            "actions": [
+                {
+                    "type": "Action.OpenUrl",
+                    "title": "View in Aha!",
+                    "url": "${idea.url}"
+                },
+                {
+                    "type": "Action.ShowCard",
+                    "title": "Edit details",
+                    "card": {
+                        "type": "AdaptiveCard",
+                        "body": [
                             {
-			                 	"$data": "${workflows}",
-                                "title": "${name}",
-                                "value": "${id}"
-                            }
-                        ]
-                    },
-                    {
-                        "id": "idea_category",
-                        "type": "Input.ChoiceSet",
-            			"value": "${selectedCategory}",
-                        "placeholder": "Select a product category",
-                        "label": "Category",
-                        "choices": [
-                            {
-                                "$data": "${categories}",
-                                "title": "${name}",
-                                "value": "${id}"
-                            }
-                        ]
-                    }
-                ],
-                "actions": [
-                    {
-                        "type": "Action.Submit",
-                        "title": "Save",
-			"data": {
-                            "actionType": "update_idea",
-                            "ideaId": "${ahaIdeaId}",
-                            "botId": "${botId}",
-                            "groupId": "${groupId}"
-			}
-                    }
-                ],
-                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
-            }
-        },
-        {
-            "type": "Action.ShowCard",
-            "title": "Add comment",
-            "card": {
-                "type": "AdaptiveCard",
-                "body": [
-                    {
-                        "id": "comment_text",
-                        "type": "Input.Text",
-                        "placeholder": "Enter your comment",
-                        "isMultiline": true,
-                        "label": "Comment text"
-                    },
-                    {
-                        "id": "comment_privacy",
-                        "type": "Input.ChoiceSet",
-                        "choices": [
-                            {
-                                "title": "Public comment",
-                                "value": "public"
+                                "id": "idea_name",
+                                "type": "Input.Text",
+                                "placeholder": "Enter the name of the idea",
+                                "label": "Name",
+                                "value": "${idea.name}"
                             },
                             {
-                                "title": "Private comment",
-                                "value": "private"
+                                "id": "idea_description",
+                                "type": "Input.Text",
+                                "placeholder": "Enter a detailed description of the idea",
+                                "isMultiline": true,
+                                "label": "Description",
+                                "value": "${idea.description.body_nohtml}"
+                            },
+                            {
+                                "id": "idea_status",
+                                "type": "Input.ChoiceSet",
+                                "value": "${idea.workflow_status.id}",
+                                "placeholder": "Select status",
+                                "label": "Status",
+                                "choices": [
+                                    {
+                                        "$data": "${workflows}",
+                                        "title": "${name}",
+                                        "value": "${id}"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "idea_category",
+                                "type": "Input.ChoiceSet",
+                                "value": "${selectedCategory}",
+                                "placeholder": "Select a product category",
+                                "label": "Category",
+                                "choices": [
+                                    {
+                                        "$data": "${categories}",
+                                        "title": "${name}",
+                                        "value": "${id}"
+                                    }
+                                ]
                             }
                         ],
-                        "placeholder": "Select privacy level",
-                        "style": "expanded",
-                        "spacing": "Small",
-                        "value": "public"
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+                                "title": "Save",
+                                "data": {
+                                    "actionType": "update_idea",
+                                    "ideaId": "${ahaIdeaId}",
+                                    "botId": "${botId}",
+                                    "groupId": "${groupId}"
+                                }
+                            }
+                        ],
+                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
                     }
-                ],
-                "actions": [
-                    {
-                        "type": "Action.Submit",
-                        "title": "Post comment",
-			"data": {
-                            "actionType": "post_idea_comment",
-                            "ideaId": "${ahaIdeaId}",
-                            "botId": "${botId}",
-                            "groupId": "${groupId}"
-			}
+                },
+                {
+                    "type": "Action.ShowCard",
+                    "title": "Add comment",
+                    "card": {
+                        "type": "AdaptiveCard",
+                        "body": [
+                            {
+                                "id": "comment_text",
+                                "type": "Input.Text",
+                                "placeholder": "Enter your comment",
+                                "isMultiline": true,
+                                "label": "Comment text"
+                            },
+                            {
+                                "id": "comment_privacy",
+                                "type": "Input.ChoiceSet",
+                                "choices": [
+                                    {
+                                        "title": "Public comment",
+                                        "value": "public"
+                                    },
+                                    {
+                                        "title": "Private comment",
+                                        "value": "private"
+                                    }
+                                ],
+                                "placeholder": "Select privacy level",
+                                "style": "expanded",
+                                "spacing": "Small",
+                                "value": "public"
+                            }
+                        ],
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+                                "title": "Post comment",
+                                "data": {
+                                    "actionType": "post_idea_comment",
+                                    "ideaId": "${ahaIdeaId}",
+                                    "botId": "${botId}",
+                                    "groupId": "${groupId}"
+                                }
+                            }
+                        ]
                     }
-                ]
-            }
+                }
+            ]
+        },
+        {
+            "type": "ColumnSet",
+            "columns": [
+                {
+                    "type": "Column",
+                    "width": "auto",
+                    "items": [
+                        {
+                            "type": "Image",
+                            "url": "https://github.com/ringcentral/github-notification-app/blob/main/icons/feedback-32.png?raw=true",
+                            "size": "Small",
+                            "style": "Person",
+                            "width": "16px"
+                        }
+                    ]
+                },
+                {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                        {
+                            "type": "TextBlock",
+                            "text": "[Improve this add-in: report bugs and feature requests](https://docs.google.com/forms/d/e/1FAIpQLSfCwi9bUT0WJW3Ug8umbNyd8NnmAZiVIcOHwXto6B9syKTnjA/viewform?usp=pp_url&entry.492712114=Aha!+Add-in)",
+                            "weight": "Lighter",
+                            "wrap": true,
+                            "size": "Small",
+                            "spacing": "None"
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }
