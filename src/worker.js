@@ -1,8 +1,8 @@
-const { AhaTokens, ChangesModel, AccountConfig }
-                                  = require('./models/models')
+const { BotConfig, ChangesModel } = require('./models/models')
 const { AllHtmlEntities }         = require('html-entities')
 const { Template }                = require('adaptivecards-templating')
 const { getAhaClient }            = require('./lib/aha');
+const RC                          = require('@ringcentral/sdk').SDK
 const Bot                         = require('ringcentral-chatbot-core/dist/models/Bot').default;
 const turnDownService             = require('turndown');
 let   throng                      = require('throng');
@@ -186,17 +186,27 @@ function start() {
     workQueue.process(maxJobsPerWorker, async (job) => {
 	console.log(`WORKER: processing ${job.data.action} job: ${job.id}`)
 	console.log("WORKER: ", job.data)
-
+	
 	// initialize job with bot and aha client
 	const bot = await Bot.findByPk( job.data.bot_id )
+
+	const rcsdk = new RC({
+	    clientId: process.env.RINGCENTRAL_CHATBOT_CLIENT_ID,
+	    clientSecret: process.env.RINGCENTRAL_CHATBOT_CLIENT_SECRET,
+	    server: process.env.RINGCENTRAL_SERVER,
+	});
+	var platform = rcsdk.platform();
+	
+
+
 	//const group = await 
-	const ahaTokens = await AhaTokens.findOne({
+	const botConfig = await BotConfig.findOne({
 	    where: {
 		botId: job.data.bot_id, groupId: job.data.group_id
 	    }
 	})
-	let token = ahaTokens ? ahaTokens.token : undefined
-	let aha = getAhaClient(token, process.env.AHA_SUBDOMAIN)
+	let token = botConfig ? botConfig.token : undefined
+	let aha = getAhaClient(token, botConfig.aha_domain)
 	try {
 	    if (job.data.action == 'create') {
 		if (job.data.aha_type == 'ideas/idea') {

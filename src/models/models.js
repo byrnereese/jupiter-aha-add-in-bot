@@ -2,19 +2,17 @@ const Sequelize = require('sequelize');
 const { sequelize } = require('./sequelize');
 
 // Model for User data
-const ahaTokens = sequelize.define('ahaTokens', {
-//    userId:{
-//        type: Sequelize.STRING,
-//        primaryKey: true
-//    },
+const botConfig = sequelize.define('botConfig', {
     token:{
-        type: Sequelize.STRING,
-        primaryKey: true
+        type: Sequelize.STRING
     },
     groupId:{
         type: Sequelize.STRING
     },
     botId: {
+        type: Sequelize.STRING
+    },
+    aha_domain: {
         type: Sequelize.STRING
     }
 },
@@ -23,6 +21,10 @@ const ahaTokens = sequelize.define('ahaTokens', {
 	{
 	    unique: true,
 	    fields: [ 'groupId', 'botId' ]
+	},
+	{
+	    unique: true,
+	    fields: [ 'token' ]
 	}
     ]
 });
@@ -47,17 +49,5 @@ const changesModel = sequelize.define('changesModel', {
     ]
 });
 
-// Model for storing account config information
-const accountConfig = sequelize.define('accountConfigModel', {
-    accountId:{
-        type: Sequelize.STRING,
-        primaryKey: true
-    },
-    domain:{
-        type: Sequelize.STRING
-    }
-});
-
-exports.AhaTokens = ahaTokens;
+exports.BotConfig = botConfig;
 exports.ChangesModel = changesModel;
-exports.AccountConfig = accountConfig;

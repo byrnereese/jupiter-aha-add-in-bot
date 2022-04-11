@@ -1,11 +1,9 @@
-const { AhaTokens, ChangesModel } = require('../models/models')
-const { getAhaClient }    = require('../lib/aha');
-const { getOAuthApp }     = require('../lib/oauth');
-const { continueSession } = require('pg/lib/sasl');
-
-const { Template } = require('adaptivecards-templating');
-const gettingStartedCardTemplate = require('../adaptiveCards/gettingStartedCard.json');
-const helpCardTemplate = require('../adaptiveCards/helpCard.json');
+const { BotConfig, ChangesModel } = require('../models/models')
+const { getAhaClient }            = require('../lib/aha');
+const { continueSession }         = require('pg/lib/sasl');
+const { Template }                = require('adaptivecards-templating');
+const gettingStartedCardTemplate  = require('../adaptiveCards/gettingStartedCard.json');
+const helpCardTemplate            = require('../adaptiveCards/helpCard.json');
 
 const botHandler = async event => {
     console.log(event.type, 'event')
@@ -26,7 +24,6 @@ const handleBotJoiningGroup = async event => {
     const { bot, group } = event
     const template = new Template(gettingStartedCardTemplate);
     const cardData = {
-        loginUrl: `https://${process.env.AHA_SUBDOMAIN}.aha.io/oauth/authorize?client_id=${process.env.AHA_CLIENT_ID}&redirect_uri=${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/oauth&response_type=code&state=${group.id}:${bot.id}`
     };
     const card = template.expand({
         $root: cardData
@@ -37,12 +34,16 @@ const handleBotJoiningGroup = async event => {
 
 const handleBotReceivedMessage = async event => {
     const { group, bot, text, userId } = event
-    const ahaTokens = await AhaTokens.findOne({
+    const botConfig = await BotConfig.findOne({
         where: {
             'botId': bot.id, 'groupId': group.id
         }
     })
-
+    if (!botConfig.aha_domain || botConfig.aha_domain == "") {
+        await bot.sendMessage(group.id, { text: `The bot has been updated. You will need to reauthenticate. Please type the command "goodbye" and then "hello" to reauthenticate to Aha.` })
+	return
+    }
+	
     if (text === "help") {
 	const template = new Template(helpCardTemplate);
 	const cardData = { };
@@ -52,7 +53,7 @@ const handleBotReceivedMessage = async event => {
         return
     }
 
-    let token = ahaTokens ? ahaTokens.token : undefined
+    let token = botConfig ? botConfig.token : undefined
     if (text === 'hello') {
         if (token) {
             await bot.sendMessage(group.id, { text: `It appears you already have an active connection to Aha in this team.` })
@@ -63,10 +64,14 @@ const handleBotReceivedMessage = async event => {
     } else if (text === 'goodbye') {
         if (token) {
 	    console.log("DEBUG: destroying tokens in database")
-	    await ahaTokens.destroy()
-            await bot.sendMessage(group.id, { text: `You have just unlinked your Aha account. Say "hello" to me, and we can start fresh.` })
+	    await botConfig.destroy()
+            await bot.sendMessage(group.id, {
+		text: `You have just unlinked your Aha account. Say "hello" to me, and we can start fresh.`
+	    })
         } else {
-            await bot.sendMessage(group.id, { text: `It does not appear you have a current connection to Aha in this team. Say "hello" to me and we can get started.` })
+            await bot.sendMessage(group.id, {
+		text: `It does not appear you have a current connection to Aha in this team. Say "hello" to me and we can get started.`
+	    })
         }
 
     } else if (text.startsWith("subscribe")) {
@@ -74,14 +79,14 @@ const handleBotReceivedMessage = async event => {
         if (token) {
             let found = text.match(/subscribe (.*)$/)
             let productCode = found[1]
-            let aha = getAhaClient(token)
+            let aha = getAhaClient(token, botConfig.aha_domain)
             let server = process.env.RINGCENTRAL_CHATBOT_SERVER
 	    let hookQs = `groupId=${group.id}&botId=${bot.id}`
 	    let buff = new Buffer(hookQs)
 	    let buffe = buff.toString('base64')
             let hookUrl = server + `/aha/webhook/${buffe}`
             let resp = aha.product.get(productCode, function (err, data, response) {
-                bot.sendMessage(group.id, { text: `To receive updates in this Team from Aha:\n1. [Create a new Activity Webhook in Aha](https://${process.env.AHA_SUBDOMAIN}.aha.io/settings/projects/${productCode}/integrations/new)\n2. In the Hook URL field, enter: ${hookUrl}\n3. Select the activities you would like to subscribe to.` })
+                bot.sendMessage(group.id, { text: `To receive updates in this Team from Aha:\n1. [Create a new Activity Webhook in Aha](https://${botConfig.aha_domain}.aha.io/settings/projects/${productCode}/integrations/new)\n2. In the Hook URL field, enter: ${hookUrl}\n3. Select the activities you would like to subscribe to.` })
             });
         } else {
             await bot.sendMessage(group.id, { text: `It does not appear you have a current connection to Aha in this team.` })

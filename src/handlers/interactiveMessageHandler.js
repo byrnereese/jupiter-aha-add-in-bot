@@ -1,24 +1,48 @@
-const { AhaTokens, ChangesModel } = require('../models/models')
-const { Template }               = require('adaptivecards-templating');
-const { getAhaClient }           = require('../lib/aha');
+const { BotConfig, ChangesModel } = require('../models/models')
+const { Template }                = require('adaptivecards-templating');
+const { getAhaClient }            = require('../lib/aha');
 
-const Bot                        = require('ringcentral-chatbot-core/dist/models/Bot').default;
-const subscriptionCardTemplate   = require('../adaptiveCards/subscriptionCard.json');
+const Bot                         = require('ringcentral-chatbot-core/dist/models/Bot').default;
+const subscriptionCardTemplate    = require('../adaptiveCards/subscriptionCard.json');
+const authCardTemplate            = require('../adaptiveCards/authCard.json');
 
 const interactiveMessageHandler = async req => {
     const submitData = req.body.data;
     const cardId     = req.body.card.id;
 
-    const ahaTokens = await AhaTokens.findOne({
-	where: {
-	    botId: submitData.botId, groupId: submitData.groupId
-	}
-    })
-    let token = ahaTokens ? ahaTokens.token : undefined
-    let aha = getAhaClient(token)
-    
     console.log(`=====incomingCardSubmit=====\n${JSON.stringify(req.body, null, 2)}`);
+    
+    // If I am authing for the first time, I need to stash the aha domain and create
+    // a botConfig object
+    if (submitData.actionType == "auth") {
+        await BotConfig.create({
+	    'botId': submitData.botId,
+	    'groupId': submitData.groupId,
+	    'aha_domain': submitData.aha_domain
+	    // there is no token yet, so don't store it
+	})
+	console.log(`MESSAGING: providing developer with login url`)
+	const cardData = {
+            loginUrl: `https://${submitData.aha_domain}.aha.io/oauth/authorize?client_id=${process.env.AHA_CLIENT_ID}&redirect_uri=${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/oauth&response_type=code&state=${submitData.groupId}:${submitData.botId}`,
+	    botId: submitData.botId,
+	    groupId: submitData.groupId
+	};
+	const template = new Template(authCardTemplate);
+	const card = template.expand({
+            $root: cardData
+	});
+	console.log("DEBUG: posting card to group "+submitData.groupId+":", card)
+	bot.sendAdaptiveCard( submitData.groupId, card);
+	return
+    }
 
+    // if you have gotten this far, this means that the bot is fully setup, and an aha domain has
+    // been stored for the bot. That means we can make calls to Aha! So, load the token and proceed.
+    const botConfig = await BotConfig.findOne({
+	where: { botId: submitData.botId, groupId: submitData.groupId }
+    })
+    let token = botConfig ? botConfig.token : undefined
+    let aha = getAhaClient(token, botConfig.aha_domain)
     const bot = await Bot.findByPk(submitData.botId);
     switch (submitData.actionType) {
     case 'setup_subscription':
@@ -31,7 +55,7 @@ const interactiveMessageHandler = async req => {
 	    'botId': submitData.botId,
 	    'groupId': submitData.groupId,
 	    'hookUrl': hookUrl,
-	    'ahaUrl': `https://${process.env.AHA_SUBDOMAIN}.aha.io/settings/projects/${submitData.product}/integrations/new`
+	    'ahaUrl': `https://${botConfig.aha_domain}.aha.io/settings/projects/${submitData.product}/integrations/new`
 	};
 	const template = new Template(subscriptionCardTemplate);
 	const card = template.expand({

@@ -8,7 +8,9 @@ const getAhaClient = function (token, domain) {
     });
 }
 
-const ahaOAuth = getOAuthApp();
+const getAhaOAuth = function ( domain ) {
+    getOAuthApp(domain);
+}
 
 exports.getAhaClient = getAhaClient;
-exports.ahaOAuth = ahaOAuth;
+exports.getAhaOAuth  = getAhaOAuth;

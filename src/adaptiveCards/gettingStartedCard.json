@@ -17,13 +17,13 @@
         },
         {
             "type": "TextBlock",
-            "text": "To get started, tell me your Aha! domain, e.g. the \"mycompany\" in mycompany.aha.io.",
+            "text": "To get started, tell me your Aha! domain, e.g. the \"mycompany\" in mycompany.aha.io, or the URL you use to access Aha.",
             "wrap": true,
             "spacing": "Medium"
         },
         {
             "type": "Input.Text",
-            "id": "aha_subdomain",
+            "id": "aha_domain",
             "placeholder": "Enter your Aha! domain",
             "spacing": "None"
         },
@@ -31,9 +31,13 @@
             "type": "ActionSet",
             "actions": [
                 {
-                    "type": "Action.OpenUrl",
-                    "title": "Login to Aha",
-                    "url": "${loginUrl}",
+                    "type": "Action.Submit",
+                    "data": {
+                        "actionType": "auth",
+                        "botId": "${botId}",
+                        "groupId": "${groupId}"
+                    },
+                    "title": "Submit",
                     "style": "positive"
                 }
             ]

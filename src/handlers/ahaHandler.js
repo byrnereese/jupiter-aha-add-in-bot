@@ -1,4 +1,4 @@
-const { AhaTokens, ChangesModel }   = require('../models/models')
+const { BotConfig, ChangesModel }   = require('../models/models')
 const { getAhaClient, ahaOAuth }    = require('../lib/aha')
 const Bot                           = require('ringcentral-chatbot-core/dist/models/Bot').default;
 let   Queue                         = require('bull');
@@ -32,7 +32,7 @@ const ahaOAuthHandler = async (req, res) => {
     console.log(`Requesting installation of bot (id:${botId}) into chat (id:${groupId}) by user (id:${userId})`)
 
     const bot = await Bot.findByPk(botId)
-    //const botAccountId = bot.creator_account_id
+
     console.log("bot: ", bot)
     const tokenUrl = `${process.env.RINGCENTRAL_CHATBOT_SERVER}${req.url}`;
     console.log(`Token URL: ${tokenUrl}`);
@@ -42,23 +42,20 @@ const ahaOAuthHandler = async (req, res) => {
     
     // Bearer token in hand. Now let's stash it.
     const query = { groupId, botId }
-    const ahaTokens = await AhaTokens.findOne({ where: query })
-    if (ahaTokens) {
-        await ahaTokens.update({
-//            userId,
-            token
+    const botConfig = await BotConfig.findOne({ where: query })
+    if (botConfig) {
+        await botConfig.update({
+            'token': token
         })
     } else {
-        await AhaTokens.create({ ...query,
-				 //userId,
-				 token })
+        await BotConfig.create({ ...query,
+				 'token': token })
     }
-
     const cardData = {
 	'botId': botId,
 	'groupId': groupId
     };
-    let aha = getAhaClient(token, process.env.AHA_SUBDOMAIN)
+    let aha = getAhaClient(token, botConfig.aha_domain)
     loadProducts( aha ).then( records => {
 	console.log("DEBUG: product list is: ", records)
 	// TODO - add HOWTO video to card
