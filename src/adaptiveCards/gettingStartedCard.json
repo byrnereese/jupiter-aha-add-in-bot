@@ -23,6 +23,7 @@
         },
         {
             "type": "Input.Text",
+            "id": "aha_subdomain",
             "placeholder": "Enter your Aha! domain",
             "spacing": "None"
         },
