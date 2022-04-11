@@ -189,7 +189,7 @@ function start() {
 
 	// initialize job with bot and aha client
 	const bot = await Bot.findByPk( job.data.bot_id )
-	const group = await 
+	//const group = await 
 	const ahaTokens = await AhaTokens.findOne({
 	    where: {
 		botId: job.data.bot_id, groupId: job.data.group_id
