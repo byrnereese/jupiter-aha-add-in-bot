@@ -1,4 +1,5 @@
-const { AhaTokens, ChangesModel } = require('./models/models')
+const { AhaTokens, ChangesModel, AccountConfig }
+                                  = require('./models/models')
 const { AllHtmlEntities }         = require('html-entities')
 const { Template }                = require('adaptivecards-templating')
 const { getAhaClient }            = require('./lib/aha');
@@ -194,7 +195,7 @@ function start() {
 	    }
 	})
 	let token = ahaTokens ? ahaTokens.token : undefined
-	let aha = getAhaClient(token)
+	let aha = getAhaClient(token, process.env.AHA_SUBDOMAIN)
 	try {
 	    if (job.data.action == 'create') {
 		if (job.data.aha_type == 'ideas/idea') {

@@ -47,5 +47,23 @@ const changesModel = sequelize.define('changesModel', {
     ]
 });
 
+// Model for Aha Change coelescing
+const accountConfig = sequelize.define('accountConfigModel', {
+    accountId:{
+        type: Sequelize.STRING
+    },
+    domain:{
+        type: Sequelize.STRING
+    }
+  },{
+    indexes: [
+	{
+	    name: 'accountId',
+	    fields: ['accountId']
+	}
+    ]
+});
+
 exports.AhaTokens = ahaTokens;
 exports.ChangesModel = changesModel;
+exports.AccountConfig = accountConifg;

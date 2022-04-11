@@ -16,6 +16,17 @@
             "wrap": true
         },
         {
+            "type": "TextBlock",
+            "text": "To get started, tell me your Aha! domain, e.g. the \"mycompany\" in mycompany.aha.io.",
+            "wrap": true,
+            "spacing": "Medium"
+        },
+        {
+            "type": "Input.Text",
+            "placeholder": "Enter your Aha! domain",
+            "spacing": "None"
+        },
+        {
             "type": "ActionSet",
             "actions": [
                 {

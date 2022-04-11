@@ -5,6 +5,7 @@ const { continueSession } = require('pg/lib/sasl');
 
 const { Template } = require('adaptivecards-templating');
 const gettingStartedCardTemplate = require('../adaptiveCards/gettingStartedCard.json');
+const helpCardTemplate = require('../adaptiveCards/helpCard.json');
 
 const botHandler = async event => {
     console.log(event.type, 'event')
@@ -43,7 +44,11 @@ const handleBotReceivedMessage = async event => {
     })
 
     if (text === "help") {
-        await bot.sendMessage(group.id, { text: `Here are the commands I am able to respond to:\n* **hello** - restart the setup process in this team\n* **goodbye** - disconnect from your Aha account\n* **subscribe <product ID>** - pass in the three letter product id and get directions on how to start receiving notifications for changes in that product` })
+	const template = new Template(helpCardTemplate);
+	const cardData = { };
+	const card = template.expand({ $root: cardData });
+	console.log("DEBUG: posting help card:", card)
+	await bot.sendAdaptiveCard( group.id, card);
         return
     }
 

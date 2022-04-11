@@ -1,10 +1,10 @@
 const Aha = require('aha-io')
 const { getOAuthApp } = require('./oauth')
 
-const getAhaClient = function (token) {
+const getAhaClient = function (token, domain) {
     return new Aha({
         token: token,
-        subdomain: process.env.AHA_SUBDOMAIN
+        subdomain: domain
     });
 }
 

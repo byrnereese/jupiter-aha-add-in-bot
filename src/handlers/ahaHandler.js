@@ -32,6 +32,8 @@ const ahaOAuthHandler = async (req, res) => {
     console.log(`Requesting installation of bot (id:${botId}) into chat (id:${groupId}) by user (id:${userId})`)
 
     const bot = await Bot.findByPk(botId)
+    //const botAccountId = bot.creator_account_id
+    console.log("bot: ", bot)
     const tokenUrl = `${process.env.RINGCENTRAL_CHATBOT_SERVER}${req.url}`;
     console.log(`Token URL: ${tokenUrl}`);
     const tokenResponse = await ahaOAuth.code.getToken(tokenUrl);
@@ -56,7 +58,7 @@ const ahaOAuthHandler = async (req, res) => {
 	'botId': botId,
 	'groupId': groupId
     };
-    let aha = getAhaClient(token)
+    let aha = getAhaClient(token, process.env.AHA_SUBDOMAIN)
     loadProducts( aha ).then( records => {
 	console.log("DEBUG: product list is: ", records)
 	// TODO - add HOWTO video to card
