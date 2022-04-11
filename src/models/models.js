@@ -60,4 +60,4 @@ const accountConfig = sequelize.define('accountConfigModel', {
 
 exports.AhaTokens = ahaTokens;
 exports.ChangesModel = changesModel;
-exports.AccountConfig = accountConifg;
+exports.AccountConfig = accountConfig;
