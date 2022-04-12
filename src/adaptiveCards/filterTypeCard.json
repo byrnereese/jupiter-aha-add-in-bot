@@ -5,21 +5,30 @@
     "body": [
         {
             "type": "TextBlock",
-            "text": "Setup a ${filterType} filter",
+            "text": "Less is more, right?",
             "wrap": true,
             "size": "ExtraLarge",
             "weight": "Bolder"
         },
         {
+            "type": "TextBlock",
+            "text": "Want to filter the events you are seeing? Each type of object that can be filtered, can be filtered by one thing. I know, its not a lot. But if you need to filter by more, try the feedback link below. ",
+            "wrap": true
+        },
+        {
             "type": "Input.ChoiceSet",
             "choices": [
                 {
-                    "title": "Product category",
-                    "value": "category"
+                    "title": "Idea",
+                    "value": "ideas"
+                },
+                {
+                    "title": "Feature",
+                    "value": "feature"
                 }
             ],
-            "placeholder": "Select idea field",
-            "label": "What field do you want to filter by?",
+            "placeholder": "Select Aha object type",
+            "label": "What do you want to filter?",
             "isRequired": true,
             "errorMessage": "Please select the object type you want to create a filter for.",
             "id": "filter_type"
@@ -29,7 +38,7 @@
             "actions": [
                 {
                     "type": "Action.Submit",
-                    "title": "Create filter",
+                    "title": "Setup an incoming event filter",
                     "style": "positive",
                     "data": {
                         "actionType": "set_filter",
@@ -39,7 +48,7 @@
                 }
             ]
         },
-        {
+                {
             "type": "ColumnSet",
             "columns": [
                 {
@@ -71,5 +80,6 @@
                 }
             ]
         }
+
     ]
 }

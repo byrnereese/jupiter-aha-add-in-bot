@@ -7,7 +7,6 @@
             "type": "TextBlock",
             "text": "Let's login to Aha!",
             "wrap": true,
-            "style": "heading",
             "size": "ExtraLarge",
             "weight": "Bolder"
         },

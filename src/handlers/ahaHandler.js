@@ -1,5 +1,6 @@
 const { BotConfig, ChangesModel }   = require('../models/models')
-const { getAhaClient, ahaOAuth }    = require('../lib/aha')
+const { getAhaClient, getAhaOAuth } = require('../lib/aha')
+const { loadProducts }              = require('../lib/aha-async')
 const Bot                           = require('ringcentral-chatbot-core/dist/models/Bot').default;
 let   Queue                         = require('bull');
 const querystring                   = require('querystring');
@@ -8,46 +9,36 @@ const setupSubscriptionCardTemplate = require('../adaptiveCards/setupSubscriptio
 
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 let JOB_DELAY = process.env.AGGREGATION_DELAY || 1000;
-
-let   workQueue = new Queue('work', REDIS_URL);
-
-const loadProducts = ( aha ) => {
-    console.log(`WORKER: loading workspaces`)
-    // TODO - loadProducts needs to iterate over a number of pages, compile a complete list
-    // and then resolve the promise
-    const promise = new Promise( (resolve, reject) => {
-        aha.product.list( function (err, data, response) {
-            resolve( data )
-        })
-    })
-    console.log("WORKER: returning from loadProducts")
-    return promise
-}
+let workQueue = new Queue('work', REDIS_URL);
 
 const ahaOAuthHandler = async (req, res) => {
     const { state } = req.query
-    console.log("Received auth request for new bot install: ", req.query)
-    console.log("state = " + state)
+    //console.log("Received auth request for new bot install: ", req.query)
+    //console.log("state = " + state)
     const [groupId, botId, userId] = state.split(':')
     console.log(`Requesting installation of bot (id:${botId}) into chat (id:${groupId}) by user (id:${userId})`)
 
     const bot = await Bot.findByPk(botId)
-
+    // TODO - what if bot is null?
     console.log("bot: ", bot)
+
+    // Bearer token in hand. Now let's stash it.
+    const query = { groupId, botId }
+    const botConfig = await BotConfig.findOne({ where: query })
+    console.log(`Aha domain: ${botConfig.aha_domain}`)
+    const ahaOAuth = getAhaOAuth( botConfig.aha_domain )
     const tokenUrl = `${process.env.RINGCENTRAL_CHATBOT_SERVER}${req.url}`;
     console.log(`Token URL: ${tokenUrl}`);
     const tokenResponse = await ahaOAuth.code.getToken(tokenUrl);
     const token = tokenResponse.data.access_token;
     console.log("Successfully obtained OAuth token")
     
-    // Bearer token in hand. Now let's stash it.
-    const query = { groupId, botId }
-    const botConfig = await BotConfig.findOne({ where: query })
     if (botConfig) {
         await botConfig.update({
             'token': token
         })
     } else {
+	console.log("DEBUG: THIS SHOULD NEVER HAPPEN")
         await BotConfig.create({ ...query,
 				 'token': token })
     }

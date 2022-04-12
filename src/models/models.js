@@ -29,6 +29,26 @@ const botConfig = sequelize.define('botConfig', {
     ]
 });
 
+const groupFilters = sequelize.define('groupFilters', {
+    groupId:{ type: Sequelize.STRING },
+    botId: { type: Sequelize.STRING },
+    type: { type: Sequelize.STRING },
+    op: { type: Sequelize.STRING },
+    value: { type: Sequelize.STRING }
+},
+{
+    indexes: [
+	{
+	    unique: true,
+	    fields: [ 'groupId', 'botId' ]
+	},
+	{
+	    unique: false,
+	    fields: [ 'groupId','token','type' ]
+	}
+    ]
+});
+
 // Model for Aha Change coelescing
 const changesModel = sequelize.define('changesModel', {
     ahaType:{
@@ -49,5 +69,6 @@ const changesModel = sequelize.define('changesModel', {
     ]
 });
 
-exports.BotConfig = botConfig;
+exports.BotConfig    = botConfig;
 exports.ChangesModel = changesModel;
+exports.GroupFilters = groupFilters;

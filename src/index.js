@@ -5,6 +5,7 @@ let   Queue         = require('bull');
 const crypto        = require('crypto');
 
 const { BotConfig }    = require('./models/botConfig');
+const { GroupFilters } = require('./models/groupFilters');
 const { ChangesModel } = require('./models/changesModel')
 const { botHandler }   = require('./handlers/botHandler');
 const { ahaOAuthHandler, ahaWebhookHandler } = require('./handlers/ahaHandler');
@@ -20,7 +21,8 @@ const botOptions = {
     botRoute: '/bot', // optional
     models: { // optional
         BotConfig,
-        ChangesModel
+        ChangesModel,
+	GroupFilters
     }
 }
 

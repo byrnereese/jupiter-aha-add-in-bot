@@ -19,28 +19,43 @@
             "type": "ActionSet",
             "actions": [
                 {
-                    "type": "Action.OpenUrl",
-                    "url": "${loginUrl}",
+                    "type": "Action.Submit",
+                    "title": "Connect to Aha!",
                     "style": "positive",
-                    "title": "Connect to Aha!"
+		    "data": {
+			"actionType": "auth",
+			"botId": "${botId}",
+			"groupId": "${groupId}",
+			"aha_domain": "${ahaDomain}"
+		    }
                 },
                 {
                     "type": "Action.Submit",
-                    "title": "Connect to Aha! (w/domain)",
-                    "style": "positive"
+                    "title": "Help you setup Aha!",
+		    "data": {
+			"actionType": "select_workspace",
+			"botId": "${botId}",
+			"groupId": "${groupId}"
+		    }
                 },
                 {
                     "type": "Action.Submit",
-                    "title": "Help you setup Aha!"
-                },
-                {
-                    "type": "Action.Submit",
-                    "title": "Setup an incoming event filter"
+                    "title": "Setup an incoming event filter",
+                    "data": {
+                        "actionType": "select_filter_type",
+                        "botId": "${botId}",
+                        "groupId": "${groupId}"
+                    }
                 },
                 {
                     "type": "Action.Submit",
                     "title": "Disconnect from Aha!",
-                    "style": "destructive"
+                    "style": "destructive",
+        		    "data": {
+            			"actionType": "disconnect",
+            			"botId": "${botId}",
+            			"groupId": "${groupId}"
+        		    }
                 }
             ]
         }

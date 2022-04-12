@@ -24,6 +24,8 @@ const handleBotJoiningGroup = async event => {
     const { bot, group } = event
     const template = new Template(gettingStartedCardTemplate);
     const cardData = {
+	botId: bot.id,
+	groupId: event.group.id
     };
     const card = template.expand({
         $root: cardData
@@ -39,30 +41,25 @@ const handleBotReceivedMessage = async event => {
             'botId': bot.id, 'groupId': group.id
         }
     })
-    if (!botConfig.aha_domain || botConfig.aha_domain == "") {
+    if (botConfig && (!botConfig.aha_domain || botConfig.aha_domain == "")) {
         await bot.sendMessage(group.id, { text: `The bot has been updated. You will need to reauthenticate. Please type the command "goodbye" and then "hello" to reauthenticate to Aha.` })
 	return
     }
 	
     if (text === "help") {
 	const template = new Template(helpCardTemplate);
-	const cardData = { };
+	const cardData = {
+	    'botId': bot.id,
+	    'groupId': group.id,
+	    'ahaDomain': botConfig.aha_domain
+	};
 	const card = template.expand({ $root: cardData });
 	console.log("DEBUG: posting help card:", card)
 	await bot.sendAdaptiveCard( group.id, card);
         return
-    }
-
-    let token = botConfig ? botConfig.token : undefined
-    if (text === 'hello') {
-        if (token) {
-            await bot.sendMessage(group.id, { text: `It appears you already have an active connection to Aha in this team.` })
-        } else {
-            await handleBotJoiningGroup(event)
-        }
-
     } else if (text === 'goodbye') {
-        if (token) {
+	// this is duplicated, other copy is in interactiveMessageHandler, consolidate
+        if (botConfig) {
 	    console.log("DEBUG: destroying tokens in database")
 	    await botConfig.destroy()
             await bot.sendMessage(group.id, {
@@ -72,6 +69,16 @@ const handleBotReceivedMessage = async event => {
             await bot.sendMessage(group.id, {
 		text: `It does not appear you have a current connection to Aha in this team. Say "hello" to me and we can get started.`
 	    })
+        }
+	return
+    }
+
+    let token = botConfig ? botConfig.token : undefined
+    if (text === 'hello') {
+        if (token) {
+            await bot.sendMessage(group.id, { text: `It appears you already have an active connection to Aha in this team.` })
+        } else {
+            await handleBotJoiningGroup(event)
         }
 
     } else if (text.startsWith("subscribe")) {
