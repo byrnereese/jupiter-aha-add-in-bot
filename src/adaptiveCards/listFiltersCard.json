@@ -12,6 +12,12 @@
         },
         {
             "type": "TextBlock",
+            "text": "THESE ARE NOT ACTIVE YET, BUT WILL BE SOON.",
+            "wrap": true,
+            "weight": "Bolder"
+        },
+        {
+            "type": "TextBlock",
             "text": "Here are the filters you currently have setup. ",
             "wrap": true
         },

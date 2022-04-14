@@ -2,7 +2,6 @@ const { BotConfig, ChangesModel } = require('./models/models')
 const { AllHtmlEntities }         = require('html-entities')
 const { Template }                = require('adaptivecards-templating')
 const { getAhaClient }            = require('./lib/aha');
-//const RC                          = require('@ringcentral/sdk').SDK
 const Bot                         = require('ringcentral-chatbot-core/dist/models/Bot').default;
 const turnDownService             = require('turndown');
 let   throng                      = require('throng');
@@ -12,7 +11,7 @@ const entities                    = new AllHtmlEntities();
 const turnDown                    = new turnDownService();
 
 const cardUpdateTemplate          = require('./adaptiveCards/ahaUpdateCard.json');
-const cardIdeaTemplate            = require('./adaptiveCards/newIdeaCard.json');
+const newIdeaCardTemplate         = require('./adaptiveCards/newIdeaCard.json');
 
 let REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
@@ -189,17 +188,14 @@ function start() {
 	
 	// initialize job with bot and aha client
 	const bot = await Bot.findByPk( job.data.bot_id )
-
+	/*
 	const rcsdk = new RC({
 	    clientId: process.env.RINGCENTRAL_CHATBOT_CLIENT_ID,
 	    clientSecret: process.env.RINGCENTRAL_CHATBOT_CLIENT_SECRET,
 	    server: process.env.RINGCENTRAL_SERVER,
 	});
 	var platform = rcsdk.platform();
-	
-
-
-	//const group = await 
+	*/
 	const botConfig = await BotConfig.findOne({
 	    where: {
 		botId: job.data.bot_id, groupId: job.data.group_id
@@ -237,7 +233,8 @@ function start() {
 			console.log("WORKER: loaded workflows", workflows)
 			cardData['workflows'] = get_workflows(workflows.workflows, "Product idea workflow" )
 			console.log("WORKER: finished loading all idea metadata")
-			return postMessage( bot, job.data.group_id, cardIdeaTemplate, cardData )
+			
+			return postMessage( bot, job.data.group_id, newIdeaCardTemplate, cardData )
 		    }).then( function() {
 			completeJob(job)
 		    })
