@@ -22,16 +22,20 @@ const botHandler = async event => {
 const handleBotJoiningGroup = async event => {
     console.log("DEBUG: received BotJoinGroup event: ", event)
     const { bot, group } = event
-    const template = new Template(gettingStartedCardTemplate);
-    const cardData = {
-	botId: bot.id,
-	groupId: event.group.id
-    };
-    const card = template.expand({
-        $root: cardData
-    });
-    console.log("DEBUG: posting card:", card)
-    await bot.sendAdaptiveCard( group.id, card);
+    if (group.type != "Everyone") {
+	const template = new Template(gettingStartedCardTemplate);
+	const cardData = {
+	    botId: bot.id,
+	    groupId: event.group.id
+	};
+	const card = template.expand({
+            $root: cardData
+	});
+	console.log("DEBUG: posting card:", card)
+	await bot.sendAdaptiveCard( group.id, card);
+    } else {
+	console.log("Skipping Everyone group")
+    }
 }
 
 const handleBotReceivedMessage = async event => {

@@ -1,0 +1,116 @@
+{
+    "type": "AdaptiveCard",
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.5",
+    "body": [
+        {
+            "type": "TextBlock",
+            "text": "Your filters",
+            "wrap": true,
+            "size": "ExtraLarge",
+            "weight": "Bolder"
+        },
+        {
+            "type": "TextBlock",
+            "text": "Here are the filters you currently have setup. ",
+            "wrap": true
+        },
+        {
+            "type": "Container",
+            "items": [
+                {
+                    "$data": "${filters}",
+                    "type": "ColumnSet",
+                    "columns": [
+                        {
+                            "type": "Column",
+                            "width": "stretch",
+                            "items": [
+                                {
+                                    "type": "TextBlock",
+                                    "text": "${type}",
+                                    "wrap": true
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Column",
+                            "width": "stretch",
+                            "items": [
+                                {
+                                    "type": "TextBlock",
+                                    "wrap": true,
+                                    "text": "${field}\n${op}\n\"${value}\""
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Column",
+                            "width": "stretch",
+                            "items": [
+                                {
+                                    "type": "ActionSet",
+                                    "actions": [
+                                        {
+                                            "type": "Action.Submit",
+                                            "title": "Edit",
+                                            "data": {
+                                                "filterId": "${id}",
+                                                "filter_type": "${type}",
+                                                "actionType": "set_filter",
+                                                "botId": "${botId}",
+                                                "groupId": "${groupId}"
+                                            }
+                                        },
+                                        {
+                                            "type": "Action.Submit",
+                                            "title": "Delete",
+                                            "data": {
+                                                "filterId": "${id}",
+                                                "actionType": "delete_filter",
+                                                "botId": "${botId}",
+                                                "groupId": "${groupId}"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ColumnSet",
+            "columns": [
+                {
+                    "type": "Column",
+                    "width": "auto",
+                    "items": [
+                        {
+                            "type": "Image",
+                            "url": "https://raw.githubusercontent.com/ringcentral/github-notification-app/main/icons_v2/feedback.png",
+                            "size": "Small",
+                            "style": "Person",
+                            "width": "16px"
+                        }
+                    ]
+                },
+                {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                        {
+                            "type": "TextBlock",
+                            "text": "[Improve this add-in: report bugs and feature requests](https://docs.google.com/forms/d/e/1FAIpQLSfCwi9bUT0WJW3Ug8umbNyd8NnmAZiVIcOHwXto6B9syKTnjA/viewform?usp=pp_url&entry.492712114=Aha!+Add-in)",
+                            "weight": "Lighter",
+                            "wrap": true,
+                            "size": "Small",
+                            "spacing": "None"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

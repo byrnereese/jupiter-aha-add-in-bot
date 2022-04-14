@@ -19,12 +19,9 @@
             "type": "Input.ChoiceSet",
             "choices": [
                 {
-                    "title": "Idea",
-                    "value": "ideas"
-                },
-                {
-                    "title": "Feature",
-                    "value": "feature"
+                    "$data": "${objects}", 
+                    "title": "${label}",
+                    "value": "${id}"
                 }
             ],
             "placeholder": "Select Aha object type",

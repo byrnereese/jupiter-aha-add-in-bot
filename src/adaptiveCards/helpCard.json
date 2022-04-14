@@ -49,6 +49,15 @@
                 },
                 {
                     "type": "Action.Submit",
+                    "title": "List event filters",
+                    "data": {
+                        "actionType": "list_filters",
+                        "botId": "${botId}",
+                        "groupId": "${groupId}"
+                    }
+                },
+                {
+                    "type": "Action.Submit",
                     "title": "Disconnect from Aha!",
                     "style": "destructive",
         		    "data": {

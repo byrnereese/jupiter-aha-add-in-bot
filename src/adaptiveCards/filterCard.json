@@ -5,7 +5,7 @@
     "body": [
         {
             "type": "TextBlock",
-            "text": "Setup a ${filterType} filter",
+            "text": "Setup a ${filter.type} filter",
             "wrap": true,
             "size": "ExtraLarge",
             "weight": "Bolder"
@@ -14,25 +14,49 @@
             "type": "Input.ChoiceSet",
             "choices": [
                 {
-                    "title": "Product category",
-                    "value": "category"
+                    "$data": "${fields}", 
+                    "title": "${label}",
+                    "value": "${id}"
                 }
             ],
-            "placeholder": "Select idea field",
+            "placeholder": "Select ${filter.type} field",
             "label": "What field do you want to filter by?",
             "isRequired": true,
-            "errorMessage": "Please select the object type you want to create a filter for.",
-            "id": "filter_type"
+            "errorMessage": "Please select the field to filter for.",
+            "id": "filter_field",
+            "value": "${filter.field}"
+        },
+        {
+            "type": "Input.ChoiceSet",
+            "choices": [
+                { "title": "equals",            "value": "eq" }
+                ,{ "title": "not equals",       "value": "ne" }
+                ,{ "title": "contains",         "value": "contains" }
+                ,{ "title": "does not contain", "value": "not_contains" }
+            ],
+            "placeholder": "Select operation",
+            "isRequired": true,
+            "errorMessage": "Please select an operation.",
+            "id": "filter_op",
+	    "value": "${filter.op}"
+        },
+        {
+            "type": "Input.Text",
+            "id": "filter_value",
+            "placeholder": "Value",
+            "spacing": "None",
+	    "value": "${filter.value}"
         },
         {
             "type": "ActionSet",
             "actions": [
                 {
                     "type": "Action.Submit",
-                    "title": "Create filter",
+                    "title": "Create/update filter",
                     "style": "positive",
                     "data": {
-                        "actionType": "set_filter",
+                        "actionType": "save_filter",
+                        "filter_type": "${filter.type}",
                         "botId": "${botId}",
                         "groupId": "${groupId}"
                     }
