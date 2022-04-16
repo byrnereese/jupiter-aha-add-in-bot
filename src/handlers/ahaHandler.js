@@ -151,7 +151,7 @@ const processAhaFilter = async ( botId, groupId, audit ) => {
 		console.log("Done processing filters.")
 		resolve( sendMessage )
 	    } else {
-		console.log("No filters found.")
+		//console.log("No filters found.")
 		// Resolve as true because with no filters in place, everything will
 		// result in a message being sent.
 		resolve( true )

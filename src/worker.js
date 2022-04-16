@@ -227,9 +227,10 @@ function start() {
 		    ahaType: job.data.audit.auditable_type
 		}
 		switch (job.data.aha_type) {
+		case 'ideas/idea_comment': 
 		case 'comment': {
 		    if (job.data.audit.associated_type == "ideas/idea") {
-			console.log("WORKER: processing new private idea comment job")
+			console.log("WORKER: processing new idea comment job")
 			const commentId = job.data.audit.auditable_id
 			const ideaId = job.data.audit.associated_id
 			loadComment( aha, commentId ).then( comment => {
@@ -249,10 +250,6 @@ function start() {
 		    } else {
 			console.log(`WORKER: Unknown associated type for comment: ${job.data.audit.associated_type}`)
 		    }
-		    break;
-		}
-		case 'ideas/idea_comment': {
-		    console.log("WORKER: processing new idea comment job")
 		    break;
 		}
 		case 'ideas/idea': {

@@ -17,7 +17,7 @@
         "@bull-board/express": "^3.8.1",
         "adaptive-expressions": "^4.15.0",
         "adaptivecards-templating": "^2.2.0",
-        "aha-io": "github:byrnereese/node-ahaio#00549ebefbb0030d26cbc1d902ab779d8430c06f",
+        "aha-io": "github:byrnereese/node-ahaio#fc0139e1851db60eb9336697a9c9f094ead1b6c6",
         "aha-io-oauth": "0.0.3",
         "axios": "^0.24.0",
         "bull": "^3.7.0",
