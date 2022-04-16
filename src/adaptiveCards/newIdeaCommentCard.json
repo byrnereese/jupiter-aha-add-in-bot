@@ -1,0 +1,149 @@
+{
+    "type": "AdaptiveCard",
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.5",
+    "body": [
+        {
+            "type": "TextBlock",
+            "size": "Medium",
+            "weight": "Bolder",
+            "text": "New private comment on: ${idea.name}"
+        },
+        {
+            "type": "ColumnSet",
+            "columns": [
+                {
+                    "type": "Column",
+                    "items": [
+                        {
+                            "type": "Image",
+                            "style": "Person",
+                            "url": "${idea.created_by_user.avatar_url}",
+                            "size": "Small"
+                        }
+                    ],
+                    "width": "auto"
+                },
+                {
+                    "type": "Column",
+                    "items": [
+                        {
+                            "type": "TextBlock",
+                            "text": "${comment.user.name}",
+                            "wrap": true,
+                            "weight": "Bolder"
+                        },
+                        {
+                            "type": "TextBlock",
+                            "text": "${comment.user.email}\n",
+                            "wrap": true,
+                            "size": "Small"
+                        },
+                        {
+                            "type": "TextBlock",
+                            "spacing": "None",
+                            "text": "Created ${comment.created_at_fmt}",
+                            "isSubtle": true,
+                            "wrap": true,
+                            "size": "Small"
+                        }
+                    ],
+                    "width": "stretch"
+                }
+            ]
+        },
+        {
+            "type": "TextBlock",
+            "text": "${comment.body_nohtml}",
+            "wrap": true
+        },
+        {
+            "type": "ActionSet",
+            "actions": [
+                {
+                    "type": "Action.OpenUrl",
+                    "title": "View in Aha!",
+                    "url": "${comment.url}"
+                },
+                {
+                    "type": "Action.ShowCard",
+                    "title": "Reply to comment",
+                    "card": {
+                        "type": "AdaptiveCard",
+                        "body": [
+                            {
+                                "id": "comment_text",
+                                "type": "Input.Text",
+                                "placeholder": "Enter your comment",
+                                "isMultiline": true,
+                                "label": "Comment text"
+                            },
+                            {
+                                "id": "comment_privacy",
+                                "type": "Input.ChoiceSet",
+                                "choices": [
+                                    {
+                                        "title": "Public comment",
+                                        "value": "public"
+                                    },
+                                    {
+                                        "title": "Private comment",
+                                        "value": "private"
+                                    }
+                                ],
+                                "placeholder": "Select privacy level",
+                                "style": "expanded",
+                                "spacing": "Small",
+                                "value": "public"
+                            }
+                        ],
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+                                "title": "Post comment",
+                                "data": {
+                                    "actionType": "post_idea_comment",
+                                    "ideaId": "${ahaIdeaId}",
+                                    "botId": "${botId}",
+                                    "groupId": "${groupId}"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "type": "ColumnSet",
+            "columns": [
+                {
+                    "type": "Column",
+                    "width": "auto",
+                    "items": [
+                        {
+                            "type": "Image",
+                            "url": "https://github.com/ringcentral/github-notification-app/blob/main/icons/feedback-32.png?raw=true",
+                            "size": "Small",
+                            "style": "Person",
+                            "width": "16px"
+                        }
+                    ]
+                },
+                {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                        {
+                            "type": "TextBlock",
+                            "text": "[Improve this add-in: report bugs and feature requests](https://docs.google.com/forms/d/e/1FAIpQLSfCwi9bUT0WJW3Ug8umbNyd8NnmAZiVIcOHwXto6B9syKTnjA/viewform?usp=pp_url&entry.492712114=Aha!+Add-in)",
+                            "weight": "Lighter",
+                            "wrap": true,
+                            "size": "Small",
+                            "spacing": "None"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

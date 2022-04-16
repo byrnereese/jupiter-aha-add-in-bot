@@ -12,6 +12,7 @@ const turnDown                    = new turnDownService();
 
 const cardUpdateTemplate          = require('./adaptiveCards/ahaUpdateCard.json');
 const newIdeaCardTemplate         = require('./adaptiveCards/newIdeaCard.json');
+const newIdeaCommentCardTemplate  = require('./adaptiveCards/newIdeaCommentCard.json');
 
 let REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
@@ -26,6 +27,20 @@ let IGNORE_FIELDS = new RegExp('(Created by user|Rank|Assigned to user|Show feat
 // responses it can be much higher. If each job is CPU-intensive, it might need
 // to be much lower.
 let maxJobsPerWorker = 50;
+
+const loadComment = ( aha, commentId ) => {
+    console.log(`WORKER: loading private comment ${commentId}`)
+    const promise = new Promise( (resolve, reject) => {
+        aha.comment.get(commentId, function (err, data, response) {
+	    console.log("comment=",data.comment)
+	    let desc = turnDown.turndown( data.comment.body )
+	    data.comment["body_nohtml"] = desc
+            resolve( data )
+        })
+    })
+    console.log("WORKER: returning from loadComment")
+    return promise
+}
 
 const loadIdea = ( aha, ideaId ) => {
     console.log(`WORKER: loading idea ${ideaId}`)
@@ -177,25 +192,24 @@ const aggregateChanges = ( accumulated_changes ) => {
     return promise
 }
 
+/*
+const processNewIdea = async ( aha, cardData ) => {
+    const promise = new Promise( (resolve, reject) => {
+	
+    })
+    return promise
+}
+*/
+
 function start() {
     // Connect to the named work queue
     console.log("WORKER: Starting up worker. Waiting for a job.")
     let workQueue = new Queue('work', REDIS_URL);
-
     workQueue.process(maxJobsPerWorker, async (job) => {
 	console.log(`WORKER: processing ${job.data.action} job: ${job.id}`)
 	console.log("WORKER: ", job.data)
-	
 	// initialize job with bot and aha client
 	const bot = await Bot.findByPk( job.data.bot_id )
-	/*
-	const rcsdk = new RC({
-	    clientId: process.env.RINGCENTRAL_CHATBOT_CLIENT_ID,
-	    clientSecret: process.env.RINGCENTRAL_CHATBOT_CLIENT_SECRET,
-	    server: process.env.RINGCENTRAL_SERVER,
-	});
-	var platform = rcsdk.platform();
-	*/
 	const botConfig = await BotConfig.findOne({
 	    where: {
 		botId: job.data.bot_id, groupId: job.data.group_id
@@ -205,24 +219,54 @@ function start() {
 	let aha = getAhaClient(token, botConfig.aha_domain)
 	try {
 	    if (job.data.action == 'create') {
-		if (job.data.aha_type == 'ideas/idea') {
+		let cardData = {
+		    botId: job.data.bot_id,
+		    groupId: job.data.group_id,
+		    ahaId: job.data.audit.auditable_id,
+		    ahaUrl: job.data.audit.auditable_url,
+		    ahaType: job.data.audit.auditable_type
+		}
+		switch (job.data.aha_type) {
+		case 'comment': {
+		    if (job.data.audit.associated_type == "ideas/idea") {
+			console.log("WORKER: processing new private idea comment job")
+			const commentId = job.data.audit.auditable_id
+			const ideaId = job.data.audit.associated_id
+			loadComment( aha, commentId ).then( comment => {
+			    comment.comment.created_at_fmt = new Date( comment.comment.created_at ).toDateString()
+			    console.log("WORKER: loaded comment", comment)
+			    cardData['commentId'] = commentId
+			    cardData['comment'] = comment.comment
+			    return loadIdea( aha, ideaId )
+			}).then( idea => {
+			    cardData['idea'] = idea.idea
+			    //cardData['ideaId'] = ideaId
+			    cardData['ahaIdeaId'] = ideaId
+			    return postMessage( bot, job.data.group_id, newIdeaCommentCardTemplate, cardData )
+			}).then( function() {
+			    completeJob(job)
+			})
+		    } else {
+			console.log(`WORKER: Unknown associated type for comment: ${job.data.audit.associated_type}`)
+		    }
+		    break;
+		}
+		case 'ideas/idea_comment': {
+		    console.log("WORKER: processing new idea comment job")
+		    break;
+		}
+		case 'ideas/idea': {
 		    console.log("WORKER: processing new idea job")
 		    const ideaId = job.data.audit.auditable_url.substring( job.data.audit.auditable_url.lastIndexOf('/') + 1 )
-		    
-		    console.log(`WORKER: aha client initialized, getting ${ideaId}`)
-		    const cardData = {
-			botId: job.data.bot_id,
-			groupId: job.data.group_id,
-			ahaId: job.data.audit.auditable_id,
-			ahaUrl: job.data.audit.auditable_url,
-			ahaType: job.data.audit.auditable_type,
-			ahaIdeaId: ideaId
-		    }
-		    
+		    cardData['ahaIdeaId'] = ideaId
 		    loadIdea( aha, ideaId ).then( idea => {
-			idea.idea.created_at_fmt = new Date( idea.idea.created_at ).toDateString()
 			console.log("WORKER: loaded idea", idea)
+			idea.idea.created_at_fmt = new Date( idea.idea.created_at ).toDateString()
+			if (!idea.idea.created_by) {
+			    idea.idea.created_by = idea.idea.user
+			}
 			cardData['idea'] = idea.idea
+			// TODO - allow pre-selection of multiple categories
 			cardData['selectedCategory'] = idea.idea.categories[0].id
 			return loadIdeaCategories( aha, idea.idea.product.reference_prefix )
 		    }).then( categories => {
@@ -238,13 +282,14 @@ function start() {
 		    }).then( function() {
 			completeJob(job)
 		    })
-		    
-		} else {
+		    break;
+		}
+		default: {
 		    // TODO - error condition
 		    console.log(`WORKER: create job failed, unknown auditable_type = ${job.data.aha_type}`)
 		    job.moveToFailed({ message: "Unknown Aha object type." })
 		}
-		
+		}
 	    } else if (job.data.action == 'update') {
 
 		console.log("WORKER: processing updates to an object")
