@@ -40,6 +40,13 @@ const handleSetFilterAction = (submitData, cardData) => {
 	let template = new Template(filterCardTemplate);
 	let fields = ahaFieldMapping[ submitData.filter_type ]['fields']
 	cardData['fields'] = fields
+	cardData['operations'] = [
+            { "label": "equals",            "opcode": "eq" }
+            ,{ "label": "not equals",       "opcode": "ne" }
+            ,{ "label": "contains",         "opcode": "contains" }
+            ,{ "label": "does not contain", "opcode": "not_contains" }
+	];
+	    
 	GroupFilters.findOne({
             where: { 'botId': submitData.botId, 'groupId': submitData.groupId, 'type': submitData.filter_type },
 	    raw: true
@@ -152,8 +159,10 @@ const handleSetupSubscriptionAction = (config, submitData, cardData) => {
     const promise = new Promise( (resolve, reject) => {
 	console.log(`MESSAGING: facilitating subscription process for ${submitData.product}`)
 	let hookQs = `groupId=${cardData.groupId}&botId=${cardData.botId}`
+	//console.log(`MESSAGING: encoding querystring: ${hookQs}`)
 	let buff = new Buffer(hookQs)
 	let buffe = buff.toString('base64')
+	//console.log(`MESSAGING: encoded querystring is ${buffe}`)
         let hookUrl = `${process.env.RINGCENTRAL_CHATBOT_SERVER}/aha/webhook/${buffe}`
 	cardData['hookUrl'] = hookUrl
 	cardData['ahaUrl'] = `https://${config.aha_domain}.aha.io/settings/projects/${submitData.product}/integrations/new`

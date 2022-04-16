@@ -2,7 +2,7 @@ const Aha          = require('aha-io')
 const ClientOAuth2 = require('client-oauth2');
 
 const ahaFieldMapping = {
-    'ideas': {
+    'ideas/idea': {
 	'label': 'Ideas',
 	'fields': [
 	    { 'id': 'name', 'label': 'Name' },

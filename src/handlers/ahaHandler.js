@@ -1,11 +1,14 @@
-const { BotConfig, ChangesModel }   = require('../models/models')
-const { getAhaClient, getAhaOAuth } = require('../lib/aha')
+const { BotConfig, ChangesModel, GroupFilters }
+                                    = require('../models/models')
+const { getAhaClient, getAhaOAuth, ahaFieldMapping }
+                                    = require('../lib/aha')
 const { loadProducts }              = require('../lib/aha-async')
 const Bot                           = require('ringcentral-chatbot-core/dist/models/Bot').default;
 let   Queue                         = require('bull');
 const querystring                   = require('querystring');
 const { Template }                  = require('adaptivecards-templating');
 const setupSubscriptionCardTemplate = require('../adaptiveCards/setupSubscriptionCard.json');
+const { Op }                        = require("sequelize");
 
 let REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 let JOB_DELAY = process.env.AGGREGATION_DELAY || 1000;
@@ -64,13 +67,108 @@ const ahaOAuthHandler = async (req, res) => {
 
 const getLastPathItem = thePath => thePath.substring(thePath.lastIndexOf('/') + 1)
 
+const evaluateFilter = ( audit, filter ) => {
+    console.log( `Evaluating ${audit.auditable_id} for filter: ${filter.field} ${filter.op} ${filter.value}` )
+    //console.log( `Is ${filter.type} valid?` )
+    let objDef = ahaFieldMapping[ filter.type ]
+    if (objDef) { // fieldDef contains the field 
+	//console.log( `Found filterType ${filter.type}` )
+	//console.log( `Looking for field.fields.id === ${filter.field}` )
+	let fieldDef = objDef.fields.filter( function(elem) {
+	    //console.log( `Does ${elem.id} == ${filter.field}`)
+	    return (elem.id == filter.field)
+	})[0]; // fix this if you ever need to match multiple fields, unlikely
+	if (fieldDef) {
+	    console.log("Field def found: ", fieldDef)
+	    let matchedField = audit.changes.filter( function(elem) {
+		//console.log( `Does ${elem.field_name} == ${fieldDef.label}`)
+		return (elem.field_name === fieldDef.label)
+	    })[0]
+	    if (matchedField) {
+		console.log("Matched field: ", matchedField)
+		// Now you need to evaluate the operation
+		console.log(`Evaluating "${filter.op}" op` )
+		switch (filter.op) {
+		case 'eq': {
+		    if (matchedField.value == filter.value) {
+			console.log(`Does ${matchedField.value} EQUAL ${filter.value}? Yes.` )
+			return true
+		    }
+		    break
+		}
+		case 'ne': {
+		    if (matchedField.value != filter.value) {
+			console.log(`Does ${matchedField.value} NOT EQUAL ${filter.value}? Yes.` )
+			return true
+		    }
+		    break;
+		}
+		case 'contains': {
+		    var re = new RegExp(filter.value, 'i');
+		    if (matchedField.value.match(re)) {
+			console.log(`Does ${matchedField.value} CONTAIN ${filter.value}? Yes.` )
+			return true
+		    }
+		    break;
+		}
+		case 'not_contains': {
+		    var re = new RegExp(filter.value, 'i');
+		    if (!matchedField.value.match(re)) {
+			console.log(`Does ${matchedField.value} NOT CONTAIN ${filter.value}? Yes.` )
+			return true
+		    }
+		    break;
+		}
+		default: {
+		    console.log(`UNKNOWN filter op: ${filter.op}` )
+		}
+		}
+		return false;
+	    }
+	}
+    } else {
+	console.log( "Invalid filter type" )
+    }
+    return true
+}
+
+const processAhaFilter = async ( botId, groupId, audit ) => {
+    const promise = new Promise( (resolve, reject) => {
+	let where = { 'botId': { [Op.eq]: parseInt(botId) },
+		      'groupId': { [Op.eq]: parseInt(groupId) },
+		      'type': audit.auditable_type }
+	console.log("Looking for filters that match: ", where)
+	let sendMessage = false
+	GroupFilters.findAll( { 'where': where }, { 'raw': true } ).then( (filters) => {
+	    if (filters && filters.length > 0) {
+		for (const filter of filters) {
+		    console.log("Processing filter: ", filter )
+		    if ( evaluateFilter( audit, filter ) ) {
+			console.log("Returned from evaluateFilter as true.")
+			sendMessage = true
+		    }
+		}
+		console.log("Done processing filters.")
+		resolve( sendMessage )
+	    } else {
+		console.log("No filters found.")
+		// Resolve as true because with no filters in place, everything will
+		// result in a message being sent.
+		resolve( true )
+	    }
+	}).catch( (err) => {
+	    console.log(`Error in processAhaFilter: ${err}`)
+	});
+    })
+    return promise
+}
+
 const ahaWebhookHandler = async (req, res) => {
     let { webhookStr } = req.params;
     console.log('The encoded string is: ' + webhookStr);
     let buff = new Buffer(webhookStr, 'base64');
     let qs = buff.toString('ascii');
     const { groupId, botId } = querystring.parse(qs)
-    //console.log(`groupId=${groupId} and botId=${botId}`)
     if (typeof groupId === "undefined" || typeof botId === "undefined") {
         console.log("Received a webhook but the group and bot IDs were empty. Something is wrong.")
         // TODO - communicate this to the user so they can fix. 
@@ -89,59 +187,68 @@ const ahaWebhookHandler = async (req, res) => {
     const bot = await Bot.findByPk(botId)
     if (bot) {
         if (audit.interesting) {
-	    let jobId = `${audit.audit_action}:${audit.auditable_id}:${audit.auditable_type}`;
-
-	    if (audit.audit_action == "update") {
-		// Aha is a really noisy webhook engine, sending lots of individual webhooks for
-		// changes related to a single feature.
-		// Our strategy is to create a background job that is delayed by n minutes. That
-		// job will aggregate all the changes related to the same aha entity and post a
-		// single card for those changes.
-		
-		// Step 1. Store the received change in the database.
-		console.log(`Storing changes for ${audit.auditable_type}, id: ${audit.auditable_id}`)
-		let c = await ChangesModel.create({
-		    'ahaType' : audit.auditable_type,
-		    'ahaId'   : audit.auditable_id,
-		    'data'    : webhook_data
-		});
-		
-		// Step 2. Create a job if one does not already exist.
-		let job = await workQueue.getJob(jobId);
-		if (!job) {
-		    console.log(`Creating job with delay of ${JOB_DELAY}ms: ${jobId}`);
-		    job = await workQueue.add({
-			'group_id' : groupId,
-			'bot_id'   : botId,
-			'action'   : audit.audit_action,
-			'aha_id'   : audit.auditable_id,
-			'aha_type' : audit.auditable_type
-		    },{
-			'jobId'           : jobId,
-			'delay'           : JOB_DELAY,
-			'removeOnComplete': true
-		    });
-		    console.log(`Job created: ${job.id}`);
+	    processAhaFilter( botId, groupId, audit ).then( (sendMessage) => {
+		if (sendMessage) {
+		    console.log("No filters found, or filters present and match found. Message will be sent.")
+		    let jobId = `${audit.audit_action}:${audit.auditable_id}:${audit.auditable_type}`;
+		    if (audit.audit_action == "update") {
+			// Aha is a really noisy webhook engine, sending lots of individual webhooks for
+			// changes related to a single feature.
+			// Our strategy is to create a background job that is delayed by n minutes. That
+			// job will aggregate all the changes related to the same aha entity and post a
+			// single card for those changes.
+			
+			// Step 1. Store the received change in the database.
+			console.log(`Storing changes for ${audit.auditable_type}, id: ${audit.auditable_id}`)
+			ChangesModel.create({
+			    'ahaType' : audit.auditable_type,
+			    'ahaId'   : audit.auditable_id,
+			    'data'    : webhook_data
+			}).then( (c) => {
+			    // Step 2. Create a job if one does not already exist.
+			    workQueue.getJob(jobId).then( (job) => {
+				if (!job) {
+				    console.log(`Creating job with delay of ${JOB_DELAY}ms: ${jobId}`);
+				    workQueue.add({
+					'group_id' : groupId,
+					'bot_id'   : botId,
+					'action'   : audit.audit_action,
+					'aha_id'   : audit.auditable_id,
+					'aha_type' : audit.auditable_type
+				    },{
+					'jobId'           : jobId,
+					'delay'           : JOB_DELAY,
+					'removeOnComplete': true
+				    }).then( (job) => {
+					console.log(`Job created: ${job.id}`);
+				    })
+				} else {
+				    console.log(`Job already exists: ${job.id}. Skipping job creation.`);
+				}
+			    })
+			})
+			
+		    } else if (audit.audit_action == "create") {
+			console.log("WORKER: create action triggered. creating job...");
+			workQueue.add({
+			    'group_id' : groupId,
+			    'bot_id'   : botId,
+			    'action'   : audit.audit_action,
+			    'aha_id'   : audit.auditable_id,
+			    'aha_type' : audit.auditable_type,
+			    'audit'    : audit
+			},{
+			    'jobId'           : jobId,
+			    'removeOnComplete': true
+			}).then( (job) => {
+			    console.log(`Job created: ${job.id}`);
+			})
+		    }
 		} else {
-		    console.log(`Job already exists: ${job.id}. Skipping job creation.`);
+		    console.log("Webhook missed all filters. No message will be sent.");
 		}
-		
-	    } else if (audit.audit_action == "create") {
-		console.log("WORKER: create action triggered. creating job...");
-		job = await workQueue.add({
-		    'group_id' : groupId,
-		    'bot_id'   : botId,
-		    'action'   : audit.audit_action,
-		    'aha_id'   : audit.auditable_id,
-		    'aha_type' : audit.auditable_type,
-		    'audit'    : audit
-		},{
-		    'jobId'           : jobId,
-		    'removeOnComplete': true
-		});
-		console.log(`Job created: ${job.id}`);
-	    }
-	    console.log("Finished processing activity webhook from Aha")
+		console.log("Finished processing activity webhook from Aha")
+	    })
         }
     }
 }

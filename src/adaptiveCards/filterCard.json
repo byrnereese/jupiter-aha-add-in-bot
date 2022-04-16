@@ -29,10 +29,11 @@
         {
             "type": "Input.ChoiceSet",
             "choices": [
-                { "title": "equals",            "value": "eq" }
-                ,{ "title": "not equals",       "value": "ne" }
-                ,{ "title": "contains",         "value": "contains" }
-                ,{ "title": "does not contain", "value": "not_contains" }
+                {
+		    "$data": "${operations}",
+		    "title": "${label}",
+		    "value": "${opcode}"
+		}
             ],
             "placeholder": "Select operation",
             "isRequired": true,
