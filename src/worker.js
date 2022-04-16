@@ -29,16 +29,41 @@ let IGNORE_FIELDS = new RegExp('(Created by user|Rank|Assigned to user|Show feat
 let maxJobsPerWorker = 50;
 
 const loadComment = ( aha, commentId ) => {
-    console.log(`WORKER: loading private comment ${commentId}`)
+    console.log(`WORKER: loading comment ${commentId}`)
     const promise = new Promise( (resolve, reject) => {
         aha.comment.get(commentId, function (err, data, response) {
-	    console.log("comment=",data.comment)
-	    let desc = turnDown.turndown( data.comment.body )
-	    data.comment["body_nohtml"] = desc
-            resolve( data )
+	    console.log(data)
+	    if (data && !data['error']) {
+		console.log("comment=",data.comment)
+		let desc = turnDown.turndown( data.comment.body )
+		data.comment["body_nohtml"] = desc
+		resolve( data )
+	    } else {
+		console.log(`WORKER: comment ${commentId} could not be found. Error: ${data['error']}`)
+	    }
         })
     })
     console.log("WORKER: returning from loadComment")
+    return promise
+}
+
+const loadPublicComment = ( aha, ideaId, commentId ) => {
+    console.log(`WORKER: loading public comment ${commentId} for idea ${ideaId}`)
+    const promise = new Promise( (resolve, reject) => {
+        aha.idea.getPublicComment(ideaId, commentId, function (err, data, response) {
+	    console.log(data)
+	    if (data && !data['error']) {
+		//console.log(data)
+		console.log("comment=",data.idea_comment)
+		let desc = turnDown.turndown( data.idea_comment.body )
+		data.idea_comment["body_nohtml"] = desc
+		resolve( data )
+	    } else {
+		console.log(`WORKER: comment ${commentId} could not be found. Error: ${data['error']}`)
+	    }
+        })
+    })
+    console.log("WORKER: returning from loadPublicComment")
     return promise
 }
 
@@ -211,9 +236,7 @@ function start() {
 	// initialize job with bot and aha client
 	const bot = await Bot.findByPk( job.data.bot_id )
 	const botConfig = await BotConfig.findOne({
-	    where: {
-		botId: job.data.bot_id, groupId: job.data.group_id
-	    }
+	    where: { botId: job.data.bot_id, groupId: job.data.group_id }
 	})
 	let token = botConfig ? botConfig.token : undefined
 	let aha = getAhaClient(token, botConfig.aha_domain)
@@ -227,10 +250,34 @@ function start() {
 		    ahaType: job.data.audit.auditable_type
 		}
 		switch (job.data.aha_type) {
-		case 'ideas/idea_comment': 
+		case 'ideas/idea_comment': {
+		    if (job.data.audit.associated_type == "ideas/idea") {
+			console.log("WORKER: processing new public idea comment job")
+			const commentId = job.data.audit.auditable_id
+			const ideaId = job.data.audit.associated_id
+			loadPublicComment( aha, ideaId, commentId ).then( comment => {
+			    comment.idea_comment.created_at_fmt = new Date( comment.idea_comment.created_at ).toDateString()
+			    console.log("WORKER: loaded comment", comment)
+			    cardData['commentId'] = commentId
+			    cardData['comment'] = comment.idea_comment
+			    cardData['comment']['user'] = comment.idea_comment.idea_commenter_user
+			    console.log(cardData)
+			    return loadIdea( aha, ideaId )
+			}).then( idea => {
+			    cardData['idea'] = idea.idea
+			    cardData['ahaIdeaId'] = ideaId
+			    return postMessage( bot, job.data.group_id, newIdeaCommentCardTemplate, cardData )
+			}).then( function() {
+			    completeJob(job)
+			})
+		    } else {
+			console.log(`WORKER: Unknown associated type for comment: ${job.data.audit.associated_type}`)
+		    }
+		    break;
+		}
 		case 'comment': {
 		    if (job.data.audit.associated_type == "ideas/idea") {
-			console.log("WORKER: processing new idea comment job")
+			console.log("WORKER: processing new private idea comment job")
 			const commentId = job.data.audit.auditable_id
 			const ideaId = job.data.audit.associated_id
 			loadComment( aha, commentId ).then( comment => {
@@ -241,7 +288,6 @@ function start() {
 			    return loadIdea( aha, ideaId )
 			}).then( idea => {
 			    cardData['idea'] = idea.idea
-			    //cardData['ideaId'] = ideaId
 			    cardData['ahaIdeaId'] = ideaId
 			    return postMessage( bot, job.data.group_id, newIdeaCommentCardTemplate, cardData )
 			}).then( function() {
