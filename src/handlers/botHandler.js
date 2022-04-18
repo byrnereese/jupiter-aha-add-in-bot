@@ -45,17 +45,13 @@ const handleBotReceivedMessage = async event => {
             'botId': bot.id, 'groupId': group.id
         }
     })
-    if (!botConfig || (botConfig && (!botConfig.aha_domain || botConfig.aha_domain == ""))) {
-        await bot.sendMessage(group.id, { text: `The bot has been updated. You will need to reauthenticate. Please type the command "goodbye" and then "hello" to reauthenticate to Aha.` })
-	return
-    }
-	
+
+    // all commands below should be executable, even if aha_domain is not set
     if (text === "help") {
 	const template = new Template(helpCardTemplate);
 	const cardData = {
 	    'botId': bot.id,
-	    'groupId': group.id,
-	    'ahaDomain': botConfig.aha_domain
+	    'groupId': group.id
 	};
 	const card = template.expand({ $root: cardData });
 	console.log("DEBUG: posting help card:", card)
@@ -79,6 +75,12 @@ const handleBotReceivedMessage = async event => {
 	return
     }
 
+    // all commands below require that the aha_domain field has been set. 
+    if (!botConfig || (botConfig && (!botConfig.aha_domain || botConfig.aha_domain == ""))) {
+        await bot.sendMessage(group.id, { text: `The bot has been updated. You will need to reauthenticate. Please type the command "goodbye" and then "hello" to reauthenticate to Aha.` })
+	return
+    }
+    
     let token = botConfig ? botConfig.token : undefined
     if (text === 'hello') {
         if (token) {

@@ -237,6 +237,21 @@ const interactiveMessageHandler = async req => {
 	})
 	break;
     }
+    case 'disconnect': {
+        if (botConfig) {
+	    console.log("DEBUG: destroying tokens in database")
+	    botConfig.destroy().then( () => {
+		bot.sendMessage(submitData.groupId, {
+		    text: `You have just unlinked your Aha account. Say "hello" to me, and we can start fresh.`
+		})
+	    })
+        } else {
+            bot.sendMessage(submitData.groupId, {
+		text: `It does not appear you have a current connection to Aha in this team. Say "hello" to me and we can get started.`
+	    })
+        }
+	break
+    }
     case 'select_filter_type': {
 	console.log(`MESSAGING: selecting a filter type`);
 	handleSelectFilterTypeAction( cardData ).then( card => {
@@ -276,20 +291,6 @@ const interactiveMessageHandler = async req => {
 	    bot.sendAdaptiveCard( submitData.groupId, card);
 	});
 	break;
-    }
-    case 'disconnect': {
-        if (botConfig) {
-	    console.log("DEBUG: destroying tokens in database")
-	    await botConfig.destroy()
-            await bot.sendMessage(submitData.groupId, {
-		text: `You have just unlinked your Aha account. Say "hello" to me, and we can start fresh.`
-	    })
-        } else {
-            await bot.sendMessage(submitData.groupId, {
-		text: `It does not appear you have a current connection to Aha in this team. Say "hello" to me and we can get started.`
-	    })
-        }
-	break
     }
     case 'select_workspace': {
 	let token = botConfig ? botConfig.token : undefined
