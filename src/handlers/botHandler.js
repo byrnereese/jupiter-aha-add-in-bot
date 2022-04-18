@@ -41,9 +41,7 @@ const handleBotJoiningGroup = async event => {
 const handleBotReceivedMessage = async event => {
     const { group, bot, text, userId } = event
     const botConfig = await BotConfig.findOne({
-        where: {
-            'botId': bot.id, 'groupId': group.id
-        }
+        where: { 'botId': bot.id, 'groupId': group.id }
     })
 
     // all commands below should be executable, even if aha_domain is not set
@@ -57,6 +55,12 @@ const handleBotReceivedMessage = async event => {
 	console.log("DEBUG: posting help card:", card)
 	await bot.sendAdaptiveCard( group.id, card);
         return
+    } else if (text === 'hello') {
+        if (botConfig && botConfig.token) {
+            await bot.sendMessage(group.id, { text: `It appears you already have an active connection to Aha in this team. To reconnect to Aha, say "goodbye" to me, then say "hello" again.` })
+        } else {
+            await handleBotJoiningGroup(event)
+        }
     } else if (text === 'goodbye') {
 	// this is duplicated, other copy is in interactiveMessageHandler, consolidate
         if (botConfig) {
@@ -82,14 +86,7 @@ const handleBotReceivedMessage = async event => {
     }
     
     let token = botConfig ? botConfig.token : undefined
-    if (text === 'hello') {
-        if (token) {
-            await bot.sendMessage(group.id, { text: `It appears you already have an active connection to Aha in this team.` })
-        } else {
-            await handleBotJoiningGroup(event)
-        }
-
-    } else if (text.startsWith("subscribe")) {
+    if (text.startsWith("subscribe")) {
         // TODO - persist in database that this group is subscribed to a product id
         if (token) {
             let found = text.match(/subscribe (.*)$/)
