@@ -207,7 +207,7 @@ const interactiveMessageHandler = async req => {
     if (submitData.actionType == "auth") {
 	if (!botConfig) {
 	    console.log("DEBUG: botConfig is not set. Initializing...")
-            await BotConfig.create({
+            botConfig = await BotConfig.create({
 		'botId': submitData.botId,
 		'groupId': submitData.groupId,
 		'aha_domain': submitData.aha_domain
