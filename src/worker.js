@@ -324,6 +324,7 @@ function start() {
 			    idea.idea.created_by = idea.idea.user
 			}
 			cardData['idea'] = idea.idea
+			console.log("idea: ", idea.idea)
 			// TODO - allow pre-selection of multiple categories
 			cardData['selectedCategory'] = idea.idea.categories[0].id
 			return loadIdeaCategories( aha, idea.idea.product.reference_prefix )
