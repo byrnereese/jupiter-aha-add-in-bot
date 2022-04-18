@@ -136,10 +136,12 @@ function get_workflows_by_name( workflows, name ) {
 }
 
 function get_workflows_from_same_family( workflows, status_id ) {
+    console.log(`Looking for workflow states in the same family as ${status_id}`)
     for (let i = 0; i < workflows.length; i++) {
 	let workflow = workflows[i]
 	for (let j = 0; j < workflow.workflow_statuses.length; j++) {
-	    if (workflow.workflow_statuses[j] == status_id) {
+	    let state = workflow.workflow_statuses[j]
+	    if (state.id == status_id) {
 		return workflow.workflow_statuses[j]
 	    }
 	}
