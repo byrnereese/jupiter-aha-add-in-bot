@@ -310,6 +310,8 @@ const interactiveMessageHandler = async req => {
     }
     case 'update_idea': {
 	// user updated an idea
+	let token = botConfig ? botConfig.token : undefined
+	let aha = getAhaClient(token, botConfig.aha_domain)
 	let update_data = {
 	    name: submitData.idea_name,
 	    description: submitData.idea_description,

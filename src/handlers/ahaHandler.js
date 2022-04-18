@@ -134,14 +134,11 @@ const evaluateFilter = ( audit, filter ) => {
 
 const processAhaFilter = async ( botId, groupId, audit ) => {
     const promise = new Promise( (resolve, reject) => {
-	/* This where clause may be necessary for sqlite
-	let where = { 'botId': { [Op.eq]: parseInt(botId) },
-		      'groupId': { [Op.eq]: parseInt(groupId) },
-		      'type': audit.auditable_type }
-	*/
-	let where = { 'botId': botId,
-		      'groupId': groupId,
-		      'type': audit.auditable_type }
+	// postgres types these as strings properly, but sqlite needs to cast them into ints, because
+	// it is typeless and autodetects things that look like ints into integers no matter what
+	let where = { 'botId'   : (process.env.USE_HEROKU_POSTGRES ? botId   : { [Op.eq]: parseInt(botId) }),
+		      'groupId' : (process.env.USE_HEROKU_POSTGRES ? groupId : { [Op.eq]: parseInt(groupId) }),
+		      'type'    : audit.auditable_type }
 	console.log("Looking for filters that match: ", where)
 	let sendMessage = false
 	GroupFilters.findAll( { 'where': where }, { 'raw': true } ).then( (filters) => {
