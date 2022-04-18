@@ -217,7 +217,7 @@ const interactiveMessageHandler = async req => {
 	if (!botConfig.aha_domain) {
 	    console.log("DEBUG: botConfig is set, but aha_domain is not. Initializing...")
 	    botConfig.aha_domain = submitData.aha_domain
-	    await.botConfig.save()
+	    await botConfig.save()
 	}
 	handleAuthAction( botConfig, cardData ).then( card => {
 	    console.log("DEBUG: posting card to group "+submitData.groupId+":", card)
