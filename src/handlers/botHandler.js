@@ -67,12 +67,12 @@ const handleBotReceivedMessage = async event => {
 	    console.log("DEBUG: destroying tokens in database")
 	    botConfig.destroy().then( () => {
 		console.log("DEBUG: sending goodbye message")
-		await bot.sendMessage(group.id, {
+		bot.sendMessage(group.id, {
 		    text: `You have just unlinked your Aha account. Say "hello" to me, and we can start fresh.`
 		})
 	    })
         } else {
-            await bot.sendMessage(group.id, {
+            bot.sendMessage(group.id, {
 		text: `It does not appear you have a current connection to Aha in this team. Say "hello" to me and we can get started.`
 	    })
         }
