@@ -126,12 +126,25 @@ const completeJob = ( job ) => {
     job.moveToCompleted("Job completed.", true)
 }
 
-function get_workflows( workflows, name ) {
+function get_workflows_by_name( workflows, name ) {
     for (let i = 0; i < workflows.length; i++) {
         if (workflows[i].name == name) {
             return workflows[i].workflow_statuses
         }
     }
+    return []
+}
+
+function get_workflows_from_same_family( workflows, status_id ) {
+    for (let i = 0; i < workflows.length; i++) {
+	let workflow = workflows[i]
+	for (let j = 0; j < workflow.workflow_statuses.length; j++) {
+	    if (workflow.workflow_statuses[j] == status_id) {
+		return workflow.workflow_statuses[j]
+	    }
+	}
+    }
+    return []
 }
 
 const loadChanges = ( type, id ) => {
@@ -318,7 +331,8 @@ function start() {
 			return loadProjectWorkflows( aha, cardData["idea"].product.reference_prefix )
 		    }).then( workflows => {
 			console.log("WORKER: loaded workflows", workflows)
-			cardData['workflows'] = get_workflows(workflows.workflows, "Product idea workflow" )
+			//cardData['workflows'] = get_workflows(workflows.workflows, "Product idea workflow" )
+			cardData['workflows'] = get_workflows_from_same_family(workflows.workflows, cardData["idea"].workflow_status.id )
 			console.log("WORKER: finished loading all idea metadata")
 			
 			return postMessage( bot, job.data.group_id, newIdeaCardTemplate, cardData )
