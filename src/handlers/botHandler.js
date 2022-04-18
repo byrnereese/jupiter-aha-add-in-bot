@@ -45,7 +45,7 @@ const handleBotReceivedMessage = async event => {
             'botId': bot.id, 'groupId': group.id
         }
     })
-    if (botConfig && (!botConfig.aha_domain || botConfig.aha_domain == "")) {
+    if (!botConfig || (botConfig && (!botConfig.aha_domain || botConfig.aha_domain == ""))) {
         await bot.sendMessage(group.id, { text: `The bot has been updated. You will need to reauthenticate. Please type the command "goodbye" and then "hello" to reauthenticate to Aha.` })
 	return
     }
