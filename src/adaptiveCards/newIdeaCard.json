@@ -138,6 +138,19 @@
                                         "value": "${id}"
                                     }
                                 ]
+                            },
+                            {
+                                "id": "idea_visibility",
+                                "type": "Input.ChoiceSet",
+                                "value": "${idea.visibility}",
+                                "placeholder": "Select visibility",
+                                "label": "Visibility",
+                                "choices": [
+                                    { "title": "Not visible","value": "aha" },
+                                    { "title": "Visible to creator","value": "creator" },
+                                    { "title": "Visible to internal users","value": "employee" },
+                                    { "title": "Visible to all","value": "public" }
+                                ]
                             }
                         ],
                         "actions": [

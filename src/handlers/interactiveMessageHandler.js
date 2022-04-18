@@ -314,6 +314,7 @@ const interactiveMessageHandler = async req => {
 	    name: submitData.idea_name,
 	    description: submitData.idea_description,
 	    workflow_status: submitData.idea_status,
+	    visibility: submitData.idea_visibility,
 	    categories: submitData.idea_category
 	}
 	console.log(`MESSAGING: updating ${submitData.ideaId}:`, update_data)

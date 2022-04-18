@@ -61,6 +61,7 @@ const handleBotReceivedMessage = async event => {
         } else {
             await handleBotJoiningGroup(event)
         }
+	return
     } else if (text === 'goodbye') {
 	// this is duplicated, other copy is in interactiveMessageHandler, consolidate
         if (botConfig) {
