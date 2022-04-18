@@ -134,8 +134,13 @@ const evaluateFilter = ( audit, filter ) => {
 
 const processAhaFilter = async ( botId, groupId, audit ) => {
     const promise = new Promise( (resolve, reject) => {
+	/* This where clause may be necessary for sqlite
 	let where = { 'botId': { [Op.eq]: parseInt(botId) },
 		      'groupId': { [Op.eq]: parseInt(groupId) },
+		      'type': audit.auditable_type }
+	*/
+	let where = { 'botId': botId,
+		      'groupId': groupId,
 		      'type': audit.auditable_type }
 	console.log("Looking for filters that match: ", where)
 	let sendMessage = false
