@@ -8,10 +8,20 @@ const { loadProducts }              = require('../lib/aha-async')
 const Bot                           = require('ringcentral-chatbot-core/dist/models/Bot').default;
 const subscriptionCardTemplate      = require('../adaptiveCards/subscriptionCard.json');
 const authCardTemplate              = require('../adaptiveCards/authCard.json');
+const gettingStartedCardTemplate    = require('../adaptiveCards/gettingStartedCard.json');
 const setupSubscriptionCardTemplate = require('../adaptiveCards/setupSubscriptionCard.json');
 const filterCardTemplate            = require('../adaptiveCards/filterCard.json');
 const filterTypeCardTemplate        = require('../adaptiveCards/filterTypeCard.json');
 const listFiltersCardTemplate       = require('../adaptiveCards/listFiltersCard.json');
+
+const handleHelloAction = (config, cardData) => {
+    const promise = new Promise( (resolve, reject) => {
+	const template = new Template(gettingStartedCardTemplate);
+	const card = template.expand({ $root: cardData });
+	resolve( card )
+    })
+    return promise
+}
 
 const handleAuthAction = (config, cardData) => {
     const promise = new Promise( (resolve, reject) => {
@@ -214,6 +224,14 @@ const interactiveMessageHandler = async req => {
     // if you have gotten this far, this means that the bot is fully setup, and an aha domain has
     // been stored for the bot. That means we can make calls to Aha! So, load the token and proceed.
     switch (submitData.actionType) {
+    case 'hello': {
+	console.log(`MESSAGING: selecting a filter type`);
+	handleHelloAction( cardData ).then( card => {
+	    console.log("DEBUG: posting card to group "+submitData.groupId+":", card)
+	    bot.sendAdaptiveCard( submitData.groupId, card);
+	})
+	break;
+    }
     case 'select_filter_type': {
 	console.log(`MESSAGING: selecting a filter type`);
 	handleSelectFilterTypeAction( cardData ).then( card => {
