@@ -142,7 +142,7 @@
                             {
                                 "id": "idea_visibility",
                                 "type": "Input.ChoiceSet",
-                                "value": "${idea.visibility}",
+                                "value": "${selectedVisibility}",
                                 "placeholder": "Select visibility",
                                 "label": "Visibility",
                                 "choices": [

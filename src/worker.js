@@ -1,7 +1,7 @@
 const { BotConfig, ChangesModel } = require('./models/models')
 const { AllHtmlEntities }         = require('html-entities')
 const { Template }                = require('adaptivecards-templating')
-const { getAhaClient }            = require('./lib/aha');
+const { getAhaClient, ahaIdeaVisibilityMapping } = require('./lib/aha');
 const Bot                         = require('ringcentral-chatbot-core/dist/models/Bot').default;
 const turnDownService             = require('turndown');
 let   throng                      = require('throng');
@@ -326,6 +326,7 @@ function start() {
 			cardData['idea'] = idea.idea
 			console.log("idea: ", idea.idea)
 			// TODO - allow pre-selection of multiple categories
+			cardData['selectedVisibility'] = ahaIdeaVisibilityMapping[idea.idea.visibility]
 			cardData['selectedCategory'] = idea.idea.categories[0].id
 			return loadIdeaCategories( aha, idea.idea.product.reference_prefix )
 		    }).then( categories => {

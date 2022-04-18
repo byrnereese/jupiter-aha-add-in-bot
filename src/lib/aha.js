@@ -1,6 +1,13 @@
 const Aha          = require('aha-io')
 const ClientOAuth2 = require('client-oauth2');
 
+const ahaIdeaVisibilityMapping = {
+    'Not visible in portals': 'aha',
+    'Visible to creator': 'creator',
+    'Visible to internal users': 'employee',
+    'Visible to all': 'public'
+}
+
 const ahaFieldMapping = {
     'ideas/idea': {
 	'label': 'Ideas',
@@ -56,3 +63,4 @@ const getAhaOAuth = function ( domain ) {
 exports.getAhaClient    = getAhaClient;
 exports.getAhaOAuth     = getAhaOAuth;
 exports.ahaFieldMapping = ahaFieldMapping;
+exports.ahaIdeaVisibilityMapping = ahaIdeaVisibilityMapping;
