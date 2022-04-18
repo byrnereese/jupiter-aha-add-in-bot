@@ -65,9 +65,11 @@ const handleBotReceivedMessage = async event => {
 	// this is duplicated, other copy is in interactiveMessageHandler, consolidate
         if (botConfig) {
 	    console.log("DEBUG: destroying tokens in database")
-	    await botConfig.destroy()
-            await bot.sendMessage(group.id, {
-		text: `You have just unlinked your Aha account. Say "hello" to me, and we can start fresh.`
+	    botConfig.destroy().then( () => {
+		console.log("DEBUG: sending goodbye message")
+		await bot.sendMessage(group.id, {
+		    text: `You have just unlinked your Aha account. Say "hello" to me, and we can start fresh.`
+		})
 	    })
         } else {
             await bot.sendMessage(group.id, {
