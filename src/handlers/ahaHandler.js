@@ -50,19 +50,17 @@ const ahaOAuthHandler = async (req, res) => {
 	'groupId': groupId
     };
     let aha = getAhaClient(token, botConfig.aha_domain)
-    loadProducts( aha ).then( records => {
-	console.log("DEBUG: product list is: ", records)
-	// TODO - add HOWTO video to card
-	const template = new Template(setupSubscriptionCardTemplate);
-	cardData['products'] = records.products
-	const card = template.expand({
-            $root: cardData
-	});
-	console.log("DEBUG: card data:", cardData)
-	console.log("DEBUG: posting card to group "+groupId+":", card)
-	bot.sendAdaptiveCard( groupId, card);
-	return
-    })
+    const products = await loadProducts(aha);
+    //console.log("DEBUG: product list is: ", records)
+    const template = new Template(setupSubscriptionCardTemplate);
+    cardData['products'] = products
+    const card = template.expand({
+        $root: cardData
+    });
+    //console.log("DEBUG: card data:", cardData)
+    console.log("DEBUG: posting card to group "+groupId+":", card)
+    bot.sendAdaptiveCard( groupId, card);
+    return
 }
 
 const getLastPathItem = thePath => thePath.substring(thePath.lastIndexOf('/') + 1)

@@ -20,7 +20,7 @@ const loadProducts = async (aha) => {
             isLastPageReached = true;
             console.log(`WORKER: last page reached`)
         }
-        console.log("WORKER: returning from loadProducts: ", result)
+        console.log("WORKER: returning from loadProducts")
     }
     return result;
 }
