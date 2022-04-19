@@ -82,9 +82,10 @@ app.post('/interactive-messages', async (req, res) => {
                 res.status(401).send('Incorrect SHARED_SECRET.');
                 return;
             }
-        }
-        
-        await interactiveMessageHandler(req);
+            await interactiveMessageHandler(req);
+        } else {
+	    console.log("ERROR: Cannot process webhooks from RingCentral. Please set IM_SHARED_SECRET.")
+	}
     } catch (e) {
         console.log(e);
     }
