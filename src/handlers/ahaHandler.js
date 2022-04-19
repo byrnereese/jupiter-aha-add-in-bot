@@ -51,6 +51,7 @@ const ahaOAuthHandler = async (req, res) => {
     };
     let aha = getAhaClient(token, botConfig.aha_domain)
     const products = await loadProducts(aha);
+    console.log(`Returned from loadProducts with ${products.length} items`)
     const template = new Template(setupSubscriptionCardTemplate);
     cardData['products'] = products
     const card = template.expand({ $root: cardData });
