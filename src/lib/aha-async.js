@@ -1,5 +1,5 @@
 const loadProducts = async (aha) => {
-    console.log(`WORKER: loading workspaces`)
+    console.log(`WORKER: loading products`)
     let isLastPageReached = false;
     let currentPage = 1;
     let result = [];
@@ -14,14 +14,14 @@ const loadProducts = async (aha) => {
         result = result.concat(productResponse.products);
         if (productResponse.pagination.current_page !== productResponse.pagination.total_pages) {
             currentPage++;
-            console.log(`WORKER: go to page:${currentPage}`)
+            console.log(`WORKER: going to next page: ${currentPage}`)
         }
         else {
             isLastPageReached = true;
             console.log(`WORKER: last page reached`)
         }
-        console.log("WORKER: returning from loadProducts")
     }
+    console.log("WORKER: returning from loadProducts")
     return result;
 }
 exports.loadProducts = loadProducts;
