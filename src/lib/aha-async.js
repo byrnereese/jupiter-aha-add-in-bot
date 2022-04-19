@@ -10,7 +10,7 @@ const loadProducts = async (aha) => {
             }, `page=${currentPage}`)
         })
         const productResponse = await promise;
-        console.log(productResponse);
+        //console.log(productResponse);
         result = result.concat(productResponse.products);
         if (productResponse.pagination.current_page !== productResponse.pagination.total_pages) {
             currentPage++;

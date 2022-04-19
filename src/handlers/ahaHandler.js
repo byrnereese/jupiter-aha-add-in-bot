@@ -55,7 +55,7 @@ const ahaOAuthHandler = async (req, res) => {
     cardData['products'] = products
     const card = template.expand({ $root: cardData });
     //console.log("DEBUG: posting card to group "+groupId+":", card)
-    console.log("DEBUG: posting card to group "+groupId)
+    console.log("DEBUG: posting card to group " + groupId)
     bot.sendAdaptiveCard( groupId, card);
     return
 }
