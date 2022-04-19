@@ -1,27 +1,27 @@
 const loadProducts = async (aha) => {
-    console.log(`WORKER: loading products`)
-    let isLastPageReached = false;
-    let currentPage = 1;
-    let result = [];
-    while (!isLastPageReached) {
-        const promise = new Promise((resolve, reject) => {
+    console.log("In loadProducts()")
+    const getProductPage = (page) => {
+        return new Promise((resolve, reject) => {
             aha.product.list(function (err, data, response) {
-                resolve(data)
-            }, `page=${currentPage}`)
+                var isLastPage = (data.pagination.current_page == data.pagination.total_pages ? true : false)
+                resolve([data, isLastPage])
+            }, `page=${page}`)
         })
-        const productResponse = await promise;
-        //console.log(productResponse);
-        result = result.concat(productResponse.products);
-        if (productResponse.pagination.current_page !== productResponse.pagination.total_pages) {
-            currentPage++;
-            console.log(`WORKER: going to next page: ${currentPage}`)
+    };
+    return new Promise((resolve, reject) => {
+        const loop = (page, results) => {
+            if (!page) { page = 1 }
+            if (!results) { results = [] }
+            getProductPage( page ).then( ([response, isLastPage]) => {
+                console.log(`is last page? ${isLastPage}`)
+                if (isLastPage) {
+                    resolve( results.concat( response.products ) )
+                } else {
+                    return loop( page + 1, results.concat( response.products ) )
+                }
+            })
         }
-        else {
-            isLastPageReached = true;
-            console.log(`WORKER: last page reached`)
-        }
-    }
-    console.log("WORKER: returning from loadProducts")
-    return result;
+        loop()
+    })
 }
 exports.loadProducts = loadProducts;

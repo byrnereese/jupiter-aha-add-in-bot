@@ -62,8 +62,8 @@
             "actions": [
                 {
                     "type": "Action.OpenUrl",
-                    "title": "View in Aha!",
-                    "url": "${comment.url}"
+                    "title": "View idea in Aha!",
+                    "url": "${idea.url}"
                 },
                 {
                     "type": "Action.ShowCard",
