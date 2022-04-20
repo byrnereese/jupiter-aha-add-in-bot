@@ -18,7 +18,7 @@
                         {
                             "type": "Image",
                             "style": "Person",
-                            "url": "${idea.created_by_user.avatar_url}",
+                            "url": "${created_by.avatar_url}",
                             "size": "Small"
                         }
                     ],
@@ -29,13 +29,13 @@
                     "items": [
                         {
                             "type": "TextBlock",
-                            "text": "${idea.created_by_user.name}",
+                            "text": "${created_by.name}",
                             "wrap": true,
                             "weight": "Bolder"
                         },
                         {
                             "type": "TextBlock",
-                            "text": "${idea.created_by_user.email}\n",
+                            "text": "${created_by.email}\n",
                             "wrap": true,
                             "size": "Small"
                         },

@@ -6,6 +6,7 @@ const Bot                         = require('ringcentral-chatbot-core/dist/model
 const turnDownService             = require('turndown');
 let   throng                      = require('throng');
 let   Queue                       = require('bull');
+const gravatar                    = require('gravatar');
 
 const entities                    = new AllHtmlEntities();
 const turnDown                    = new turnDownService();
@@ -275,7 +276,14 @@ function start() {
 			    console.log("WORKER: loaded comment", comment)
 			    cardData['commentId'] = commentId
 			    cardData['comment'] = comment.idea_comment
-			    cardData['comment']['user'] = comment.idea_comment.idea_commenter_user
+			    if (comment.idea_comment.idea_commenter_user) {
+				cardData['created_by'] = comment.idea_comment.idea_commenter_user
+			    } else if (comment.idea_comment.user) {
+				cardData['created_by'] = comment.idea_comment.user
+			    }
+			    if (!cardData['created_by']['avatar_url']) {
+				cardData['created_by']['avatar_url'] = gravatar.url(cardData['created_by'].email);
+			    }
 			    console.log(cardData)
 			    return loadIdea( aha, ideaId )
 			}).then( idea => {
@@ -300,6 +308,7 @@ function start() {
 			    console.log("WORKER: loaded comment", comment)
 			    cardData['commentId'] = commentId
 			    cardData['comment'] = comment.comment
+			    cardData['created_by'] = comment.comment.user
 			    return loadIdea( aha, ideaId )
 			}).then( idea => {
 			    cardData['idea'] = idea.idea
@@ -320,8 +329,15 @@ function start() {
 		    loadIdea( aha, ideaId ).then( idea => {
 			console.log("WORKER: loaded idea", idea)
 			idea.idea.created_at_fmt = new Date( idea.idea.created_at ).toDateString()
-			if (!idea.idea.created_by) {
-			    idea.idea.created_by = idea.idea.user
+			if (idea.idea.created_by_user) {
+			    cardData['created_by'] = idea.idea.created_by_user
+			} if (idea.idea.created_by_portal_user) {
+			    cardData['created_by'] = idea.idea.created_by_portal_user
+			} else if (idea.idea.created_by_idea_user) {
+			    cardData['created_by'] = idea.idea.created_by_idea_user
+			}
+			if (!cardData['created_by']['avatar_url']) {
+			    cardData['created_by']['avatar_url'] = gravatar.url(cardData['created_by'].email);
 			}
 			cardData['idea'] = idea.idea
 			console.log("idea: ", idea.idea)
