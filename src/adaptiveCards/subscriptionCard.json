@@ -12,7 +12,14 @@
         },
         {
             "type": "TextBlock",
-            "text": "Next, I need you to login to Aha and create something called an \"Activity webhook.\" The button below will take you where you need to go. Click it, and then scroll down until you find the \"Activity Webhook\" option under API header.",
+            "text": "Before we take this next step I should warn you: you need to be an Aha! admin to complete this step.",
+            "wrap": true,
+            "weight": "Bolder",
+            "size": "Default"
+        },
+        {
+            "type": "TextBlock",
+            "text": "Ok, I need you to login to Aha and create something called an \"Activity webhook.\" The button below will take you where you need to go. Click it, and then scroll down until you find the \"Activity Webhook\" option under the \"API\" header.",
             "wrap": true
         },
         {
@@ -31,7 +38,7 @@
         },
         {
             "type": "TextBlock",
-            "text": "Almost done. Next, I need you to select the events you want to subscribe to. I only support the following events:\r- Everything related to features\r- Ideas > Name\r- Ideas > Status\r- Ideas > Public comment.",
+            "text": "Almost done. Next, I need you to select the events you want to subscribe to. I only support the following events:\n- Everything related to features\n- Everything related to ideas",
             "wrap": true
         },
         {
@@ -51,7 +58,7 @@
         },
         {
             "type": "TextBlock",
-            "text": "https://www.youtube.com/watch?v=sYQGRDPHPjA",
+            "text": "Unable to watch the video? Visit this link: https://www.youtube.com/watch?v=sYQGRDPHPjA",
             "wrap": true,
             "size": "Small"
         },
