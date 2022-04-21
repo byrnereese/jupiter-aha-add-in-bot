@@ -19,6 +19,13 @@ const botHandler = async event => {
     }
 }
 
+const supportedCommands = [
+    "hello",
+    "goodbye",
+    "help",
+    "subscribe"
+];
+
 const handleBotJoiningGroup = async event => {
     console.log("DEBUG: received BotJoinGroup event: ", event)
     const { bot, group } = event
@@ -43,7 +50,13 @@ const handleBotReceivedMessage = async event => {
     const botConfig = await BotConfig.findOne({
         where: { 'botId': bot.id, 'groupId': group.id }
     })
-
+    console.log( "Message received: ", text )
+    let command = text.split(' ')[0].toLowerCase()
+    if (!supportedCommands.includes(command)) {
+	console.log(`The command ${command} is not supported. Sending message to ${group.id}`)
+        await bot.sendMessage(group.id, { text: `I am sorry, but that is not an instruction I understand.` })
+	return;
+    }
     // all commands below should be executable, even if aha_domain is not set
     if (text === "help") {
 	const template = new Template(helpCardTemplate);

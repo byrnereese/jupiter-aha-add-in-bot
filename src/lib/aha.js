@@ -12,31 +12,47 @@ const ahaFieldMapping = {
     'ideas/idea': {
 	'label': 'Ideas',
 	'fields': [
-	    { 'id': 'name', 'label': 'Name' },
-	    { 'id': 'description', 'label': 'Description' },
-	    { 'id': 'categories', 'label': 'Categories' },
-	    { 'id': 'workflow_status', 'label': 'Status' },
-	    { 'id': 'epic', 'label': 'Master Feature/Epic' }
+	    { 'id': 'name', 'label': 'Name' }
+	    ,{ 'id': 'description', 'label': 'Description' }
+	    ,{ 'id': 'categories', 'label': 'Categories' }
+	    ,{ 'id': 'workflow_status', 'label': 'Workflow status' }
+	    ,{ 'id': 'workspace', 'label': 'Workspace' }
+	    ,{ 'id': 'creator', 'label': 'Creator' }
+	    ,{ 'id': 'visibility', 'label': 'Visibility' }
+	    ,{ 'id': 'votes', 'label': 'Votes' }
 	]
     },
+    /*
+    'ideas/idea_comment': {
+	'label': 'Idea comment (public)',
+	'fields': {
+	}
+    },
+    'comment': {
+	'label': 'Idea comment (private)',
+	'fields': {
+	}
+    },
+    */
     'features': {
 	'label': 'Features',
 	'fields': [
-	    { 'id': 'name', 'label': 'Name' },
-	    { 'id': 'workflow_kind', 'label': 'Type' },
-	    { 'id': 'workflow_status', 'label': 'Status' },
-	    { 'id': 'description', 'label': 'Description' },
-	    { 'id': 'epic', 'label': 'Master Feature/Epic' },
-	    { 'id': 'release', 'label': 'Release' }
+	    { 'id': 'name', 'label': 'Name' }
+	    ,{ 'id': 'workflow_status', 'label': 'Workflow status' }
+	    ,{ 'id': 'creator', 'label': 'Created by user' }
+	    ,{ 'id': 'release', 'label': 'Release' }
+	    ,{ 'id': 'workspace', 'label': 'Workspace' }
+	    ,{ 'id': 'type', 'label': 'Type' }
 	]
     },
-    'epics': {
+    'epic': {
 	'label': 'Master Features/Epics',
 	'fields': [
-	    { 'id': 'name', 'label': 'Name' },
-	    { 'id': 'workflow_status', 'label': 'Status' },
-	    { 'id': 'description', 'label': 'Description' },
-	    { 'id': 'release', 'label': 'Release' }
+	    { 'id': 'name', 'label': 'Name' }
+	    ,{ 'id': 'workflow_status', 'label': 'Workflow status' }
+	    ,{ 'id': 'workspace', 'label': 'Workspace' }
+	    ,{ 'id': 'description', 'label': 'Description' }
+	    ,{ 'id': 'release', 'label': 'Release' }
 	]
     }
 };
