@@ -10,14 +10,16 @@ const featureCardTemplate         = require('../adaptiveCards/featureCard.json')
 const botHandler = async event => {
     console.log(event.type, 'event')
     switch (event.type) {
-        case 'Message4Bot':
-            await handleBotReceivedMessage(event)
-            break
-        case 'BotJoinGroup': // bot user joined a new group
-            await handleBotJoiningGroup(event)
-            break
-        default:
-            break
+    case 'PostAdded':
+    case 'Message4Bot':
+        await handleBotReceivedMessage(event)
+        break
+    case 'BotJoinGroup': // bot user joined a new group
+        await handleBotJoiningGroup(event)
+        break
+    default:
+	console.log('Unknown event type: ' + event.type)
+        break
     }
 }
 

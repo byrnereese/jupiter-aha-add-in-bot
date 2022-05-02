@@ -56,7 +56,7 @@ app.get('/aha/oauth', async (req, res) => {
         console.error(e);
     }
     res.status(200);
-	res.send('<!doctype><html><body><script>close()</script></body></html>')
+    res.send('<!doctype><html><body><script>close()</script></body></html>')
 })
 
 app.post('/aha/webhook/:webhookStr', async (req, res) => {
@@ -67,7 +67,7 @@ app.post('/aha/webhook/:webhookStr', async (req, res) => {
         console.error(e);
     }
     res.status(200);
-	res.send('<!doctype><html><body><script>close()</script></body></html>')
+    res.send('<!doctype><html><body><script>close()</script></body></html>')
 })
 
 app.post('/interactive-messages', async (req, res) => {
