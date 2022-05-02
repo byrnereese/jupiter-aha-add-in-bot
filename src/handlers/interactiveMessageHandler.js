@@ -8,15 +8,15 @@ const { loadProducts }              = require('../lib/aha-async')
 const Bot                           = require('ringcentral-chatbot-core/dist/models/Bot').default;
 const subscriptionCardTemplate      = require('../adaptiveCards/subscriptionCard.json');
 const authCardTemplate              = require('../adaptiveCards/authCard.json');
-const gettingStartedCardTemplate    = require('../adaptiveCards/gettingStartedCard.json');
+const helloCardTemplate             = require('../adaptiveCards/helloCard.json');
 const setupSubscriptionCardTemplate = require('../adaptiveCards/setupSubscriptionCard.json');
 const filterCardTemplate            = require('../adaptiveCards/filterCard.json');
 const filterTypeCardTemplate        = require('../adaptiveCards/filterTypeCard.json');
 const listFiltersCardTemplate       = require('../adaptiveCards/listFiltersCard.json');
 
-const handleHelloAction = (config, cardData) => {
+const handleHelloAction = (cardData) => {
     const promise = new Promise( (resolve, reject) => {
-	const template = new Template(gettingStartedCardTemplate);
+	const template = new Template(helloCardTemplate);
 	const card = template.expand({ $root: cardData });
 	resolve( card )
     })
@@ -155,11 +155,11 @@ const handleDeleteFilterAction = (submitData, cardData) => {
 
 const handleSelectWorkspaceAction = (aha, cardData) => {
     const promise = new Promise( (resolve, reject) => {
-	loadProducts( aha ).then( records => {
-            cardData['products'] = records.products
+	loadProducts( aha ).then( products => {
+            cardData['products'] = products
             let template = new Template(setupSubscriptionCardTemplate);
             let card = template.expand({ $root: cardData });
-            return
+            resolve(card)
 	})
     })
     return promise
@@ -168,7 +168,7 @@ const handleSelectWorkspaceAction = (aha, cardData) => {
 const handleSetupSubscriptionAction = (config, submitData, cardData) => {
     const promise = new Promise( (resolve, reject) => {
 	console.log(`MESSAGING: facilitating subscription process for ${submitData.product}`)
-	let hookQs = `groupId=${cardData.groupId}&botId=${cardData.botId}`
+	let hookQs = `groupId=${submitData.groupId}&botId=${submitData.botId}`
 	//console.log(`MESSAGING: encoding querystring: ${hookQs}`)
 	let buff = new Buffer(hookQs)
 	let buffe = buff.toString('base64')
@@ -190,8 +190,8 @@ const interactiveMessageHandler = async req => {
     // Q: are extension IDs globally unique? I doubt it. 
     // TODO - do we need the bot Id in submitData? Does the webhook contain that info?
     const submitData = req.body.data;
-    const bot        = await Bot.findByPk(submitData.botId); 
     const cardId     = req.body.card.id;
+    const bot        = await Bot.findByPk(submitData.botId); 
     // TODO - we have the cardId, so let's replace cards as we go through flows
     
     // If I am authing for the first time, I need to stash the aha domain and create
@@ -201,6 +201,7 @@ const interactiveMessageHandler = async req => {
         'groupId': submitData.groupId,
 	'userId': req.body.user.id
     }
+    console.log(`cardData=`,cardData)
     let botConfig = await BotConfig.findOne({
         where: { 'botId': submitData.botId, 'groupId': submitData.groupId }
     })
@@ -220,7 +221,7 @@ const interactiveMessageHandler = async req => {
 	    await botConfig.save()
 	}
 	handleAuthAction( botConfig, cardData ).then( card => {
-	    console.log("DEBUG: posting card to group "+submitData.groupId+":", card)
+	    console.log(`DEBUG: posting card to group ${submitData.groupId}: `, card)
 	    bot.sendAdaptiveCard( submitData.groupId, card);
 	})
 	return
@@ -232,7 +233,8 @@ const interactiveMessageHandler = async req => {
     case 'hello': {
 	console.log(`MESSAGING: selecting a filter type`);
 	handleHelloAction( cardData ).then( card => {
-	    console.log("DEBUG: posting card to group "+submitData.groupId+":", card)
+	    console.log(`cardData=`,cardData)
+	    console.log("DEBUG: posting card to group "+submitData.groupId+":", JSON.stringify(card))
 	    bot.sendAdaptiveCard( submitData.groupId, card);
 	})
 	break;
@@ -295,9 +297,12 @@ const interactiveMessageHandler = async req => {
     case 'select_workspace': {
 	let token = botConfig ? botConfig.token : undefined
 	let aha = getAhaClient(token, botConfig.aha_domain)
+	console.log(cardData)
 	handleSelectWorkspaceAction( aha, cardData ).then( card => {
-            console.log("DEBUG: posting card to group "+submitData.groupId+":", card)
+            console.log("DEBUG: posting card to group "+submitData.groupId+":", JSON.stringify(card))
             bot.sendAdaptiveCard( submitData.groupId, card);
+	}).catch( err => {
+	    console.log("Something went wrong: ",err)
 	})
 	break
     }

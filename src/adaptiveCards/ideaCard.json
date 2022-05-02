@@ -1,0 +1,123 @@
+{
+    "type": "AdaptiveCard",
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.5",
+    "body": [
+        {
+            "type": "TextBlock",
+            "size": "Medium",
+            "weight": "Bolder",
+            "text": "${idea.name}"
+        },
+        {
+            "type": "TextBlock",
+            "text": "${idea.description.body_nohtml}",
+            "wrap": true
+        },
+        {
+            "type": "FactSet",
+            "facts": [
+                {
+                    "title": "Visibility",
+                    "value": "${idea.visibility}"
+                },
+                {
+                    "title": "Product",
+                    "value": "${idea.product.name}"
+                },
+                {
+                    "title": "Votes",
+                    "value": "\"${idea.votes}\""
+                }
+            ],
+            "separator": true
+        },
+        {
+            "type": "ColumnSet",
+            "columns": [
+                {
+                    "type": "Column",
+                    "items": [
+                        {
+                            "type": "Image",
+                            "style": "Person",
+                            "url": "${created_by.avatar_url}",
+                            "size": "Small"
+                        }
+                    ],
+                    "width": "50px"
+                },
+                {
+                    "type": "Column",
+                    "items": [
+                        {
+                            "type": "TextBlock",
+                            "spacing": "None",
+                            "text": "Created on ${idea.created_at_fmt} by:",
+                            "isSubtle": true,
+                            "wrap": true,
+                            "size": "Small"
+                        },
+                        {
+                            "type": "TextBlock",
+                            "text": "${created_by.name}",
+                            "wrap": true,
+                            "weight": "Bolder",
+                            "spacing": "None"
+                        },
+                        {
+                            "type": "TextBlock",
+                            "text": "${created_by.email}\n",
+                            "wrap": true,
+                            "size": "Small",
+                            "spacing": "None"
+                        }
+                    ],
+                    "width": "stretch"
+                }
+            ]
+        },
+        {
+            "type": "ActionSet",
+            "actions": [
+                {
+                    "type": "Action.OpenUrl",
+                    "title": "View in Aha!",
+                    "url": "${idea.url}"
+                }
+            ]
+        },
+        {
+            "type": "ColumnSet",
+            "columns": [
+                {
+                    "type": "Column",
+                    "width": "auto",
+                    "items": [
+                        {
+                            "type": "Image",
+                            "url": "https://github.com/ringcentral/github-notification-app/blob/main/icons/feedback-32.png?raw=true",
+                            "size": "Small",
+                            "style": "Person",
+                            "width": "16px"
+                        }
+                    ]
+                },
+                {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                        {
+                            "type": "TextBlock",
+                            "text": "[Improve this add-in: report bugs and feature requests](https://docs.google.com/forms/d/e/1FAIpQLSfCwi9bUT0WJW3Ug8umbNyd8NnmAZiVIcOHwXto6B9syKTnjA/viewform?usp=pp_url&entry.492712114=Aha!+Add-in)",
+                            "weight": "Lighter",
+                            "wrap": true,
+                            "size": "Small",
+                            "spacing": "None"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

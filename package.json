@@ -44,6 +44,6 @@
         "serverless": "^3.2.1",
         "serverless-deployment-bucket": "^1.5.2",
         "shelljs": "^0.8.5",
-        "sqlite3": "^5.0.2"
+        "sqlite3": "^5.0.6"
     }
 }

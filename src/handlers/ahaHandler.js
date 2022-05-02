@@ -1,6 +1,6 @@
 const { BotConfig, ChangesModel, GroupFilters }
                                     = require('../models/models')
-const { getAhaClient, getAhaOAuth, ahaFieldMapping }
+const { getAhaClient, getAhaOAuth, ahaFieldMapping, loadIdea }
                                     = require('../lib/aha')
 const { loadProducts }              = require('../lib/aha-async')
 const Bot                           = require('ringcentral-chatbot-core/dist/models/Bot').default;
@@ -55,7 +55,6 @@ const ahaOAuthHandler = async (req, res) => {
     const template = new Template(setupSubscriptionCardTemplate);
     cardData['products'] = products
     const card = template.expand({ $root: cardData });
-    //console.log("DEBUG: posting card to group "+groupId+":", card)
     console.log("DEBUG: posting card to group " + groupId)
     bot.sendAdaptiveCard( groupId, card);
     return
@@ -63,9 +62,53 @@ const ahaOAuthHandler = async (req, res) => {
 
 const getLastPathItem = thePath => thePath.substring(thePath.lastIndexOf('/') + 1)
 
-const evaluateFilter = ( audit, filter ) => {
+const execFilterOp = ( filter, matchedValue ) => {
+    if (matchedValue) {
+	console.log("Matched value: ", matchedValue)
+	// Now you need to evaluate the operation
+	console.log(`Evaluating "${filter.op}" op` )
+	switch (filter.op) {
+	case 'eq': {
+	    if (matchedValue == filter.value) {
+		console.log(`Does ${matchedValue} EQUAL ${filter.value}? Yes.` )
+		return true
+	    }
+	    break
+	}
+	case 'ne': {false
+	    if (matchedValue != filter.value) {
+		console.log(`Does ${matchedValue} NOT EQUAL ${filter.value}? Yes.` )
+		return true
+	    }
+	    break;
+	}
+	case 'contains': {
+	    var re = new RegExp(filter.value, 'i');
+	    if (matchedValue.match(re)) {
+		console.log(`Does ${matchedValue} CONTAIN ${filter.value}? Yes.` )
+		return true
+	    }
+	    break;
+	}
+	case 'not_contains': {
+	    var re = new RegExp(filter.value, 'i');
+	    if (!matchedValue.match(re)) {
+		console.log(`Does ${matchedValue} NOT CONTAIN ${filter.value}? Yes.` )
+		return true
+	    }
+	    break;
+	}
+	default: {
+	    console.log(`UNKNOWN filter op: ${filter.op}` )
+	}
+	}
+    }
+    console.log("Return false from execFilterOp")
+    return false
+}
+
+const evaluateFilter = ( botConfig, audit, filter ) => {
     console.log( `Evaluating ${audit.auditable_id} for filter: ${filter.field} ${filter.op} ${filter.value}` )
-    //console.log( `Is ${filter.type} valid?` )
     let objDef = ahaFieldMapping[ filter.type ]
     if (objDef) { // fieldDef contains the field 
 	//console.log( `Found filterType ${filter.type}` )
@@ -76,51 +119,34 @@ const evaluateFilter = ( audit, filter ) => {
 	})[0]; // fix this if you ever need to match multiple fields, unlikely
 	if (fieldDef) {
 	    console.log("Field def found: ", fieldDef)
-	    let matchedField = audit.changes.filter( function(elem) {
-		//console.log( `Does ${elem.field_name} == ${fieldDef.label}`)
-		return (elem.field_name === fieldDef.label)
-	    })[0]
-	    if (matchedField) {
-		console.log("Matched field: ", matchedField)
-		// Now you need to evaluate the operation
-		console.log(`Evaluating "${filter.op}" op` )
-		switch (filter.op) {
-		case 'eq': {
-		    if (matchedField.value == filter.value) {
-			console.log(`Does ${matchedField.value} EQUAL ${filter.value}? Yes.` )
-			return true
-		    }
-		    break
+	    if (fieldDef.type == "audit") {
+		let matchedField = audit.changes.filter( function(elem) {
+		    //console.log( `Does ${elem.field_name} == ${fieldDef.label}`)
+		    return (elem.field_name === fieldDef.label)
+		})
+		if (matchedField && matchedField[0]) {
+		    return execFilterOp( filter, matchedField[0].value )
 		}
-		case 'ne': {
-		    if (matchedField.value != filter.value) {
-			console.log(`Does ${matchedField.value} NOT EQUAL ${filter.value}? Yes.` )
-			return true
-		    }
-		    break;
+	    } else if (fieldDef.type == "object") {
+		console.log(`Loading object of type ${filter.type}`)
+		let token = botConfig ? botConfig.token : undefined
+		let aha = getAhaClient(token, botConfig.aha_domain)
+		if (filter.type == "ideas/idea") {
+		    loadIdea( aha, audit.auditable_id ).then( idea => {
+			console.log("Loaded idea: ", JSON.stringify(idea))
+			if (filter.field == "categories") {
+			    for (const cat of idea.idea.categories) {
+				if ( execFilterOp( filter, cat.name ) ) { return true }
+			    }
+			    // TODO this is returning asynchronously after the function itself returns
+			    return false
+			}
+		    })
 		}
-		case 'contains': {
-		    var re = new RegExp(filter.value, 'i');
-		    if (matchedField.value.match(re)) {
-			console.log(`Does ${matchedField.value} CONTAIN ${filter.value}? Yes.` )
-			return true
-		    }
-		    break;
-		}
-		case 'not_contains': {
-		    var re = new RegExp(filter.value, 'i');
-		    if (!matchedField.value.match(re)) {
-			console.log(`Does ${matchedField.value} NOT CONTAIN ${filter.value}? Yes.` )
-			return true
-		    }
-		    break;
-		}
-		default: {
-		    console.log(`UNKNOWN filter op: ${filter.op}` )
-		}
-		}
-		return false;
+	    } else {
+		console.log(`Unknown fieldDef.type: ${fieldDef.type}`)
 	    }
+	    // TODO
 	}
     } else {
 	console.log( "Invalid filter type" )
@@ -128,12 +154,12 @@ const evaluateFilter = ( audit, filter ) => {
     return true
 }
 
-const processAhaFilter = async ( botId, groupId, audit ) => {
+const processAhaFilter = async ( botConfig, audit ) => {
     const promise = new Promise( (resolve, reject) => {
 	// postgres types these as strings properly, but sqlite needs to cast them into ints, because
 	// it is typeless and autodetects things that look like ints into integers no matter what
-	let where = { 'botId'   : (process.env.USE_HEROKU_POSTGRES ? botId   : { [Op.eq]: parseInt(botId) }),
-		      'groupId' : (process.env.USE_HEROKU_POSTGRES ? groupId : { [Op.eq]: parseInt(groupId) }),
+	let where = { 'botId'   : (process.env.USE_HEROKU_POSTGRES ? botConfig.botId   : { [Op.eq]: parseInt(botConfig.botId) }),
+		      'groupId' : (process.env.USE_HEROKU_POSTGRES ? botConfig.groupId : { [Op.eq]: parseInt(botConfig.groupId) }),
 		      'type'    : audit.auditable_type }
 	console.log("Looking for filters that match: ", where)
 	let sendMessage = false
@@ -141,7 +167,16 @@ const processAhaFilter = async ( botId, groupId, audit ) => {
 	    if (filters && filters.length > 0) {
 		for (const filter of filters) {
 		    console.log("Processing filter: ", filter )
-		    if ( evaluateFilter( audit, filter ) ) {
+		    /*
+		    if (fieldDef.type == "object") {
+			console.log(`Loading object of type ${filter.type}`)
+			let token = botConfig ? botConfig.token : undefined
+			let aha = getAhaClient(token, botConfig.aha_domain)
+			if (filter.type == "ideas/idea") {
+			    loadIdea( aha, audit.auditable_id ).then( idea => {
+				console.log("Loaded idea: ", JSON.stringify(idea))
+		    */
+		    if ( evaluateFilter( botConfig, audit, filter ) ) {
 			console.log("Returned from evaluateFilter as true.")
 			sendMessage = true
 		    }
@@ -183,9 +218,10 @@ const ahaWebhookHandler = async (req, res) => {
     }
 
     const bot = await Bot.findByPk(botId)
+    const botConfig = await BotConfig.findOne({ where: { 'botId': botId, 'groupId': groupId } })
     if (bot) {
         if (audit.interesting) {
-	    processAhaFilter( botId, groupId, audit ).then( (sendMessage) => {
+	    processAhaFilter( botConfig, audit ).then( (sendMessage) => {
 		if (sendMessage) {
 		    console.log("No filters found, or filters present and match found. Message will be sent.")
 		    let jobId = `${audit.audit_action}:${audit.auditable_id}:${audit.auditable_type}`;

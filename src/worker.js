@@ -1,7 +1,7 @@
 const { BotConfig, ChangesModel } = require('./models/models')
 const { AllHtmlEntities }         = require('html-entities')
 const { Template }                = require('adaptivecards-templating')
-const { getAhaClient, ahaIdeaVisibilityMapping } = require('./lib/aha');
+const { getAhaClient, ahaIdeaVisibilityMapping, loadIdea } = require('./lib/aha');
 const Bot                         = require('ringcentral-chatbot-core/dist/models/Bot').default;
 const turnDownService             = require('turndown');
 let   throng                      = require('throng');
@@ -65,19 +65,6 @@ const loadPublicComment = ( aha, ideaId, commentId ) => {
         })
     })
     console.log("WORKER: returning from loadPublicComment")
-    return promise
-}
-
-const loadIdea = ( aha, ideaId ) => {
-    console.log(`WORKER: loading idea ${ideaId}`)
-    const promise = new Promise( (resolve, reject) => {
-        aha.idea.get(ideaId, function (err, data, response) {
-	    let desc = turnDown.turndown( data.idea.description.body )
-	    data.idea.description["body_nohtml"] = desc
-            resolve( data )
-        })
-    })
-    console.log("WORKER: returning from loadIdea")
     return promise
 }
 

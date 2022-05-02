@@ -1,5 +1,7 @@
-const Aha          = require('aha-io')
-const ClientOAuth2 = require('client-oauth2');
+const Aha             = require('aha-io')
+const ClientOAuth2    = require('client-oauth2');
+const turnDownService = require('turndown');
+const turnDown        = new turnDownService();
 
 const ahaIdeaVisibilityMapping = {
     'Not visible in portals': 'aha',
@@ -12,14 +14,14 @@ const ahaFieldMapping = {
     'ideas/idea': {
 	'label': 'Ideas',
 	'fields': [
-	    { 'id': 'name', 'label': 'Name' }
-	    ,{ 'id': 'description', 'label': 'Description' }
-	    ,{ 'id': 'categories', 'label': 'Categories' }
-	    ,{ 'id': 'workflow_status', 'label': 'Workflow status' }
-	    ,{ 'id': 'workspace', 'label': 'Workspace' }
-	    ,{ 'id': 'creator', 'label': 'Creator' }
-	    ,{ 'id': 'visibility', 'label': 'Visibility' }
-	    ,{ 'id': 'votes', 'label': 'Votes' }
+	    { 'id': 'name', 'label': 'Name', 'type': 'audit' }
+	    ,{ 'id': 'description', 'label': 'Description', 'type': 'audit' }
+	    ,{ 'id': 'categories', 'label': 'Categories', 'type': 'object' }
+	    ,{ 'id': 'workflow_status', 'label': 'Workflow status', 'type': 'audit' }
+	    ,{ 'id': 'workspace', 'label': 'Workspace', 'type': 'audit' }
+	    ,{ 'id': 'creator', 'label': 'Creator', 'type': 'audit' }
+	    ,{ 'id': 'visibility', 'label': 'Visibility', 'type': 'audit' }
+	    ,{ 'id': 'votes', 'label': 'Votes', 'type': 'audit' }
 	]
     },
     /*
@@ -76,6 +78,57 @@ const getAhaOAuth = function ( domain ) {
     return ahaAuth
 }
 
+const loadIdea = ( aha, ideaId ) => {
+    console.log(`WORKER: loading idea ${ideaId}`)
+    const promise = new Promise( (resolve, reject) => {
+        aha.idea.get(ideaId, function (err, data, response) {
+	    let desc = turnDown.turndown( data.idea.description.body )
+	    data.idea.description["body_nohtml"] = desc
+            resolve( data )
+        })
+    })
+    console.log("WORKER: returning from loadIdea")
+    return promise
+}
+
+const loadFeature = ( aha, featureId ) => {
+    console.log(`WORKER: loading feature ${featureId}`)
+    const promise = new Promise( (resolve, reject) => {
+        aha.feature.get(featureId, function (err, data, response) {
+	    let desc = turnDown.turndown( data.feature.description.body )
+	    data.feature.description["body_nohtml"] = desc
+            resolve( data )
+        })
+    })
+    console.log("WORKER: returning from loadFeature")
+    return promise
+}
+
+function uniq(a) {
+   return Array.from(new Set(a));
+}
+function getAhaUrls( domain, text ) {
+    const link_pattern = '^https?://'+domain+'.aha.io/(.+)/((\\w+\-)+\\d+)$'
+    const aha_link_re = new RegExp(link_pattern);
+    const geturl_re = new RegExp(
+	"((ftp|http|https|gopher|mailto|nezws|nntp|telnet|wais|file|prospero|aim|webcal):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*;/?:~-]))"
+	,"g"
+    )
+    let aha_urls = []
+    if (urls = text.match( geturl_re, 'gi')) {
+	urls = uniq(urls)
+	for (url of urls) {
+	    if (matches = url.match( aha_link_re )) {
+		aha_urls.push( matches )
+	    }
+	}
+    }
+    return aha_urls
+}
+
+exports.getAhaUrls      = getAhaUrls;
+exports.loadIdea        = loadIdea;
+exports.loadFeature     = loadFeature;
 exports.getAhaClient    = getAhaClient;
 exports.getAhaOAuth     = getAhaOAuth;
 exports.ahaFieldMapping = ahaFieldMapping;

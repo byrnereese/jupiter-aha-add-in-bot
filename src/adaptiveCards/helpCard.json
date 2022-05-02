@@ -4,38 +4,69 @@
     "version": "1.5",
     "body": [
         {
-            "type": "TextBlock",
-            "text": "How can I help?",
-            "wrap": true,
-            "size": "ExtraLarge",
-            "weight": "Bolder"
+            "type": "Container",
+            "isVisible": "${if(connectedToAha,true,false)}",
+            "items": [
+                {
+                    "type": "TextBlock",
+                    "text": "How can I help?",
+                    "wrap": true,
+                    "size": "ExtraLarge",
+                    "weight": "Bolder"
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "Below are the things I can help you with. Go ahead, click them, they're buttons.",
+                    "wrap": true
+                }
+            ]
         },
         {
-            "type": "TextBlock",
-            "text": "Below are the things I can help you with. Go ahead, click them, they're buttons.",
-            "wrap": true
+            "type": "Container",
+            "isVisible": "${if(connectedToAha,false,true)}",
+            "items": [
+                {
+                    "type": "TextBlock",
+                    "text": "Help me help you :)",
+                    "wrap": true,
+                    "size": "ExtraLarge",
+                    "weight": "Bolder"
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "There are a number of things I can do to assist you in using Aha. Sadly, I can't do any of them until we login to Aha.",
+                    "wrap": true
+                }
+            ]
         },
         {
             "type": "ActionSet",
+            "isVisible": "${if(connectedToAha,false,true)}",
             "actions": [
                 {
                     "type": "Action.Submit",
                     "title": "Connect to Aha!",
                     "style": "positive",
-		    "data": {
-			"actionType": "hello",
-			"botId": "${botId}",
-			"groupId": "${groupId}"
-		    }
-                },
+                    "data": {
+                        "actionType": "hello",
+                        "botId": "${botId}",
+                        "groupId": "${groupId}"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "ActionSet",
+            "isVisible": "${if(connectedToAha,true,false)}",
+            "actions": [
                 {
                     "type": "Action.Submit",
-                    "title": "Help you setup Aha!",
-		    "data": {
-			"actionType": "select_workspace",
-			"botId": "${botId}",
-			"groupId": "${groupId}"
-		    }
+                    "title": "Help you subscribe to events",
+                    "data": {
+                        "actionType": "select_workspace",
+                        "botId": "${botId}",
+                        "groupId": "${groupId}"
+                    }
                 },
                 {
                     "type": "Action.Submit",
@@ -59,11 +90,11 @@
                     "type": "Action.Submit",
                     "title": "Disconnect from Aha!",
                     "style": "destructive",
-        		    "data": {
-            			"actionType": "disconnect",
-            			"botId": "${botId}",
-            			"groupId": "${groupId}"
-        		    }
+                    "data": {
+                        "actionType": "disconnect",
+                        "botId": "${botId}",
+                        "groupId": "${groupId}"
+                    }
                 }
             ]
         }
