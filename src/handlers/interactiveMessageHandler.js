@@ -230,6 +230,10 @@ const interactiveMessageHandler = async req => {
     // if you have gotten this far, this means that the bot is fully setup, and an aha domain has
     // been stored for the bot. That means we can make calls to Aha! So, load the token and proceed.
     switch (submitData.actionType) {
+    case 'dialog': {
+	console.log("Trying to spawn dialog")
+	break;
+    }
     case 'hello': {
 	console.log(`MESSAGING: selecting a filter type`);
 	handleHelloAction( cardData ).then( card => {

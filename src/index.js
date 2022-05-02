@@ -89,7 +89,33 @@ app.post('/interactive-messages', async (req, res) => {
     } catch (e) {
         console.log(e);
     }
-    
+    /*
+    let response = {
+	"type": "dialog",
+	"dialog": {
+	    "title": "this is a title",
+	    "size": "medium",
+	    "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/2048px-Instagram_icon.png",
+	    "card": {
+		"type": "AdaptiveCard",
+		"$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+		"version": "1.3",
+		"body": [
+		    {
+			"type": "TextBlock",
+			"text": "Hello.",
+			"wrap": true,
+			"size": "ExtraLarge",
+			"weight": "Bolder"
+		    }
+		]
+	    }
+	}
+    };
+    console.log("Opening dialog: ", response)
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(response))
+    */
     res.status(200);
     res.json('OK');
 });

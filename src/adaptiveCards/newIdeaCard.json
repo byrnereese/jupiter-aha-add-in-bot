@@ -31,13 +31,15 @@
                             "type": "TextBlock",
                             "text": "${created_by.name}",
                             "wrap": true,
-                            "weight": "Bolder"
+                            "weight": "Bolder",
+                            "spacing": "None"
                         },
                         {
                             "type": "TextBlock",
                             "text": "${created_by.email}",
                             "wrap": true,
-                            "size": "Small"
+                            "size": "Small",
+                            "spacing": "None"
                         },
                         {
                             "type": "TextBlock",
@@ -146,10 +148,22 @@
                                 "placeholder": "Select visibility",
                                 "label": "Visibility",
                                 "choices": [
-                                    { "title": "Not visible","value": "aha" },
-                                    { "title": "Visible to creator","value": "creator" },
-                                    { "title": "Visible to internal users","value": "employee" },
-                                    { "title": "Visible to all","value": "public" }
+                                    {
+                                        "title": "Not visible",
+                                        "value": "aha"
+                                    },
+                                    {
+                                        "title": "Visible to creator",
+                                        "value": "creator"
+                                    },
+                                    {
+                                        "title": "Visible to internal users",
+                                        "value": "employee"
+                                    },
+                                    {
+                                        "title": "Visible to all",
+                                        "value": "public"
+                                    }
                                 ]
                             }
                         ],

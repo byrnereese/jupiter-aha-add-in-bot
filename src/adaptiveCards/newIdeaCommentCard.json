@@ -31,13 +31,15 @@
                             "type": "TextBlock",
                             "text": "${created_by.name}",
                             "wrap": true,
-                            "weight": "Bolder"
+                            "weight": "Bolder",
+                            "spacing": "None"
                         },
                         {
                             "type": "TextBlock",
                             "text": "${created_by.email}\n",
                             "wrap": true,
-                            "size": "Small"
+                            "size": "Small",
+                            "spacing": "None"
                         },
                         {
                             "type": "TextBlock",
