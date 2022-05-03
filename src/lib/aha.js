@@ -107,8 +107,8 @@ const loadFeature = ( aha, featureId ) => {
 function uniq(a) {
    return Array.from(new Set(a));
 }
-function getAhaUrls( domain, text ) {
-    const link_pattern = '^https?://'+domain+'.aha.io/(.+)/((\\w+\-)+\\d+)$'
+function getAhaUrls( text ) {
+    const link_pattern = '^https?://([^\.]+)\.aha\.io/(.+)/((\\w+\-)+\\d+)$'
     const aha_link_re = new RegExp(link_pattern);
     const geturl_re = new RegExp(
 	"((ftp|http|https|gopher|mailto|nezws|nntp|telnet|wais|file|prospero|aim|webcal):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*;/?:~-]))"

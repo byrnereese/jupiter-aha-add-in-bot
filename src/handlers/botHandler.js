@@ -10,11 +10,13 @@ const featureCardTemplate         = require('../adaptiveCards/featureCard.json')
 const botHandler = async event => {
     console.log(event.type, 'event')
     switch (event.type) {
-    case 'PostAdded':
     case 'Message4Bot':
         await handleBotReceivedMessage(event)
         break
-    case 'BotJoinGroup': // bot user joined a new group
+    case 'PostAdded':
+        await handleUnfurling(event)
+        break
+    case 'BotJoinGroup': 
         await handleBotJoiningGroup(event)
         break
     default:
@@ -120,33 +122,46 @@ const unfurl = async ( botConfig, obj_type, obj_id ) => {
     return promise
 }
 
-const handleBotReceivedMessage = async event => {
-    const { group, bot, text, userId } = event
+const handleUnfurling = async event => {
+    const { type, message } = event
+    if (!message.text) { return }
     console.log( event )
     const botConfig = await BotConfig.findOne({
-        where: { 'botId': bot.id, 'groupId': group.id }
+        where: { 'groupId': message.body.groupId },
+	order: [[ 'createdAt', 'DESC' ]]
     })
-    console.log( "Message received: ", event.message.text )
-
+    console.log( "Parsing message for Aha links: ", message.text )
     if (botConfig) {
-	let aha_urls = getAhaUrls( botConfig.aha_domain, text )
+	let aha_urls = getAhaUrls( botConfig.aha_domain, message.text )
 	for (url of aha_urls) {
 	    let obj_type = url[1]
 	    let obj_id   = url[2]
 	    console.log(`Loading ${obj_type} with id of ${obj_id}`)
 	    unfurl( botConfig, obj_type, obj_id ).then( card => {
 		if (card) {
-		    bot.sendAdaptiveCard( group.id, card);
+		    bot.sendAdaptiveCard( message.body.groupId, card);
 		}
 	    })
 	}
 	const mention_re = new RegExp('^\\s*!\\[\\:Person\\]\\('+botConfig.botId+'\\)')
-	if (!event.message.text.match( mention_re )) {
+	if (!message.text.match( mention_re )) {
 	    // the bot was not mentioned, so there is nothing to do
 	    console.log("Bot was not mentioned. Ignoring message.")
 	    return
 	}
     }
+
+}
+
+const handleBotReceivedMessage = async event => {
+    const { group, bot, text, userId } = event
+    console.log( event )
+    // this is problematic because on a PostAdded event, there is no bot object.
+    // hack? load most recent botconfig for group id
+    const botConfig = await BotConfig.findOne({
+        where: { 'botId': bot.id, 'groupId': group.id }
+    })
+    console.log( "Message received: ", event.message.text )
 
     let command = text.split(' ')[0].toLowerCase()
     if (!supportedCommands.includes(command)) {
