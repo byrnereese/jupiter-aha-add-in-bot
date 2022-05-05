@@ -85,7 +85,7 @@ const loadProjectWorkflows = ( aha, productId ) => {
     console.log(`WORKER: loading workflows for ${productId}`)
     const promise = new Promise( (resolve, reject) => {
         aha.product.workflows( productId, function (err, data, response) {
-            console.log( "err: " , err )
+            //console.log( `Loaded workflows for product (${productId}): `, data )
             resolve( data )
         })
     })
@@ -129,9 +129,10 @@ function get_workflows_from_same_family( workflows, status_id ) {
 	let workflow = workflows[i]
 	for (let j = 0; j < workflow.workflow_statuses.length; j++) {
 	    let state = workflow.workflow_statuses[j]
-	    console.log(`WORKER: checking state for status id ${status_id}: `, state)
+	    console.log(`WORKER: checking state: `, state)
 	    if (state.id == status_id) {
-		return workflow.workflow_statuses[j]
+		console.log(`WORKER: found matching workflow: ${state.name}`)
+		return workflow.workflow_statuses
 	    }
 	}
     }
@@ -342,7 +343,7 @@ function start() {
 			cardData['categories'] = categories.idea_categories
 			return loadProjectWorkflows( aha, cardData["idea"].product.reference_prefix )
 		    }).then( workflows => {
-			console.log("WORKER: loaded workflows", workflows)
+			console.log("WORKER: loaded workflows", workflows.workflows)
 			//cardData['workflows'] = get_workflows(workflows.workflows, "Product idea workflow" )
 			cardData['workflows'] = get_workflows_from_same_family(
 			    workflows.workflows, cardData["idea"].workflow_status.id )
