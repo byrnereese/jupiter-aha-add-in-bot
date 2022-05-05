@@ -177,8 +177,10 @@ const processAhaFilter = async ( botConfig, audit ) => {
 				console.log("Loaded idea: ", JSON.stringify(idea))
 		    */
 		    if ( evaluateFilter( botConfig, audit, filter ) ) {
-			console.log("Returned from evaluateFilter as true.")
+			console.log("Returned from evaluateFilter as true. Message will be posted.")
 			sendMessage = true
+		    } else {
+			console.log("Returned from evaluateFilter as false. No message will be posted.")
 		    }
 		}
 		console.log("Done processing filters.")

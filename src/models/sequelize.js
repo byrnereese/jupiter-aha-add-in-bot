@@ -18,7 +18,7 @@ else {
   config =
   {
     dialect: 'postgres',
-    logging: console.log
+    logging: (process.env.SEQUELIZE_LOGGING_ENABLED ? console.log : false)
   }
 }
 

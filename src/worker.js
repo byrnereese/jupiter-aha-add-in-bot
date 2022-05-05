@@ -129,6 +129,7 @@ function get_workflows_from_same_family( workflows, status_id ) {
 	let workflow = workflows[i]
 	for (let j = 0; j < workflow.workflow_statuses.length; j++) {
 	    let state = workflow.workflow_statuses[j]
+	    console.log(`WORKER: checking state: ${state}`)
 	    if (state.id == status_id) {
 		return workflow.workflow_statuses[j]
 	    }
@@ -339,7 +340,8 @@ function start() {
 		    }).then( workflows => {
 			console.log("WORKER: loaded workflows", workflows)
 			//cardData['workflows'] = get_workflows(workflows.workflows, "Product idea workflow" )
-			cardData['workflows'] = get_workflows_from_same_family(workflows.workflows, cardData["idea"].workflow_status.id )
+			cardData['workflows'] = get_workflows_from_same_family(
+			    workflows.workflows, cardData["idea"].workflow_status.id )
 			console.log("WORKER: finished loading all idea metadata")
 			
 			return postMessage( bot, job.data.group_id, newIdeaCardTemplate, cardData )
