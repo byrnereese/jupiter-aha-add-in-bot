@@ -10,7 +10,6 @@ const featureCardTemplate         = require('../adaptiveCards/featureCard.json')
 const botHandler = async event => {
     console.log(event.type, 'event')
     switch (event.type) {
-    case 'PostAdded':
     case 'Message4Bot':
         await handleBotReceivedMessage(event)
         break
