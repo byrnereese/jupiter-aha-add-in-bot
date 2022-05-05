@@ -129,7 +129,7 @@ function get_workflows_from_same_family( workflows, status_id ) {
 	let workflow = workflows[i]
 	for (let j = 0; j < workflow.workflow_statuses.length; j++) {
 	    let state = workflow.workflow_statuses[j]
-	    console.log(`WORKER: checking state for status id ${status_id}: ${state}`)
+	    console.log(`WORKER: checking state for status id ${status_id}: `, state)
 	    if (state.id == status_id) {
 		return workflow.workflow_statuses[j]
 	    }
