@@ -331,7 +331,11 @@ function start() {
 			console.log("idea: ", idea.idea)
 			// TODO - allow pre-selection of multiple categories
 			cardData['selectedVisibility'] = ahaIdeaVisibilityMapping[idea.idea.visibility]
-			cardData['selectedCategory'] = idea.idea.categories[0].id
+			if (idea.idea.categories && idea.idea.categories.length > 0) {
+			    cardData['selectedCategory'] = idea.idea.categories[0].id
+			} else {
+			    cardData['selectedCategory'] = 0
+			}
 			return loadIdeaCategories( aha, idea.idea.product.reference_prefix )
 		    }).then( categories => {
 			console.log("WORKER: loaded categories", categories)
