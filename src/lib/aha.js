@@ -97,6 +97,7 @@ const loadFeature = ( aha, featureId ) => {
     console.log(`WORKER: loading feature ${featureId}`)
     const promise = new Promise( (resolve, reject) => {
         aha.feature.get(featureId, function (err, data, response) {
+	    console.log("DEBUG: turningdown feature:",data)
 	    let desc = turnDown.turndown( data.feature.description.body )
 	    data.feature.description["body_nohtml"] = desc
             resolve( data )
