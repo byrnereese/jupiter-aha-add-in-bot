@@ -270,7 +270,7 @@ function start() {
 			    } else if (comment.idea_comment.user) {
 				cardData['created_by'] = comment.idea_comment.user
 			    }
-			    if (!cardData['created_by']['avatar_url']) {
+			    if (!cardData['created_by'] && !cardData['created_by']['avatar_url']) {
 				cardData['created_by']['avatar_url'] = gravatar.url(cardData['created_by'].email);
 			    }
 			    console.log(cardData)

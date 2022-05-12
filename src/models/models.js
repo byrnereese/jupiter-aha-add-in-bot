@@ -23,6 +23,10 @@ const botConfig = sequelize.define('botConfig', {
 	    fields: [ 'groupId', 'botId' ]
 	},
 	{
+	    unique: false,
+	    fields: [ 'groupId', 'aha_domain' ]
+	},
+	{
 	    unique: true,
 	    fields: [ 'token' ]
 	}

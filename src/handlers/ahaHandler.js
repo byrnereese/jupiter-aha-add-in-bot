@@ -135,8 +135,10 @@ const evaluateFilter = ( botConfig, audit, filter ) => {
 		    loadIdea( aha, audit.auditable_id ).then( idea => {
 			console.log("Loaded idea: ", JSON.stringify(idea))
 			if (filter.field == "categories") {
-			    for (const cat of idea.idea.categories) {
-				if ( execFilterOp( filter, cat.name ) ) { return true }
+			    if (idea.idea.categories) {
+				for (const cat of idea.idea.categories) {
+				    if ( execFilterOp( filter, cat.name ) ) { return true }
+				}
 			    }
 			    // TODO this is returning asynchronously after the function itself returns
 			    return false

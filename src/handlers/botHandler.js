@@ -2,6 +2,7 @@ const { BotConfig, ChangesModel } = require('../models/models')
 const { getAhaClient, loadIdea, loadFeature, getAhaUrls } = require('../lib/aha');
 const { continueSession }         = require('pg/lib/sasl');
 const { Template }                = require('adaptivecards-templating');
+const Bot                     = require('ringcentral-chatbot-core/dist/models/Bot');
 const helloCardTemplate           = require('../adaptiveCards/helloCard.json');
 const helpCardTemplate            = require('../adaptiveCards/helpCard.json');
 const ideaCardTemplate            = require('../adaptiveCards/ideaCard.json');
@@ -9,12 +10,19 @@ const featureCardTemplate         = require('../adaptiveCards/featureCard.json')
 
 const botHandler = async event => {
     console.log(event.type, 'event')
+    //console.log("DEBUG: Bot: ", Bot)
     switch (event.type) {
+    case 'PostAdded':
+        await handlePostAdded(event)
+        break
     case 'Message4Bot':
         await handleBotReceivedMessage(event)
         break
     case 'BotJoinGroup': // bot user joined a new group
         await handleBotJoiningGroup(event)
+        break
+    case 'Delete': // bot has been uninstalled, do cleanup
+        await handleBotDelete(event)
         break
     default:
 	console.log('Unknown event type: ' + event.type)
@@ -30,8 +38,83 @@ const supportedCommands = [
     "subscribe"
 ];
 
+const handleBotDelete = async event => {
+    console.log("DEBUG: received BotDelete event: ", event)
+    const { type, message } = event
+    let botId = message.body.extensionId
+    console.log("DEBUG: cleaning up for bot:", botId)
+    await BotConfig.destroy({
+        where: { 'botId': message.body.extensionId }
+    })
+}
+
+/*
+{
+  type: 'PostAdded',
+  message: {
+    uuid: '5714392446338563912',
+    event: '/restapi/v1.0/glip/posts',
+    timestamp: '2022-05-11T17:05:02.742Z',
+    subscriptionId: '4e7756be-6bb4-4193-9e25-9f93674e75ad',
+    ownerId: '720204005',
+    body: {
+      id: '6465961988',
+      groupId: '843022338',
+      type: 'TextMessage',
+      text: 'I am sorry, but that is not an instruction I understand.',
+      creatorId: '720204005',
+      addedPersonIds: null,
+      creationTime: '2022-05-11T17:05:02.369Z',
+      lastModifiedTime: '2022-05-11T17:05:02.369Z',
+      attachments: null,
+      activity: null,
+      title: null,
+      iconUri: null,
+      iconEmoji: null,
+      mentions: null,
+      eventType: 'PostAdded'
+    }
+  }
+}
+*/
+
+const handlePostAdded = async event => {
+    const { type, message } = event
+    if (message.ownerId == message.body.creatorId) {
+	console.log("Ignore message posted by the bot")
+	return
+    }
+    //console.log("DEBUG: received PostAdded event: ", event)
+    let groupId = message.body.groupId
+    let text = message.body.text
+
+    //console.log("DEBUG: time to process input for unfurling:",text)
+    let aha_urls = getAhaUrls( text )
+    for (url of aha_urls) {
+	// looking for a bot config 
+	let aha_domain = url[1]
+	let obj_type   = url[2]
+	let obj_id     = url[3]
+	//console.log(`DEBUG: looking for botConfig in group ${groupId} with domain of '${aha_domain}'`)
+	const botConfig = await BotConfig.findOne({
+	    where: { 'aha_domain': aha_domain, 'groupId': groupId }
+	})
+	if (botConfig) {
+	    //console.log(`Loading ${obj_type} with id of ${obj_id}`)
+	    //console.log(`Loading bot with id of ${botConfig.botId}`)
+	    const bot = await Bot.default.findByPk(botConfig.botId);
+    	    unfurl( botConfig, obj_type, obj_id ).then( card => {
+		if (card) {
+		    console.log(`DEBUG: Aha URL found and card created. Posting card...`)
+		    bot.sendAdaptiveCard( groupId, card);
+		}
+	    })
+	}
+    }
+}
+
 const handleBotJoiningGroup = async event => {
-    console.log("DEBUG: received BotJoinGroup event: ", event)
+    //console.log("DEBUG: received BotJoinGroup event: ", event)
     const { bot, group } = event
     if (group.type != "Everyone") {
 	const template = new Template(helloCardTemplate);
@@ -42,7 +125,7 @@ const handleBotJoiningGroup = async event => {
 	const card = template.expand({
             $root: cardData
 	});
-	console.log("DEBUG: posting card:", card)
+	//console.log("DEBUG: posting card:", card)
 	await bot.sendAdaptiveCard( group.id, card);
     } else {
 	console.log("Skipping Everyone group")
@@ -60,7 +143,7 @@ const unfurl = async ( botConfig, obj_type, obj_id ) => {
 	switch (obj_type) {
 	case 'ideas/ideas': {
 	    loadIdea( aha, obj_id ).then( idea => {
-		console.log("found idea: ", idea)
+		//console.log("found idea: ", idea)
 		idea.idea.created_at_fmt = new Date( idea.idea.created_at ).toDateString()
 		if (idea.idea.created_by_user) {
 		    cardData['created_by'] = idea.idea.created_by_user
@@ -82,7 +165,7 @@ const unfurl = async ( botConfig, obj_type, obj_id ) => {
 	}
 	case 'features': {
 	    loadFeature( aha, obj_id ).then( feature => {
-		console.log("found feature: ", feature)
+		//console.log("found feature: ", feature)
 		feature.feature.created_at_fmt = new Date( feature.feature.created_at ).toDateString()
 		cardData['feature'] = feature.feature
 		if (feature.feature.created_by_user) {
@@ -104,7 +187,7 @@ const unfurl = async ( botConfig, obj_type, obj_id ) => {
 		}
 		const template = new Template(featureCardTemplate);
 		const card = template.expand({ $root: cardData });
-		console.log(JSON.stringify(card))
+		console.log("Returning card:", JSON.stringify(card))
 		resolve(card)
 	    })
 	    break
@@ -121,31 +204,11 @@ const unfurl = async ( botConfig, obj_type, obj_id ) => {
 
 const handleBotReceivedMessage = async event => {
     const { group, bot, text, userId } = event
-    console.log( event )
+    //console.log( event )
     const botConfig = await BotConfig.findOne({
         where: { 'botId': bot.id, 'groupId': group.id }
     })
     console.log( "Message received: ", event.message.text )
-
-    if (botConfig) {
-	let aha_urls = getAhaUrls( botConfig.aha_domain, text )
-	for (url of aha_urls) {
-	    let obj_type = url[1]
-	    let obj_id   = url[2]
-	    console.log(`Loading ${obj_type} with id of ${obj_id}`)
-	    unfurl( botConfig, obj_type, obj_id ).then( card => {
-		if (card) {
-		    bot.sendAdaptiveCard( group.id, card);
-		}
-	    })
-	}
-	const mention_re = new RegExp('^\\s*!\\[\\:Person\\]\\('+botConfig.botId+'\\)')
-	if (!event.message.text.match( mention_re )) {
-	    // the bot was not mentioned, so there is nothing to do
-	    console.log("Bot was not mentioned. Ignoring message.")
-	    return
-	}
-    }
 
     let command = text.split(' ')[0].toLowerCase()
     if (!supportedCommands.includes(command)) {
@@ -163,11 +226,11 @@ const handleBotReceivedMessage = async event => {
 	    'connectedToAha': (botConfig && botConfig.token ? true : false)
 	};
 	const card = template.expand({ $root: cardData });
-	console.log( JSON.stringify( card ) )
+	//console.log( JSON.stringify( card ) )
 	await bot.sendAdaptiveCard( group.id, card);
         return
     } else if (text === 'mention') {
-	console.log( event )
+	//console.log( event )
         await bot.sendMessage(group.id, { text: `Hello there. I am mentioning you: ![:Person](${userId}). Or a team: ![:Team](1124106246). Also all - ![:Team](-1). <a class='at_mention_compose' rel='{"id":-1}'>@Team</a>` })
     } else if (text === 'hello') {
         if (botConfig && botConfig.token) {
@@ -179,7 +242,7 @@ const handleBotReceivedMessage = async event => {
     } else if (text === 'goodbye') {
 	// this is duplicated, other copy is in interactiveMessageHandler, consolidate
         if (botConfig) {
-	    console.log("DEBUG: destroying tokens in database")
+	    //console.log("DEBUG: destroying tokens in database")
 	    botConfig.destroy().then( () => {
 		console.log("DEBUG: sending goodbye message")
 		bot.sendMessage(group.id, {
