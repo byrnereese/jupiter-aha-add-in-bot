@@ -182,8 +182,21 @@ const handleSetupSubscriptionAction = (config, submitData, cardData) => {
     })
     return promise
 }
-    
-const interactiveMessageHandler = async req => {
+
+const buildDialog = function( title, size, card ) {
+    let dialog = {
+	"type": "dialog",
+	"dialog": {
+	    "title": title,
+	    "size": size,
+	    "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/2048px-Instagram_icon.png",
+	    "card": card
+	}
+    }
+    return dialog
+}
+
+const interactiveMessageHandler = async (req,res) => {
     console.log(`=====incomingCardSubmit=====\n${JSON.stringify(req.body, null, 2)}`);
     // TODO - implement flow - if user submitting card has not authed with Aha,
     //        prompt them to login and store aha token for the user
@@ -201,11 +214,14 @@ const interactiveMessageHandler = async req => {
         'groupId': submitData.groupId,
 	'userId': req.body.user.id
     }
-    console.log(`cardData=`,cardData)
+    //console.log(`cardData=`,cardData)
     let botConfig = await BotConfig.findOne({
         where: { 'botId': submitData.botId, 'groupId': submitData.groupId }
     })
-    if (submitData.actionType == "auth") {
+    // if you have gotten this far, this means that the bot is fully setup, and an aha domain has
+    // been stored for the bot. That means we can make calls to Aha! So, load the token and proceed.
+    switch (submitData.actionType) {
+    case 'auth': {
 	if (!botConfig) {
 	    console.log("DEBUG: botConfig is not set. Initializing...")
             botConfig = await BotConfig.create({
@@ -221,25 +237,35 @@ const interactiveMessageHandler = async req => {
 	    await botConfig.save()
 	}
 	handleAuthAction( botConfig, cardData ).then( card => {
-	    console.log(`DEBUG: posting card to group ${submitData.groupId}: `, card)
-	    bot.sendAdaptiveCard( submitData.groupId, card);
+	    console.log(`DEBUG: posting auth dialog:`, card)
+	    let dialog = buildDialog('Connect to Aha','Medium', card)
+	    res.setHeader('Content-Type', 'application/json');
+	    res.end(JSON.stringify(dialog))
+	    //console.log(`DEBUG: sending auth card:`, card)
+	    //bot.sendAdaptiveCard( submitData.groupId, card);
 	})
-	return
-    }
-
-    // if you have gotten this far, this means that the bot is fully setup, and an aha domain has
-    // been stored for the bot. That means we can make calls to Aha! So, load the token and proceed.
-    switch (submitData.actionType) {
-    case 'dialog': {
-	console.log("Trying to spawn dialog")
 	break;
     }
     case 'hello': {
-	console.log(`MESSAGING: selecting a filter type`);
+	console.log(`MESSAGING: prompting user to enter Aha domain for auth`);
 	handleHelloAction( cardData ).then( card => {
-	    console.log(`cardData=`,cardData)
-	    console.log("DEBUG: posting card to group "+submitData.groupId+":", JSON.stringify(card))
-	    bot.sendAdaptiveCard( submitData.groupId, card);
+	    //console.log("DEBUG: posting card to group "+submitData.groupId+":", JSON.stringify(card))
+	    //bot.sendAdaptiveCard( submitData.groupId, card);
+	    let dialog = {
+		"type": "dialog",
+		"dialog": {
+		    "title": "iFrame (2) Dialog Example",
+		    "size": "Medium",
+		    "iconUrl": "https://www.kindpng.com/picc/m/255-2554719_a-generic-square-placeholder-image-with-rounded-corners.png",
+		    "iframeUrl": "https://www.google.com"
+		}
+	    };
+	    //console.log(`DEBUG: opening hello dialog with card: `, card)
+	    //let dialog = buildDialog('Connect to Aha','Medium', card)
+	    res.status(200);
+	    res.setHeader('Content-Type', 'application/json');
+	    console.log( JSON.stringify(dialog) )
+	    res.end( JSON.stringify(dialog) )
 	})
 	break;
     }
@@ -301,7 +327,7 @@ const interactiveMessageHandler = async req => {
     case 'select_workspace': {
 	let token = botConfig ? botConfig.token : undefined
 	let aha = getAhaClient(token, botConfig.aha_domain)
-	console.log(cardData)
+	//console.log(cardData)
 	handleSelectWorkspaceAction( aha, cardData ).then( card => {
             console.log("DEBUG: posting card to group "+submitData.groupId+":", JSON.stringify(card))
             bot.sendAdaptiveCard( submitData.groupId, card);

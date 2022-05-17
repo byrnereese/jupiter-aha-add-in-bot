@@ -13,11 +13,14 @@ const botHandler = async event => {
     console.log(event.type, 'event')
     //console.log("DEBUG: Bot: ", Bot)
     switch (event.type) {
-    case 'PostAdded':
-        await handlePostAdded(event)
-        break
+    //case 'PostAdded':
+    //    await handlePostAdded(event)
+    //    break
     case 'Message4Bot':
-        await handleBotReceivedMessage(event)
+        await handleBotMessage(event)
+        break
+    case 'Message4Others':
+        await handleMessage(event)
         break
     case 'BotJoinGroup': // bot user joined a new group
         await handleBotJoiningGroup(event)
@@ -77,7 +80,6 @@ const handleBotDelete = async event => {
     }
   }
 }
-*/
 
 const handlePostAdded = async event => {
     const { type, message } = event
@@ -113,6 +115,7 @@ const handlePostAdded = async event => {
 	}
     }
 }
+*/
 
 const handleBotJoiningGroup = async event => {
     //console.log("DEBUG: received BotJoinGroup event: ", event)
@@ -203,7 +206,36 @@ const unfurl = async ( botConfig, obj_type, obj_id ) => {
     return promise
 }
 
-const handleBotReceivedMessage = async event => {
+const handleMessage = async event => {
+    const { group, bot, text, userId } = event
+    const botConfig = await BotConfig.findOne({
+        where: { 'botId': bot.id, 'groupId': group.id }
+    })
+    let aha_urls = getAhaUrls( text )
+    for (url of aha_urls) {
+	// looking for a bot config 
+	let aha_domain = url[1]
+	let obj_type   = url[2]
+	let obj_id     = url[3]
+	//console.log(`DEBUG: looking for botConfig in group ${groupId} with domain of '${aha_domain}'`)
+	const botConfig = await BotConfig.findOne({
+	    where: { 'aha_domain': aha_domain, 'groupId': group.id }
+	})
+	if (botConfig) {
+	    //console.log(`Loading ${obj_type} with id of ${obj_id}`)
+	    //console.log(`Loading bot with id of ${botConfig.botId}`)
+	    //const bot = await Bot.default.findByPk(botConfig.botId);
+    	    unfurl( botConfig, obj_type, obj_id ).then( card => {
+		if (card) {
+		    console.log(`DEBUG: Aha URL found and card created. Posting card...`)
+		    bot.sendAdaptiveCard( group.id, card);
+		}
+	    })
+	}
+    }
+}
+
+const handleBotMessage = async event => {
     const { group, bot, text, userId } = event
     //console.log( event )
     const botConfig = await BotConfig.findOne({

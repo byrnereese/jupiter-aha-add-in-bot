@@ -265,6 +265,7 @@ function start() {
 			    console.log("WORKER: loaded comment", comment)
 			    cardData['commentId'] = commentId
 			    cardData['comment'] = comment.idea_comment
+			    cardData['comment_type'] = 'public'
 			    if (comment.idea_comment.idea_commenter_user) {
 				cardData['created_by'] = comment.idea_comment.idea_commenter_user
 			    } else if (comment.idea_comment.user) {
@@ -295,6 +296,7 @@ function start() {
 			loadComment( aha, commentId ).then( comment => {
 			    comment.comment.created_at_fmt = new Date( comment.comment.created_at ).toDateString()
 			    console.log("WORKER: loaded comment", comment)
+			    cardData['comment_type'] = 'private'
 			    cardData['commentId'] = commentId
 			    cardData['comment'] = comment.comment
 			    cardData['created_by'] = comment.comment.user
