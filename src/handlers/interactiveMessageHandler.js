@@ -251,6 +251,7 @@ const interactiveMessageHandler = async (req,res) => {
 	handleHelloAction( cardData ).then( card => {
 	    //console.log("DEBUG: posting card to group "+submitData.groupId+":", JSON.stringify(card))
 	    //bot.sendAdaptiveCard( submitData.groupId, card);
+	    /*
 	    let dialog = {
 		"type": "dialog",
 		"dialog": {
@@ -260,11 +261,12 @@ const interactiveMessageHandler = async (req,res) => {
 		    "iframeUrl": "https://www.google.com"
 		}
 	    };
-	    //console.log(`DEBUG: opening hello dialog with card: `, card)
-	    //let dialog = buildDialog('Connect to Aha','Medium', card)
+	    */
+	    console.log(`DEBUG: opening hello dialog with card: `, card)
+	    let dialog = buildDialog('Connect to Aha','Medium', card)
 	    res.status(200);
 	    res.setHeader('Content-Type', 'application/json');
-	    console.log( JSON.stringify(dialog) )
+	    //console.log( JSON.stringify(dialog) )
 	    res.end( JSON.stringify(dialog) )
 	})
 	break;
