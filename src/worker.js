@@ -52,7 +52,7 @@ const loadPublicComment = ( aha, ideaId, commentId ) => {
     console.log(`WORKER: loading public comment ${commentId} for idea ${ideaId}`)
     const promise = new Promise( (resolve, reject) => {
         aha.idea.getPublicComment(ideaId, commentId, function (err, data, response) {
-	    console.log(data)
+	    //console.log(data)
 	    if (data && !data['error']) {
 		//console.log(data)
 		console.log("comment=",data.idea_comment)
@@ -337,7 +337,7 @@ function start() {
 			if (idea.idea.categories && idea.idea.categories.length > 0) {
 			    cardData['selectedCategory'] = idea.idea.categories[0].id
 			} else {
-			    cardData['selectedCategory'] = 0
+			    cardData['selectedCategory'] = "0"
 			}
 			return loadIdeaCategories( aha, idea.idea.product.reference_prefix )
 		    }).then( categories => {
