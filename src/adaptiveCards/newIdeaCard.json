@@ -64,7 +64,7 @@
         {
             "type": "TextBlock",
             "text": "${idea.description.body_nohtml}",
-	    "maxLines": 5,
+	    "maxLines": 20,
             "wrap": true
         },
         {
