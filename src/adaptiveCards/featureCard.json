@@ -12,6 +12,7 @@
         {
             "type": "TextBlock",
             "text": "${feature.description.body_nohtml}",
+	    "maxLines": 20,
             "wrap": true
         },
         {
