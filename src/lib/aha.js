@@ -84,6 +84,8 @@ const loadIdea = ( aha, ideaId ) => {
         aha.idea.get(ideaId, function (err, data, response) {
 	    if (data.idea && data.idea.description) {
 		let desc = turnDown.turndown( data.idea.description.body )
+		desc = desc.replace(/\s \s/g,"")
+		desc = desc.replace(/\n\n/g,"\n")
 		data.idea.description["body_nohtml"] = desc
 	    }
             resolve( data )
@@ -98,7 +100,10 @@ const loadFeature = ( aha, featureId ) => {
     const promise = new Promise( (resolve, reject) => {
         aha.feature.get(featureId, function (err, data, response) {
 	    console.log("DEBUG: turningdown feature:",data)
+	    console.log(desc)
 	    let desc = turnDown.turndown( data.feature.description.body )
+	    desc = desc.replace(/\s \s/g,"")
+	    desc = desc.replace(/\n\n/g,"\n")
 	    data.feature.description["body_nohtml"] = desc
             resolve( data )
         })

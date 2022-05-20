@@ -1,151 +1,248 @@
-{
-    "type": "AdaptiveCard",
-    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-    "version": "1.5",
-    "body": [
-        {
-            "type": "TextBlock",
-            "size": "Medium",
-            "weight": "Bolder",
-            "text": "New ${comment_type} comment on: ${idea.name}"
-        },
-        {
-            "type": "ColumnSet",
-            "columns": [
-                {
-                    "type": "Column",
-                    "items": [
-                        {
-                            "type": "Image",
-                            "style": "Person",
-                            "url": "${created_by.avatar_url}",
-                            "size": "Small"
-                        }
-                    ],
-                    "width": "auto"
-                },
-                {
-                    "type": "Column",
-                    "items": [
-                        {
-                            "type": "TextBlock",
-                            "text": "${created_by.name}",
-                            "wrap": true,
-                            "weight": "Bolder",
-                            "spacing": "None"
-                        },
-                        {
-                            "type": "TextBlock",
-                            "text": "${created_by.email}\n",
-                            "wrap": true,
-                            "size": "Small",
-                            "spacing": "None"
-                        },
-                        {
-                            "type": "TextBlock",
-                            "spacing": "None",
-                            "text": "Created ${comment.created_at_fmt}",
-                            "isSubtle": true,
-                            "wrap": true,
-                            "size": "Small"
-                        }
-                    ],
-                    "width": "stretch"
-                }
-            ]
-        },
-        {
-            "type": "TextBlock",
-            "text": "${comment.body_nohtml}",
-            "wrap": true
-        },
-        {
-            "type": "ActionSet",
-            "actions": [
-                {
-                    "type": "Action.OpenUrl",
-                    "title": "View idea in Aha!",
-                    "url": "${idea.url}"
-                },
-                {
-                    "type": "Action.ShowCard",
-                    "title": "Reply to comment",
-                    "card": {
-                        "type": "AdaptiveCard",
-                        "body": [
-                            {
-                                "id": "comment_text",
-                                "type": "Input.Text",
-                                "placeholder": "Enter your comment",
-                                "isMultiline": true,
-                                "label": "Comment text"
-                            },
-                            {
-                                "id": "comment_privacy",
-                                "type": "Input.ChoiceSet",
-                                "choices": [
-                                    {
-                                        "title": "Public comment",
-                                        "value": "public"
-                                    },
-                                    {
-                                        "title": "Private comment",
-                                        "value": "private"
-                                    }
-                                ],
-                                "placeholder": "Select privacy level",
-                                "style": "expanded",
-                                "spacing": "Small",
-                                "value": "public"
-                            }
-                        ],
-                        "actions": [
-                            {
-                                "type": "Action.Submit",
-                                "title": "Post comment",
-                                "data": {
-                                    "actionType": "post_idea_comment",
-                                    "ideaId": "${ahaIdeaId}",
-                                    "botId": "${botId}",
-                                    "groupId": "${groupId}"
-                                }
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        {
-            "type": "ColumnSet",
-            "columns": [
-                {
-                    "type": "Column",
-                    "width": "auto",
-                    "items": [
-                        {
-                            "type": "Image",
-                            "url": "https://github.com/ringcentral/github-notification-app/blob/main/icons/feedback-32.png?raw=true",
-                            "size": "Small",
-                            "style": "Person",
-                            "width": "16px"
-                        }
-                    ]
-                },
-                {
-                    "type": "Column",
-                    "width": "stretch",
-                    "items": [
-                        {
-                            "type": "TextBlock",
-                            "text": "[Improve this add-in: report bugs and feature requests](https://docs.google.com/forms/d/e/1FAIpQLSfCwi9bUT0WJW3Ug8umbNyd8NnmAZiVIcOHwXto6B9syKTnjA/viewform?usp=pp_url&entry.492712114=Aha!+Add-in)",
-                            "weight": "Lighter",
-                            "wrap": true,
-                            "size": "Small",
-                            "spacing": "None"
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+@font-face {
+    font-family: 'RingCentralDisplay';
+    src:  url('/attachments/7096230308613825011/token/1d1e9ba7a9748d7ed74115bccb0cafde46670eccd29db4875a19a61728a7f137') format('woff2');
+  }
+@font-face {
+    font-family: 'RingCentralDisplay-Medium';
+    src:  url('/attachments/7098470171551134474/token/5bdb3d91d3504bd687d1328b0f79877439b95a0d63f481db25bcc5ce2350fef3?size=original') format('woff2');
+  }
+@font-face {
+    font-family: 'RingCentralSans';
+    src:  url('/attachments/7096230308613825011/token/1d1e9ba7a9748d7ed74115bccb0cafde46670eccd29db4875a19a61728a7f137?size=original') format('woff2');
+  }
+@font-face {
+    font-family: 'RingCentralSans-Medium';
+    src:  url('/attachments/7098470177647446807/token/ab6a732c469463f0421e41857c2233f58792f059f635d7352d19347f656b9abb?size=original') format('woff2');
+  }
+@font-face {
+    font-family: 'RingCentralSans-Bold';
+    src:  url('/attachments/7098470171454880775/token/e786a4b540e71e24bbe63473c42815e5ba5ebbd44da5c3ba287733f25fa0ab7b?size=original') format('woff2');
+  }
+  
+  body, body.ideas-portal {
+      font-family: 'RingCentralDisplay', sans-serif !important;
+  }
+  .portal-user.popover {
+      display: none;
+  }
+  .popover.vote-popover.portal-user {
+      display: none;
+  }
+  .dropdown-toggle::after {
+      display: none;
+  }
+  .search-bar__search {
+      display: none;
+  
+  }
+  .current-user-info.user-menu {
+      display: none;
+  }
+  .user-menu {
+      width: 16%;
+      margin-right: 0px!Important;
+  }
+  
+  .signup-link.user-menu {
+      float: right;
+      margin: 0 auto;
+  }
+  .signup-link.user-menu {
+      width: 16%;
+      margin: 0 auto;
+  }
+  a.login-link {
+      padding-right: 0px!Important;
+  }
+  
+  .current-user-info.user-menu {
+      margin: 0 auto;
+      position: relative;
+      float: right;
+      width: 16%;
+      margin-right: -30px;
+  }
+  .container.text-center.text-md-left.pad-left {
+    width: 63%;
+    background: #001238;
+    margin-right: 111px;
+    margin-top: -1px;
+    padding-left: 60px;
 }
+  .custom-footer.main-footer {
+      width: 80.2%;
+      margin-left: 0px;
+  }
+  
+  .search-bar__search-active {
+      width: 100%;
+  }
+  p.text-justify.intro-text {
+      color: #ffffff;
+      font-family: 'RingCentralDisplay', sans-serif;
+      font-weight: 500;
+      letter-spacing: 1px;
+  }
+  
+  
+  .btn.btn-outline, .btn.btn-primary.btn-vote:not(.voted) {
+      border-radius: 15px;
+  }
+  .collapse {
+      overflow: unset;
+  }
+  .btn.btn-outline, .btn.btn-primary.btn-vote:not(.voted) {
+      border: 1px solid var(--accent-color);
+      color: #ffffff;
+      background: #ff7a00;
+  }
+  div#portal-sidebar {
+      -moz-box-shadow: 0px 1px 8px 1px rgba(0,0,0,0.51);
+      margin: 30px;
+      box-shadow: 0px 1px 8px 1px rgb(0 0 0 / 20%);
+      -webkit-box-shadow: 0px 1px 8px 1px rgb(0 0 0 / 20%);
+      -moz-box-shadow: 0px 1px 8px 1px rgba(0,0,0,0.2);
+      border-radius: 5px;
+      width: 90%;
+      height: 500px;
+      margin-left: 175px;
+  }
+  .portal-sidebar .add-idea-button {
+      background-color: #0684BC;
+  }
+  div#portal-sidebar {
+      height: 500px;
+  }
+  .btn.btn-primary.btn-vote.voted {
+      background-color: #0484bc;
+      border-radius: 20px;
+  }
+  .btn.btn-outline, .btn.btn-primary.btn-vote:not(.voted) {
+      border: 0px solid #ffffff;
+      color: #ffffff;
+      background: #ff7a00;
+  }
+  .btn.btn-primary.btn-vote.voted {
+      background-color: #0484bc;
+      border-radius: 20px;
+      border: 1px solid #fff;
+  }
+  section.list-ideas {
+      -moz-box-shadow: 0px 1px 8px 1px rgba(0,0,0,0.51);
+      box-shadow: 0px 1px 8px 1px rgb(0 0 0 / 20%);
+      -webkit-box-shadow: 0px 1px 8px 1px rgb(0 0 0 / 20%);
+      -moz-box-shadow: 0px 1px 8px 1px rgba(0,0,0,0.2);
+      padding-right: 80PX;
+      margin-right: 30px;
+      margin-top: 30px;
+      background: #ffffff;
+      width: 76.50%;
+      border-radius: 5px 0px;
+      margin-left: 160px;
+      margin-bottom: 0px;
+  }
+  
+  .search-bar {
+      padding-top: 5px;
+      padding-bottom: 5px;
+      margin-top: 30px;
+      border-radius: 5px;
+      margin-bottom: 30px;
+    border-bottom: 0px solid #ffffff;
+  }
+  .search-bar__search-active {
+      margin: 15px;
+  }
+  .container-fluid.bg {
+      background-color: #001138;
+      padding: 60px 175px;
+  }
+  .navbar {
+  padding: 0.5rem 11rem !Important;
+  }
+  .navbar-light .navbar-nav .nav-link {
+      color: #0484bc!Important;
+      margin-right: 20px!Important;
+  }
+  footer.page-footer.font-small.indigo {
+      background: #001138;
+      margin-right: 60px;
+  }
+  .container {
+      max-width: 90%;
+      padding: 40px 0px;
+  }
+  .column-with-sidebar__column {
+      -ms-grid-column: 2;
+      margin-left: 0.6rem;
+  }
+  h5 {
+      color: #fff!Important;
+      font-size: 16px!Important;
+  }
+  li a {
+      color: #c3d6ff;
+      line-height: 2rem;
+      font-family: 'RCFont', sans-serif;
+      font-size: 14px;
+  }
+  .footer-copyright.text-right.py-3 {
+      color: #001238;
+      padding-right: 110px;
+  }
+  ul.navbar-nav li a {
+      font-size: 18px;
+  }
+  body, body.ideas-portal {
+      background-color: #ffffff;
+  }
+  
+  p.text-color {
+      color: #ff7900;
+  }
+  
+  @media (max-width:480px) {
+  .container-fluid.bg {
+      background-color: #001138;
+      padding: 60px 20px;
+  }
+  p.text-justify.intro-text {
+      color: #ffffff;
+      font-family: 'RCFont', sans-serif;
+      font-weight: 500;
+      letter-spacing: 1px;
+      font-size: 20px;
+  }
+  .navbar {
+      padding: 0.5rem 2rem!Important;
+  }
+  ul.navbar-nav {
+      padding-left: 0px;
+  }
+  a.navbar-brand img {
+      width: 160px;
+  }
+  section.list-ideas {
+      -moz-box-shadow: 0px 1px 8px 1px rgba(0,0,0,0.51);
+      box-shadow: 0px 1px 8px 1px rgb(0 0 0 / 20%);
+      -webkit-box-shadow: 0px 1px 8px 1px rgb(0 0 0 / 20%);
+      -moz-box-shadow: 0px 1px 8px 1px rgba(0,0,0,0.2);
+      padding-right: 20px;
+      margin-right: 30px;
+      margin-top: 0px;
+      background: #ffffff;
+      border-radius: 5px 0px;
+      padding-left: 20px;
+      margin-left: 20px;
+  }
+  div#portal-sidebar {
+      margin: 0px 30px 30px;
+  }
+  footer.page-footer.font-small.indigo {
+      margin-right: 0px;
+  }
+  .footer-copyright.text-right.py-3 {
+      padding-right: 80px;
+  }
+  
+  }
