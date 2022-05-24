@@ -279,7 +279,7 @@ function start() {
 			    } catch (err) {
 				console.log("Could load or set gravatar URL. Null email.")
 			    }
-			    console.log(cardData)
+			    //console.log(cardData)
 			    return loadIdea( aha, ideaId )
 			}).then( idea => {
 			    cardData['idea'] = idea.idea
@@ -300,7 +300,7 @@ function start() {
 			const ideaId = job.data.audit.associated_id
 			loadComment( aha, commentId ).then( comment => {
 			    comment.comment.created_at_fmt = new Date( comment.comment.created_at ).toDateString()
-			    console.log("WORKER: loaded comment", comment)
+			    //console.log("WORKER: loaded comment", comment)
 			    cardData['comment_type'] = 'private'
 			    cardData['commentId'] = commentId
 			    cardData['comment'] = comment.comment
@@ -323,7 +323,7 @@ function start() {
 		    const ideaId = job.data.audit.auditable_url.substring( job.data.audit.auditable_url.lastIndexOf('/') + 1 )
 		    cardData['ahaIdeaId'] = ideaId
 		    loadIdea( aha, ideaId ).then( idea => {
-			console.log("WORKER: loaded idea", idea)
+			//console.log("WORKER: loaded idea", idea)
 			idea.idea.created_at_fmt = new Date( idea.idea.created_at ).toDateString()
 			if (idea.idea.created_by_user) {
 			    cardData['created_by'] = idea.idea.created_by_user
@@ -336,7 +336,7 @@ function start() {
 			    cardData['created_by']['avatar_url'] = gravatar.url(cardData['created_by'].email);
 			}
 			cardData['idea'] = idea.idea
-			console.log("idea: ", idea.idea)
+			//console.log("idea: ", idea.idea)
 			// TODO - allow pre-selection of multiple categories
 			cardData['selectedVisibility'] = ahaIdeaVisibilityMapping[idea.idea.visibility]
 			if (idea.idea.categories && idea.idea.categories.length > 0) {
@@ -346,7 +346,7 @@ function start() {
 			}
 			return loadIdeaCategories( aha, idea.idea.product.reference_prefix )
 		    }).then( categories => {
-			console.log("WORKER: loaded categories", categories)
+			//console.log("WORKER: loaded categories", categories)
 			cardData['categories'] = categories.idea_categories
 			return loadProjectWorkflows( aha, cardData["idea"].product.reference_prefix )
 		    }).then( workflows => {
@@ -386,7 +386,7 @@ function start() {
 			changes:      Object.keys(changes).map( k => changes[k] ),
 			change_date:  aha_obj['created_at']
 		    }
-		    console.log("WORKER: Card data that will be posted: ", cardData)
+		    //console.log("WORKER: Card data that will be posted: ", cardData)
 		    console.log(`WORKER: ${changes.length} aggregated for job ${job.id}.`)
 		    return postMessage( bot, job.data.group_id, cardUpdateTemplate, cardData )
 		}).then( function() {
