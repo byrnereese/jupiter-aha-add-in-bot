@@ -10,22 +10,26 @@ const ideaCardTemplate            = require('../adaptiveCards/ideaCard.json');
 const featureCardTemplate         = require('../adaptiveCards/featureCard.json');
 
 const botHandler = async event => {
-    console.log(event.type, 'event')
+    //console.log(event.type, 'event')
     //console.log("DEBUG: Bot: ", Bot)
     switch (event.type) {
     //case 'PostAdded':
     //    await handlePostAdded(event)
     //    break
     case 'Message4Bot':
+	console.log("Processing Message4Bot event")
         await handleBotMessage(event)
         break
     case 'Message4Others':
+	console.log("Processing Message4Others event for unfurling")
         await handleMessage(event)
         break
     case 'BotJoinGroup': // bot user joined a new group
+	console.log("Processing BotJoinGroup event to say hello")
         await handleBotJoiningGroup(event)
         break
     case 'Delete': // bot has been uninstalled, do cleanup
+	console.log("Processing Delete event for garbage collecting")
         await handleBotDelete(event)
         break
     default:
@@ -191,7 +195,7 @@ const unfurl = async ( botConfig, obj_type, obj_id ) => {
 		}
 		const template = new Template(featureCardTemplate);
 		const card = template.expand({ $root: cardData });
-		console.log("Returning card:", JSON.stringify(card))
+		//console.log("Returning card:", JSON.stringify(card))
 		resolve(card)
 	    })
 	    break

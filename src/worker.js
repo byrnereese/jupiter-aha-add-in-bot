@@ -33,9 +33,10 @@ const loadComment = ( aha, commentId ) => {
     console.log(`WORKER: loading comment ${commentId}`)
     const promise = new Promise( (resolve, reject) => {
         aha.comment.get(commentId, function (err, data, response) {
-	    console.log(data)
+	    //console.log(data)
 	    if (data && !data['error']) {
-		console.log("comment=",data.comment)
+		console.log("Fetched comment")
+		//console.log("comment=",data.comment)
 		let desc = turnDown.turndown( data.comment.body )
 		data.comment["body_nohtml"] = desc
 		resolve( data )
@@ -54,8 +55,8 @@ const loadPublicComment = ( aha, ideaId, commentId ) => {
         aha.idea.getPublicComment(ideaId, commentId, function (err, data, response) {
 	    //console.log(data)
 	    if (data && !data['error']) {
-		//console.log(data)
-		console.log("comment=",data.idea_comment)
+		console.log("Loading public comment")
+		//console.log("comment=",data.idea_comment)
 		let desc = turnDown.turndown( data.idea_comment.body )
 		data.idea_comment["body_nohtml"] = desc
 		resolve( data )
@@ -271,8 +272,12 @@ function start() {
 			    } else if (comment.idea_comment.user) {
 				cardData['created_by'] = comment.idea_comment.user
 			    }
-			    if (!cardData['created_by'] && !cardData['created_by']['avatar_url']) {
-				cardData['created_by']['avatar_url'] = gravatar.url(cardData['created_by'].email);
+			    try {
+				if (!cardData['created_by'] && !cardData['created_by']['avatar_url']) {
+				    cardData['created_by']['avatar_url'] = gravatar.url(cardData['created_by'].email);
+				}
+			    } catch (err) {
+				console.log("Could load or set gravatar URL. Null email.")
 			    }
 			    console.log(cardData)
 			    return loadIdea( aha, ideaId )
