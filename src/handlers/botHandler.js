@@ -29,7 +29,7 @@ const botHandler = async event => {
         await handleBotDelete(event)
         break
     default:
-	console.log('Unknown event type: ' + event.type)
+	//console.log('Unknown event type: ' + event.type)
         break
     }
 }
